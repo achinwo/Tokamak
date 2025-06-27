@@ -17,7 +17,7 @@
 
 import Foundation
 
-public struct _RotationEffect: GeometryEffect {
+public struct _RotationEffect: @MainActor GeometryEffect {
   public var angle: Angle
   public var anchor: UnitPoint
 
@@ -44,8 +44,8 @@ public struct _RotationEffect: GeometryEffect {
   }
 }
 
-public extension View {
-  func rotationEffect(_ angle: Angle, anchor: UnitPoint = .center) -> some View {
+extension View {
+  public func rotationEffect(_ angle: Angle, anchor: UnitPoint = .center) -> some View {
     modifier(_RotationEffect(angle: angle, anchor: anchor))
   }
 }

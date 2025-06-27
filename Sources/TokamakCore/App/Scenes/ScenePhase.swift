@@ -15,7 +15,7 @@
 //  Created by Carson Katri on 7/19/20.
 //
 
-public enum ScenePhase: Comparable {
+public enum ScenePhase: @MainActor Comparable {
   case active
   case inactive
   case background
@@ -25,8 +25,8 @@ struct ScenePhaseKey: EnvironmentKey {
   static let defaultValue: ScenePhase = .active
 }
 
-public extension EnvironmentValues {
-  var scenePhase: ScenePhase {
+extension EnvironmentValues {
+  public var scenePhase: ScenePhase {
     get {
       self[ScenePhaseKey.self]
     }

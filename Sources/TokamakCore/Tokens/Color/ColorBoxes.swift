@@ -61,6 +61,8 @@ public class AnyColorBox: AnyTokenBox, Hashable {
     }
   }
 
+  init() {}  // dummy initializer for silencing compiler
+
   public static func == (lhs: AnyColorBox, rhs: AnyColorBox) -> Bool {
     lhs.equals(rhs)
   }
@@ -101,7 +103,7 @@ public final class _ConcreteColorBox: AnyColorBox {
   }
 }
 
-public final class _EnvironmentDependentColorBox: AnyColorBox {
+public final class _EnvironmentDependentColorBox: AnyColorBox, Sendable {
   public let resolver: (EnvironmentValues) -> Color
 
   override public func equals(_ other: AnyColorBox) -> Bool {

@@ -87,13 +87,13 @@ public protocol FiberRenderer {
   /// Instead, we create a list of changed fibers
   /// (in this case just `DuelOfTheStates` as both properties were on it),
   /// and reconcile after all changes have been collected.
-  func schedule(_ action: @escaping () -> ())
+  func schedule(_ action: @escaping () -> Void)
 }
 
-public extension FiberRenderer {
-  var defaultEnvironment: EnvironmentValues { .init() }
+extension FiberRenderer {
+  public var defaultEnvironment: EnvironmentValues { .init() }
 
-  func visitPrimitiveChildren<Primitive, Visitor>(
+  public func visitPrimitiveChildren<Primitive, Visitor>(
     _ view: Primitive
   ) -> ViewVisitorF<Visitor>? where Primitive: View, Visitor: ViewVisitor {
     nil
@@ -101,21 +101,28 @@ public extension FiberRenderer {
 
   func viewVisitor<V: View, Visitor: ViewVisitor>(for view: V) -> ViewVisitorF<Visitor> {
     if Self.isPrimitive(view) {
-      return visitPrimitiveChildren(view) ?? view._visitChildren
+      return { (visitor: Visitor) in
+        // if let visitorF = visitPrimitiveChildren(view) {
+        //   visitorF(visitor)
+        // }
+        view._visitChildren(visitor)
+      }
     } else {
-      return view._visitChildren
+      return { (visitor: Visitor) in
+        view._visitChildren(visitor)
+      }
     }
   }
 
   @discardableResult
   @_disfavoredOverload
-  func render<V: View>(_ view: V) -> FiberReconciler<Self> {
+  public func render<V: View>(_ view: V) -> FiberReconciler<Self> {
     .init(self, view)
   }
 
   @discardableResult
   @_disfavoredOverload
-  func render<A: App>(_ app: A) -> FiberReconciler<Self> {
+  public func render<A: App>(_ app: A) -> FiberReconciler<Self> {
     .init(self, app)
   }
 }

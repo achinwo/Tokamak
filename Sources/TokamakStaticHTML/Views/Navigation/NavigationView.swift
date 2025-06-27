@@ -51,41 +51,54 @@ extension NavigationView: _HTMLPrimitive {
   @_spi(TokamakStaticHTML)
   public var renderedBody: AnyView {
     let proxy = _NavigationViewProxy(self)
-    return AnyView(HTML("div", [
-      "class": "_tokamak-navigationview",
-    ]) {
-      proxy.makeToolbar { title, toolbarContent in
-        if let toolbarContent = toolbarContent {
-          HTML("div", [
-            "class": "_tokamak-toolbar",
-          ]) {
-            Group {
-              if toolbarContent.isEmpty {
-                HTML("div", ["class": "_tokamak-toolbar-content _tokamak-toolbar-leading"]) {
-                  title.font(.headline)
+    return AnyView(
+      HTML(
+        "div",
+        [
+          "class": "_tokamak-navigationview"
+        ]
+      ) {
+        proxy.makeToolbar { title, toolbarContent in
+          if let toolbarContent = toolbarContent {
+            HTML(
+              "div",
+              [
+                "class": "_tokamak-toolbar"
+              ]
+            ) {
+              Group {
+                if toolbarContent.isEmpty {
+                  HTML("div", ["class": "_tokamak-toolbar-content _tokamak-toolbar-leading"]) {
+                    title.font(.headline)
+                  }
+                } else {
+                  NavBody(toolbarContent, title, self)
                 }
-              } else {
-                NavBody(toolbarContent, title, self)
               }
+              .font(.caption)
+              .buttonStyle(ToolbarButtonStyle())
+              .textFieldStyle(ToolbarTextFieldStyle())
             }
-            .font(.caption)
-            .buttonStyle(ToolbarButtonStyle())
-            .textFieldStyle(ToolbarTextFieldStyle())
+          }
+          HTML(
+            "div",
+            [
+              "class": toolbarContent != nil ? "_tokamak-navigationview-with-toolbar-content" : ""
+            ]
+          ) {
+            proxy.content
+          }
+          HTML(
+            "div",
+            [
+              "class": "_tokamak-navigationview-destination",
+              "style": toolbarContent != nil ? "padding-top: 50px;" : "",
+            ]
+          ) {
+            proxy.destination
           }
         }
-        HTML("div", [
-          "class": toolbarContent != nil ? "_tokamak-navigationview-with-toolbar-content" : "",
-        ]) {
-          proxy.content
-        }
-        HTML("div", [
-          "class": "_tokamak-navigationview-destination",
-          "style": toolbarContent != nil ? "padding-top: 50px;" : "",
-        ]) {
-          proxy.destination
-        }
-      }
-    })
+      })
   }
 
   func items(from items: [AnyToolbarItem], at placements: ToolbarItemPlacement...) -> some View {
@@ -107,7 +120,7 @@ struct ToolbarButtonStyle: ButtonStyle {
   }
 }
 
-struct ToolbarTextFieldStyle: TextFieldStyle {
+struct ToolbarTextFieldStyle: @MainActor TextFieldStyle {
   func _body(configuration: TextField<_Label>) -> some View {
     HTML("div", ["class": "_tokamak-toolbar-textfield"]) {
       configuration

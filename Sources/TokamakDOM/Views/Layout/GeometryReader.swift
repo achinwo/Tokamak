@@ -67,7 +67,7 @@ struct _GeometryReader<Content: View>: View {
           let height = rect.height.number
         else { return .undefined }
 
-        state?.size = .init(width: width, height: height)
+        state?.size = .fromDouble(width: width, height: height)
         return .undefined
       }
       state.closure = closure

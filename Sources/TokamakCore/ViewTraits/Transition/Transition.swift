@@ -73,7 +73,7 @@ public extension _AnyTransitionModifier {
   }
 }
 
-public struct _MoveTransition: _AnyTransitionModifier {
+public struct _MoveTransition: @MainActor _AnyTransitionModifier {
   public let edge: Edge
   public let isActive: Bool
   public typealias Body = Self.Content

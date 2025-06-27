@@ -40,7 +40,7 @@ extension _Canvas {
     unhostedElement.innerHTML = JSValue.string(innerHTML)
     _ = document.body.appendChild(unhostedElement)
     let bounds = document.getElementById!(id).object!.getBoundingClientRect!().object!
-    let size = CGSize(width: bounds.width.number!, height: bounds.height.number!)
+    let size = CGSize.fromDouble(width: bounds.width.number!, height: bounds.height.number!)
     // Remove it from the document.
     _ = unhostedElement.parentNode.removeChild(unhostedElement)
 
@@ -74,17 +74,17 @@ extension _Canvas {
     func draw(_ img: JSObject) {
       // Draw the SVG on the canvas.
       switch positioning {
-      case let .in(rect):
+      case .in(let rect):
         _ = canvasContext.drawImage!(
           img,
           Double(rect.origin.x), Double(rect.origin.y),
           Double(rect.size.width), Double(rect.size.height)
         )
-      case let .at(point, anchor):
+      case .at(let point, let anchor):
         _ = canvasContext.drawImage!(
           img,
-          Double(point.x - (anchor.x * symbol.size.width)),
-          Double(point.y - (anchor.y * symbol.size.height))
+          Double(point.x - ((anchor ?? .center).x * symbol.size.width)),
+          Double(point.y - ((anchor ?? .center).y * symbol.size.height))
         )
       }
     }
@@ -102,10 +102,11 @@ extension _Canvas {
       // Create a URL to the SVG data.
       let objectURL = JSObject.global.URL.function!.createObjectURL!(svgData)
 
-      img.onload = .object(JSOneshotClosure { _ in
-        draw(img)
-        return .undefined
-      })
+      img.onload = .object(
+        JSOneshotClosure { _ in
+          draw(img)
+          return .undefined
+        })
 
       img.src = objectURL
       cacheSymbol(id: symbol._id, img)

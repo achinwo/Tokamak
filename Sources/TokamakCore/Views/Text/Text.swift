@@ -196,7 +196,7 @@ public extension Text {
   }
 }
 
-extension Text: Layout {
+extension Text: @MainActor Layout {
   public func sizeThatFits(
     proposal: ProposedViewSize,
     subviews: Subviews,

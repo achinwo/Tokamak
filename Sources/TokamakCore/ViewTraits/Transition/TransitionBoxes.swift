@@ -53,6 +53,8 @@ public class _AnyTransitionBox: AnyTokenBox {
     )
   }
 
+  init() {}  // dummy initializer for silencing compiler
+
   public func resolve(in environment: EnvironmentValues) -> ResolvedValue {
     fatalError("implement \(#function) in subclass")
   }
@@ -97,6 +99,7 @@ final class AsymmetricTransitionBox: _AnyTransitionBox {
   }
 }
 
+@MainActor
 final class CombinedTransitionBox: _AnyTransitionBox {
   let a: _AnyTransitionBox
   let b: _AnyTransitionBox

@@ -21,13 +21,13 @@ import TokamakStaticHTML
 
 public typealias HTML = TokamakStaticHTML.HTML
 
-public typealias Listener = (JSObject) -> ()
+public typealias Listener = (JSObject) -> Void
 
 protocol AnyDynamicHTML: AnyHTML {
   var listeners: [String: Listener] { get }
 }
 
-public struct DynamicHTML<Content>: View, AnyDynamicHTML {
+public struct DynamicHTML<Content>: View, @MainActor AnyDynamicHTML {
   public let tag: String
   public let attributes: [HTMLAttribute: String]
   public let listeners: [String: Listener]
@@ -45,8 +45,8 @@ public struct DynamicHTML<Content>: View, AnyDynamicHTML {
   }
 }
 
-public extension DynamicHTML where Content: StringProtocol {
-  init(
+extension DynamicHTML where Content: StringProtocol {
+  public init(
     _ tag: String,
     _ attributes: [HTMLAttribute: String] = [:],
     listeners: [String: Listener] = [:],
@@ -80,8 +80,8 @@ extension DynamicHTML: ParentView where Content: View {
   }
 }
 
-public extension DynamicHTML where Content == EmptyView {
-  init(
+extension DynamicHTML where Content == EmptyView {
+  public init(
     _ tag: String,
     _ attributes: [HTMLAttribute: String] = [:],
     listeners: [String: Listener] = [:]

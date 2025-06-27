@@ -66,7 +66,7 @@ public struct EdgeInsets: Equatable {
   }
 }
 
-extension EdgeInsets: Animatable, _VectorMath {
+extension EdgeInsets: @MainActor Animatable, @MainActor _VectorMath {
   public typealias AnimatableData = AnimatablePair<
     CGFloat,
     AnimatablePair<

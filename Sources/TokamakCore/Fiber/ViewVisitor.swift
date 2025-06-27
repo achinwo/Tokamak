@@ -20,13 +20,13 @@ public protocol ViewVisitor {
   func visit<V: View>(_ view: V)
 }
 
-public extension View {
-  func _visitChildren<V: ViewVisitor>(_ visitor: V) {
+extension View {
+  public func _visitChildren<V: ViewVisitor>(_ visitor: V) {
     visitor.visit(body)
   }
 }
 
-public typealias ViewVisitorF<V: ViewVisitor> = (V) -> ()
+public typealias ViewVisitorF<V: ViewVisitor> = @Sendable @MainActor (V) -> Void
 
 /// A type that creates a `Result` by visiting multiple `View`s.
 protocol ViewReducer {

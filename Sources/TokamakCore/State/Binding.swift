@@ -81,7 +81,7 @@ extension Binding: Identifiable where Value: Identifiable {
   public var id: Value.ID { wrappedValue.id }
 }
 
-extension Binding: Sequence where Value: MutableCollection {
+extension Binding: @MainActor Sequence where Value: MutableCollection {
   public typealias Element = Binding<Value.Element>
   public typealias Iterator = IndexingIterator<Binding<Value>>
   public typealias SubSequence = Slice<Binding<Value>>

@@ -15,6 +15,7 @@
 //  Created by Max Desiatov on 07/04/2020.
 //
 
+@MainActor
 public protocol View {
   associatedtype Body: View
 
@@ -30,9 +31,9 @@ public protocol View {
   static func _makeView(_ inputs: ViewInputs<Self>) -> ViewOutputs
 }
 
-public extension Never {
+extension Never {
   @_spi(TokamakCore)
-  var body: Never {
+  public var body: Never {
     fatalError()
   }
 }
@@ -42,13 +43,13 @@ extension Never: View {}
 /// A `View` that offers primitive functionality, which renders its `body` inaccessible.
 public protocol _PrimitiveView: View where Body == Never {}
 
-public extension _PrimitiveView {
+extension _PrimitiveView {
   @_spi(TokamakCore)
-  var body: Never {
+  public var body: Never {
     neverBody(String(reflecting: Self.self))
   }
 
-  func _visitChildren<V>(_ visitor: V) where V: ViewVisitor {}
+  public func _visitChildren<V>(_ visitor: V) where V: ViewVisitor {}
 }
 
 /// A `View` type that renders with subviews, usually specified in the `Content` type argument

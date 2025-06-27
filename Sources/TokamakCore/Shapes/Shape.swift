@@ -17,6 +17,7 @@
 
 import Foundation
 
+@MainActor
 public protocol Shape: Animatable, View {
   func path(in rect: CGRect) -> Path
 
@@ -25,8 +26,8 @@ public protocol Shape: Animatable, View {
   func sizeThatFits(_ proposal: ProposedViewSize) -> CGSize
 }
 
-public extension Shape {
-  func sizeThatFits(_ proposal: ProposedViewSize) -> CGSize {
+extension Shape {
+  public func sizeThatFits(_ proposal: ProposedViewSize) -> CGSize {
     // TODO: Check if SwiftUI changes this behavior.
 
     // SwiftUI seems to not compute the path at all and just return
@@ -41,16 +42,17 @@ public enum ShapeRole: Hashable {
   case separator
 }
 
-public extension Shape {
-  static var role: ShapeRole { .fill }
+extension Shape {
+  public static var role: ShapeRole { .fill }
 }
 
-public extension ShapeStyle where Self: View, Self.Body == _ShapeView<Rectangle, Self> {
-  var body: Body {
+extension ShapeStyle where Self: View, Self.Body == _ShapeView<Rectangle, Self> {
+  public var body: Body {
     _ShapeView(shape: Rectangle(), style: self)
   }
 }
 
+@MainActor
 public protocol InsettableShape: Shape {
   associatedtype InsetShape: InsettableShape
   func inset(by amount: CGFloat) -> InsetShape
@@ -66,7 +68,9 @@ public struct FillStyle: Equatable {
   }
 }
 
-public struct _ShapeView<Content, Style>: _PrimitiveView, Layout where Content: Shape,
+public struct _ShapeView<Content, Style>: @MainActor _PrimitiveView, @MainActor Layout
+where
+  Content: Shape,
   Style: ShapeStyle
 {
   @Environment(\.self)
@@ -112,26 +116,26 @@ public struct _ShapeView<Content, Style>: _PrimitiveView, Layout where Content: 
   }
 }
 
-public extension Shape {
-  func trim(from startFraction: CGFloat = 0, to endFraction: CGFloat = 1) -> some Shape {
+extension Shape {
+  public func trim(from startFraction: CGFloat = 0, to endFraction: CGFloat = 1) -> some Shape {
     _TrimmedShape(shape: self, startFraction: startFraction, endFraction: endFraction)
   }
 }
 
-public extension Shape {
-  func offset(_ offset: CGSize) -> OffsetShape<Self> {
+extension Shape {
+  public func offset(_ offset: CGSize) -> OffsetShape<Self> {
     OffsetShape(shape: self, offset: offset)
   }
 
-  func offset(_ offset: CGPoint) -> OffsetShape<Self> {
+  public func offset(_ offset: CGPoint) -> OffsetShape<Self> {
     OffsetShape(shape: self, offset: CGSize(width: offset.x, height: offset.y))
   }
 
-  func offset(x: CGFloat = 0, y: CGFloat = 0) -> OffsetShape<Self> {
+  public func offset(x: CGFloat = 0, y: CGFloat = 0) -> OffsetShape<Self> {
     OffsetShape(shape: self, offset: .init(width: x, height: y))
   }
 
-  func scale(
+  public func scale(
     x: CGFloat = 1,
     y: CGFloat = 1,
     anchor: UnitPoint = .center
@@ -143,62 +147,62 @@ public extension Shape {
     )
   }
 
-  func scale(_ scale: CGFloat, anchor: UnitPoint = .center) -> ScaledShape<Self> {
+  public func scale(_ scale: CGFloat, anchor: UnitPoint = .center) -> ScaledShape<Self> {
     self.scale(x: scale, y: scale, anchor: anchor)
   }
 
-  func rotation(_ angle: Angle, anchor: UnitPoint = .center) -> RotatedShape<Self> {
+  public func rotation(_ angle: Angle, anchor: UnitPoint = .center) -> RotatedShape<Self> {
     RotatedShape(shape: self, angle: angle, anchor: anchor)
   }
 
-  func transform(_ transform: CGAffineTransform) -> TransformedShape<Self> {
+  public func transform(_ transform: CGAffineTransform) -> TransformedShape<Self> {
     TransformedShape(shape: self, transform: transform)
   }
 }
 
-public extension Shape {
-  func size(_ size: CGSize) -> some Shape {
+extension Shape {
+  public func size(_ size: CGSize) -> some Shape {
     _SizedShape(shape: self, size: size)
   }
 
-  func size(width: CGFloat, height: CGFloat) -> some Shape {
+  public func size(width: CGFloat, height: CGFloat) -> some Shape {
     size(.init(width: width, height: height))
   }
 }
 
-public extension Shape {
-  func stroke(style: StrokeStyle) -> some Shape {
+extension Shape {
+  public func stroke(style: StrokeStyle) -> some Shape {
     _StrokedShape(shape: self, style: style)
   }
 
-  func stroke(lineWidth: CGFloat = 1) -> some Shape {
+  public func stroke(lineWidth: CGFloat = 1) -> some Shape {
     stroke(style: StrokeStyle(lineWidth: lineWidth))
   }
 }
 
-public extension Shape {
-  func fill<S>(
+extension Shape {
+  public func fill<S>(
     _ content: S,
     style: FillStyle = FillStyle()
   ) -> some View where S: ShapeStyle {
     _ShapeView(shape: self, style: content, fillStyle: style)
   }
 
-  func fill(style: FillStyle = FillStyle()) -> some View {
+  public func fill(style: FillStyle = FillStyle()) -> some View {
     _ShapeView(shape: self, style: ForegroundStyle(), fillStyle: style)
   }
 
-  func stroke<S>(_ content: S, style: StrokeStyle) -> some View where S: ShapeStyle {
+  public func stroke<S>(_ content: S, style: StrokeStyle) -> some View where S: ShapeStyle {
     stroke(style: style).fill(content)
   }
 
-  func stroke<S>(_ content: S, lineWidth: CGFloat = 1) -> some View where S: ShapeStyle {
+  public func stroke<S>(_ content: S, lineWidth: CGFloat = 1) -> some View where S: ShapeStyle {
     stroke(content, style: StrokeStyle(lineWidth: lineWidth))
   }
 }
 
-public extension Shape {
-  var body: some View {
+extension Shape {
+  public var body: some View {
     _ShapeView(shape: self, style: ForegroundStyle())
   }
 }

@@ -65,23 +65,25 @@ extension _Canvas {
       bounds: .zero
     )
     switch positioning {
-    case let .in(rect):
+    case .in(let rect):
       _ = canvasContext.fillText!(
         _TextProxy(text._text).rawText,
         Double(rect.origin.x),
         Double(rect.origin.y),
         Double(rect.size.width)
       )
-    case let .at(point, anchor):
+    case .at(let point, let anchor):
       // Horizontal alignment
       canvasContext.textAlign = .string(
-        anchor.x == 0 ? "start" : (anchor.x == 0.5 ? "center" : "end")
+        (anchor ?? .center).x == 0 ? "start" : ((anchor ?? .center).x == 0.5 ? "center" : "end")
       )
       // Vertical alignment
       canvasContext.textBaseline = .string(
-        anchor
-          .y == 0 ? "top" :
-          (anchor.y == 0.5 ? "middle" : (anchor.y == 1 ? "bottom" : "alphabetic"))
+        (anchor ?? .center)
+          .y == 0
+          ? "top"
+          : ((anchor ?? .center).y == 0.5
+            ? "middle" : ((anchor ?? .center).y == 1 ? "bottom" : "alphabetic"))
       )
       applyModifiers(proxy.modifiers, to: canvasContext, in: parent._environment)
       _ = canvasContext.fillText!(proxy.rawText, Double(point.x), Double(point.y))
@@ -102,12 +104,12 @@ extension _Canvas {
     var family: String?
     for modifier in modifiers {
       switch modifier {
-      case let .color(color):
+      case .color(let color):
         if let color = color {
           canvas.fillStyle = GraphicsContext.Shading.color(color)
             .cssValue(in: environment, with: canvas, bounds: .zero)
         }
-      case let .font(font):
+      case .font(let font):
         if let font = font {
           let styles = font.styles(in: environment)
           style += styles["font-style"] ?? ""
@@ -119,12 +121,13 @@ extension _Canvas {
         }
       case .italic:
         style += "italic"
-      case let .weight(w):
+      case .weight(let w):
         if let value = w?.value {
           weight = "\(value)"
         }
       case .kerning, .tracking, .rounded, .baseline, .strikethrough,
-           .underline: break // Not supported in <canvas>.
+        .underline:
+        break  // Not supported in <canvas>.
       }
     }
 

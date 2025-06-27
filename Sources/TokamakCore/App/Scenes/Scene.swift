@@ -15,7 +15,7 @@
 //  Created by Carson Katri on 7/16/20.
 //
 
-public protocol Scene {
+public protocol Scene: Sendable {
   associatedtype Body: Scene
 
   // FIXME: If I put `@SceneBuilder` in front of this
@@ -26,6 +26,7 @@ public protocol Scene {
   /// or in cases where the body would normally need to be type erased.
   ///
   /// You can `visit(_:)` either another `Scene` or a `View` with a `SceneVisitor`
+
   func _visitChildren<V: SceneVisitor>(_ visitor: V)
 
   /// Create `SceneOutputs`, including any modifications to the environment, preferences, or a custom

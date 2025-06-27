@@ -35,16 +35,16 @@ public protocol ContainedZLayout: Layout where Cache == ContainedZLayoutCache {
 }
 
 @_spi(TokamakCore)
-public extension ContainedZLayout {
-  func makeCache(subviews: Subviews) -> Cache {
+extension ContainedZLayout {
+  public func makeCache(subviews: Subviews) -> Cache {
     .init()
   }
 
-  func spacing(subviews: LayoutSubviews, cache: inout Cache) -> ViewSpacing {
+  public func spacing(subviews: LayoutSubviews, cache: inout Cache) -> ViewSpacing {
     subviews[keyPath: Self.primarySubview]?.spacing ?? .init()
   }
 
-  func sizeThatFits(
+  public func sizeThatFits(
     proposal: ProposedViewSize,
     subviews: Subviews,
     cache: inout Cache
@@ -57,7 +57,7 @@ public extension ContainedZLayout {
     )
   }
 
-  func placeSubviews(
+  public func placeSubviews(
     in bounds: CGRect,
     proposal: ProposedViewSize,
     subviews: Subviews,
@@ -68,7 +68,8 @@ public extension ContainedZLayout {
     // Place the foreground at the origin.
     subviews[keyPath: Self.primarySubview]?.place(at: bounds.origin, proposal: proposal)
 
-    let backgroundSubviews = subviews[keyPath: Self.primarySubview] == subviews.first
+    let backgroundSubviews =
+      subviews[keyPath: Self.primarySubview] == subviews.first
       ? subviews.dropFirst(1)
       : subviews.dropLast(1)
 
@@ -125,12 +126,12 @@ public extension ContainedZLayout {
 
 /// Expects the primary subview to be last.
 @_spi(TokamakCore)
-extension _BackgroundLayout: ContainedZLayout {
+extension _BackgroundLayout: @MainActor ContainedZLayout {
   public static var primarySubview: KeyPath<LayoutSubviews, LayoutSubview?> { \.last }
 }
 
 /// Expects the primary subview to be the first.
 @_spi(TokamakCore)
-extension _OverlayLayout: ContainedZLayout {
+extension _OverlayLayout: @MainActor ContainedZLayout {
   public static var primarySubview: KeyPath<LayoutSubviews, LayoutSubview?> { \.first }
 }

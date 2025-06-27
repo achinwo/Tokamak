@@ -18,7 +18,7 @@
 import Foundation
 
 @frozen
-public struct EllipticalGradient: ShapeStyle, View {
+public struct EllipticalGradient: ShapeStyle, @MainActor View {
   internal var gradient: Gradient
   internal var center: UnitPoint
   internal var startRadiusFraction: CGFloat

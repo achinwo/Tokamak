@@ -17,9 +17,9 @@
 
 import Foundation
 
-private extension ViewDimensions {
+extension ViewDimensions {
   /// Access the guide value of an `Alignment` for a particular `Axis`.
-  subscript(alignment alignment: Alignment, in axis: Axis) -> CGFloat {
+  fileprivate subscript(alignment alignment: Alignment, in axis: Axis) -> CGFloat {
     switch axis {
     case .horizontal: return self[alignment.vertical]
     case .vertical: return self[alignment.horizontal]
@@ -63,8 +63,8 @@ public protocol StackLayout: Layout where Cache == StackLayoutCache {
 }
 
 @_spi(TokamakCore)
-public extension StackLayout {
-  static var layoutProperties: LayoutProperties {
+extension StackLayout {
+  public static var layoutProperties: LayoutProperties {
     var properties = LayoutProperties()
     properties.stackOrientation = Self.orientation
     return properties
@@ -74,7 +74,7 @@ public extension StackLayout {
   ///
   /// A `vertical` axis will return `height`.
   /// A `horizontal` axis will return `width`.
-  static var mainAxis: WritableKeyPath<CGSize, CGFloat> {
+  public static var mainAxis: WritableKeyPath<CGSize, CGFloat> {
     switch Self.orientation {
     case .vertical: return \.height
     case .horizontal: return \.width
@@ -85,25 +85,27 @@ public extension StackLayout {
   ///
   /// A `vertical` axis will return `width`.
   /// A `horizontal` axis will return `height`.
-  static var crossAxis: WritableKeyPath<CGSize, CGFloat> {
+  public static var crossAxis: WritableKeyPath<CGSize, CGFloat> {
     switch Self.orientation {
     case .vertical: return \.width
     case .horizontal: return \.height
     }
   }
 
-  func makeCache(subviews: Subviews) -> Cache {
+  public func makeCache(subviews: Subviews) -> Cache {
     // Ensure we have enough space in `idealSizes` for each subview.
     .init(maxSubview: nil, idealSizes: Array(repeating: .zero, count: subviews.count))
   }
 
-  func updateCache(_ cache: inout Cache, subviews: Subviews) {
+  public func updateCache(_ cache: inout Cache, subviews: Subviews) {
     cache.maxSubview = nil
     // Ensure we have enough space in `idealSizes` for each subview.
     cache.idealSizes = Array(repeating: .zero, count: subviews.count)
   }
 
-  func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
+  public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache)
+    -> CGSize
+  {
     let proposal = proposal.replacingUnspecifiedDimensions()
 
     /// The minimum size of each `View` on the main axis.
@@ -203,11 +205,11 @@ public extension StackLayout {
     return size
   }
 
-  func spacing(subviews: Subviews, cache: inout Cache) -> ViewSpacing {
+  public func spacing(subviews: Subviews, cache: inout Cache) -> ViewSpacing {
     subviews.reduce(into: .zero) { $0.formUnion($1.spacing) }
   }
 
-  func placeSubviews(
+  public func placeSubviews(
     in bounds: CGRect,
     proposal: ProposedViewSize,
     subviews: Subviews,
@@ -239,7 +241,8 @@ public extension StackLayout {
       // `alignment` of the `maxSubview`.
       var placement = CGSize(width: bounds.minX, height: bounds.minY)
       placement[keyPath: Self.mainAxis] += position
-      placement[keyPath: Self.crossAxis] += alignmentOffset
+      placement[keyPath: Self.crossAxis] +=
+        alignmentOffset
         - size[alignment: _alignment, in: Self.orientation]
 
       view.place(
@@ -256,13 +259,13 @@ public extension StackLayout {
 }
 
 @_spi(TokamakCore)
-extension VStack: StackLayout {
+extension VStack: @MainActor StackLayout {
   public static var orientation: Axis { .vertical }
   public var _alignment: Alignment { .init(horizontal: alignment, vertical: .center) }
 }
 
 @_spi(TokamakCore)
-extension HStack: StackLayout {
+extension HStack: @MainActor StackLayout {
   public static var orientation: Axis { .horizontal }
   public var _alignment: Alignment { .init(horizontal: .center, vertical: alignment) }
 }

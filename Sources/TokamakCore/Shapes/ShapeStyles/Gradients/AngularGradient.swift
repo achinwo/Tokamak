@@ -18,7 +18,7 @@
 import Foundation
 
 @frozen
-public struct AngularGradient: ShapeStyle, View {
+public struct AngularGradient: ShapeStyle, @MainActor View {
   internal var gradient: Gradient
   internal var center: UnitPoint
   internal var startAngle: Angle
@@ -93,8 +93,8 @@ public struct AngularGradient: ShapeStyle, View {
   public static func _apply(to type: inout _ShapeStyle_ShapeType) {}
 }
 
-public extension ShapeStyle where Self == AngularGradient {
-  static func angularGradient(
+extension ShapeStyle where Self == AngularGradient {
+  public static func angularGradient(
     _ gradient: Gradient,
     center: UnitPoint,
     startAngle: Angle,
@@ -106,7 +106,7 @@ public extension ShapeStyle where Self == AngularGradient {
     )
   }
 
-  static func angularGradient(
+  public static func angularGradient(
     colors: [Color],
     center: UnitPoint,
     startAngle: Angle,
@@ -118,7 +118,7 @@ public extension ShapeStyle where Self == AngularGradient {
     )
   }
 
-  static func angularGradient(
+  public static func angularGradient(
     stops: [Gradient.Stop],
     center: UnitPoint,
     startAngle: Angle,
@@ -131,8 +131,8 @@ public extension ShapeStyle where Self == AngularGradient {
   }
 }
 
-public extension ShapeStyle where Self == AngularGradient {
-  static func conicGradient(
+extension ShapeStyle where Self == AngularGradient {
+  public static func conicGradient(
     _ gradient: Gradient,
     center: UnitPoint,
     angle: Angle = .zero
@@ -140,7 +140,7 @@ public extension ShapeStyle where Self == AngularGradient {
     .init(gradient: gradient, center: center, angle: angle)
   }
 
-  static func conicGradient(
+  public static func conicGradient(
     colors: [Color],
     center: UnitPoint,
     angle: Angle = .zero
@@ -148,7 +148,7 @@ public extension ShapeStyle where Self == AngularGradient {
     .init(colors: colors, center: center, angle: angle)
   }
 
-  static func conicGradient(
+  public static func conicGradient(
     stops: [Gradient.Stop],
     center: UnitPoint,
     angle: Angle = .zero

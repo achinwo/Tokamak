@@ -17,7 +17,7 @@
 
 import Foundation
 
-public struct Ellipse: Shape {
+public struct Ellipse: @MainActor Shape {
   public func path(in rect: CGRect) -> Path {
     .init(storage: .ellipse(rect), sizing: .flexible)
   }
@@ -25,7 +25,7 @@ public struct Ellipse: Shape {
   public init() {}
 }
 
-public struct Circle: Shape {
+public struct Circle: @MainActor Shape {
   public func path(in rect: CGRect) -> Path {
     .init(
       storage: .ellipse(
@@ -44,12 +44,12 @@ public struct Circle: Shape {
   public init() {}
 }
 
-extension Circle: InsettableShape {
+extension Circle: @MainActor InsettableShape {
   public func inset(by amount: CGFloat) -> _Inset {
     _Inset(amount: amount)
   }
 
-  public struct _Inset: InsettableShape {
+  public struct _Inset: @MainActor InsettableShape {
     public var amount: CGFloat
 
     init(amount: CGFloat) {
@@ -58,13 +58,14 @@ extension Circle: InsettableShape {
 
     public func path(in rect: CGRect) -> Path {
       .init(
-        storage: .ellipse(CGRect(
-          origin: rect.origin,
-          size: CGSize(
-            width: rect.size.width - (amount / 2),
-            height: rect.size.height - (amount / 2)
-          )
-        )),
+        storage: .ellipse(
+          CGRect(
+            origin: rect.origin,
+            size: CGSize(
+              width: rect.size.width - (amount / 2),
+              height: rect.size.height - (amount / 2)
+            )
+          )),
         sizing: .flexible
       )
     }
@@ -77,7 +78,7 @@ extension Circle: InsettableShape {
   }
 }
 
-public struct Capsule: Shape {
+public struct Capsule: @MainActor Shape {
   public var style: RoundedCornerStyle
 
   public init(style: RoundedCornerStyle = .circular) {
@@ -86,10 +87,11 @@ public struct Capsule: Shape {
 
   public func path(in rect: CGRect) -> Path {
     .init(
-      storage: .roundedRect(.init(
-        capsule: rect,
-        style: style
-      )),
+      storage: .roundedRect(
+        .init(
+          capsule: rect,
+          style: style
+        )),
       sizing: .flexible
     )
   }

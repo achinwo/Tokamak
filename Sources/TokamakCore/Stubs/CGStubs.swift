@@ -14,8 +14,10 @@
 //
 //  Created by Max Desiatov on 08/04/2020.
 //
-
+#if canImport(CoreFoundation)
 import CoreFoundation
+#endif
+
 import Foundation
 
 extension CGPoint {

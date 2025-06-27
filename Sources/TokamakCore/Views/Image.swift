@@ -33,6 +33,8 @@ public class _AnyImageProviderBox: AnyTokenBox, Equatable {
     }
   }
 
+  init() {}  // dummy initializer for silencing compiler "Main actor-isolated initializer 'init()' has different actor isolation from nonisolated overridden declaration"
+
   public static func == (lhs: _AnyImageProviderBox, rhs: _AnyImageProviderBox) -> Bool {
     lhs.equals(rhs)
   }
@@ -120,27 +122,27 @@ public struct Image: _PrimitiveView, Equatable {
   }
 }
 
-public extension Image {
-  init(_ name: String, bundle: Bundle? = nil) {
+extension Image {
+  public init(_ name: String, bundle: Bundle? = nil) {
     self.init(name, bundle: bundle, label: Text(name))
   }
 
-  init(_ name: String, bundle: Bundle? = nil, label: Text) {
+  public init(_ name: String, bundle: Bundle? = nil, label: Text) {
     self.init(NamedImageProvider(name: name, bundle: bundle, label: label))
   }
 
-  init(decorative name: String, bundle: Bundle? = nil) {
+  public init(decorative name: String, bundle: Bundle? = nil) {
     self.init(NamedImageProvider(name: name, bundle: bundle, label: nil))
   }
 }
 
-public extension Image {
-  enum ResizingMode: Hashable {
+extension Image {
+  public enum ResizingMode: Hashable {
     case tile
     case stretch
   }
 
-  func resizable(
+  public func resizable(
     capInsets: EdgeInsets = EdgeInsets(),
     resizingMode: ResizingMode = .stretch
   ) -> Image {
@@ -158,7 +160,7 @@ public struct _ImageProxy {
   public var environment: EnvironmentValues { subject.environment }
 }
 
-extension Image: Layout {
+extension Image: @MainActor Layout {
   public func sizeThatFits(
     proposal: ProposedViewSize,
     subviews: Subviews,

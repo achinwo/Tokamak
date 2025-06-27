@@ -17,8 +17,7 @@
 
 import Foundation
 import JavaScriptKit
-@_spi(TokamakCore)
-import TokamakCore
+@_spi(TokamakCore) import TokamakCore
 import TokamakStaticHTML
 
 extension Canvas: DOMPrimitive {
@@ -27,7 +26,7 @@ extension Canvas: DOMPrimitive {
   }
 }
 
-extension Canvas: SpacerContainer {
+extension Canvas: @MainActor SpacerContainer {
   public var hasSpacer: Bool { true }
   public var axis: SpacerContainerAxis { .vertical }
   public var fillCrossAxis: Bool { true }
@@ -68,9 +67,12 @@ struct _Canvas<Symbols: View>: View {
 
   var body: some View {
     GeometryReader { proxy in
-      HTML("canvas", [
-        "style": "width: 100%; height: 100%;",
-      ])
+      HTML(
+        "canvas",
+        [
+          "style": "width: 100%; height: 100%;"
+        ]
+      )
       ._domRef($coordinator.canvas)
       .onAppear { draw(in: proxy.size) }
       ._onUpdate {
@@ -85,7 +87,7 @@ struct _Canvas<Symbols: View>: View {
 
   private func draw(in size: CGSize) {
     guard let canvas = coordinator.canvas,
-          let canvasContext = canvas.getContext!("2d").object
+      let canvasContext = canvas.getContext!("2d").object
     else { return }
     // Setup the canvas size
     canvas.width = .number(Double(size.width * CGFloat(devicePixelRatio)))
@@ -110,10 +112,11 @@ struct _Canvas<Symbols: View>: View {
     // Render into the context.
     parent.renderer(&graphicsContext, size)
     if inAnimatingTimelineView && !isAnimatingTimelineViewPaused {
-      coordinator.currentDrawLoop = JSObject.global.requestAnimationFrame!(JSOneshotClosure { _ in
-        draw(in: size)
-        return .undefined
-      })
+      coordinator.currentDrawLoop = JSObject.global.requestAnimationFrame!(
+        JSOneshotClosure { _ in
+          draw(in: size)
+          return .undefined
+        })
     }
   }
 
@@ -124,47 +127,50 @@ struct _Canvas<Symbols: View>: View {
   ) {
     canvasContext.globalCompositeOperation = .string(storage.blendMode.cssValue)
     switch operation {
-    case let .clip(path, _, _):
+    case .clip(let path, _, _):
       clip(to: path, in: canvasContext)
     case .beginClipLayer:
       _ = canvasContext.save!()
     case .endClipLayer:
       _ = canvasContext.restore!()
       _ = canvasContext.clip!()
-    case let .addFilter(filter, _):
+    case .addFilter(let filter, _):
       applyFilter(filter, to: canvasContext)
     case .beginLayer:
       _ = canvasContext.save!()
     case .endLayer:
       _ = canvasContext.restore!()
-    case let .fill(path, shading, fillStyle):
+    case .fill(let path, let shading, let fillStyle):
       fillPath(path, with: shading, style: fillStyle, in: canvasContext)
-    case let .stroke(path, shading, strokeStyle):
+    case .stroke(let path, let shading, let strokeStyle):
       strokePath(path, with: shading, style: strokeStyle, in: canvasContext)
-    case let .drawImage(image, positioning, style):
+    case .drawImage(let image, let positioning, let style):
       drawImage(image, at: positioning, with: style, in: canvasContext)
-    case let .drawText(text, positioning):
+    case .drawText(let text, let positioning):
       drawText(text, at: positioning, in: canvasContext)
-    case let .drawSymbol(symbol, positioning):
+    case .drawSymbol(let symbol, let positioning):
       drawSymbol(symbol, at: positioning, in: canvasContext)
     }
   }
 
   private func applyFilter(_ filter: GraphicsContext.Filter, to canvasContext: JSObject) {
-    let previousFilter = canvasContext.filter
-      .string == "none" ? "" : (canvasContext.filter.string ?? "")
+    let previousFilter =
+      canvasContext.filter
+        .string == "none" ? "" : (canvasContext.filter.string ?? "")
     switch filter._storage {
-    case let .projectionTransform(matrix):
+    case .projectionTransform(let matrix):
       _ = canvasContext.transform!(
         Double(matrix.m11), Double(matrix.m12),
         Double(matrix.m21), Double(matrix.m22),
         Double(matrix.m31), Double(matrix.m32)
       )
-    case let .shadow(color, radius, x, y, _, _):
+    case .shadow(let color, let radius, let x, let y, _, _):
       canvasContext
         .shadowColor = .string(
-          _ColorProxy(color).resolve(in: parent._environment)
-            .cssValue
+          _ColorProxy(color ?? Color(.sRGBLinear, white: 0, opacity: 0.33)).resolve(
+            in: parent._environment
+          )
+          .cssValue
         )
       canvasContext.shadowBlur = .number(Double(radius))
       canvasContext.shadowOffsetX = .number(Double(x))
@@ -173,21 +179,21 @@ struct _Canvas<Symbols: View>: View {
       break
     case .colorMatrix:
       break
-    case let .hueRotation(angle):
+    case .hueRotation(let angle):
       canvasContext.filter = .string("\(previousFilter) hue-rotate(\(angle.radians)rad)")
-    case let .saturation(amount):
+    case .saturation(let amount):
       canvasContext.filter = .string("\(previousFilter) saturate(\(amount * 100)%)")
-    case let .brightness(amount):
+    case .brightness(let amount):
       canvasContext.filter = .string("\(previousFilter) brightness(\(amount * 100)%)")
-    case let .contrast(amount):
+    case .contrast(let amount):
       canvasContext.filter = .string("\(previousFilter) contrast(\(amount * 100)%)")
-    case let .colorInvert(amount):
+    case .colorInvert(let amount):
       canvasContext.filter = .string("\(previousFilter) invert(\(amount * 100)%)")
-    case let .grayscale(amount):
+    case .grayscale(let amount):
       canvasContext.filter = .string("\(previousFilter) grayscale(\(amount * 100)%)")
     case .luminanceToAlpha:
       break
-    case let .blur(radius, _):
+    case .blur(let radius, _):
       canvasContext.filter = .string("\(previousFilter) blur(\(radius)px)")
     case .alphaThreshold:
       break
@@ -201,7 +207,7 @@ extension GraphicsContext.Shading {
     with canvas: JSObject,
     bounds: CGRect
   ) -> JSValue {
-    if case let .resolved(resolved) = _resolve(in: environment)._storage {
+    if case .resolved(let resolved) = _resolve(in: environment)._storage {
       return resolved.cssValue(in: environment, with: canvas, bounds: bounds)
     }
     return .string("none")
@@ -215,15 +221,15 @@ extension GraphicsContext._ResolvedShading {
     bounds: CGRect
   ) -> JSValue {
     switch self {
-    case let .levels(palette):
+    case .levels(let palette):
       guard let primary = palette.first else { break }
       return primary.cssValue(in: environment, with: canvas, bounds: bounds)
-    case let .style(style):
+    case .style(let style):
       return style.cssValue(in: environment, with: canvas, bounds: bounds)
-    case let .gradient(gradient, geometry, _):
+    case .gradient(let gradient, let geometry, _):
       let gradientBounds = CGRect(origin: .zero, size: .init(width: 1, height: 1))
       switch geometry {
-      case let .axial(startPoint, endPoint):
+      case .axial(let startPoint, let endPoint):
         return _ResolvedStyle.gradient(
           gradient,
           style: .linear(
@@ -231,7 +237,7 @@ extension GraphicsContext._ResolvedShading {
             endPoint: .init(x: endPoint.x, y: endPoint.y)
           )
         ).cssValue(in: environment, with: canvas, bounds: gradientBounds)
-      case let .conic(center, angle):
+      case .conic(let center, let angle):
         return _ResolvedStyle.gradient(
           gradient,
           style: .angular(
@@ -240,7 +246,7 @@ extension GraphicsContext._ResolvedShading {
             endAngle: angle
           )
         ).cssValue(in: environment, with: canvas, bounds: gradientBounds)
-      case let .radial(center, startRadius, endRadius):
+      case .radial(let center, let startRadius, let endRadius):
         return _ResolvedStyle.gradient(
           gradient,
           style: .radial(
@@ -265,26 +271,26 @@ extension _ResolvedStyle {
     bounds: CGRect
   ) -> JSValue {
     switch self {
-    case let .color(color):
+    case .color(let color):
       return .string(color.opacity(color.opacity * Double(opacity)).cssValue)
     case .foregroundMaterial:
       break
-    case let .array(palette):
+    case .array(let palette):
       guard let primary = palette.first else { break }
       return primary.cssValue(in: environment, opacity: opacity, with: canvas, bounds: bounds)
-    case let .opacity(opacity, style):
+    case .opacity(let opacity, let style):
       return style.cssValue(in: environment, opacity: opacity, with: canvas, bounds: bounds)
-    case let .gradient(gradient, style):
+    case .gradient(let gradient, let style):
       let canvasGradient: JSObject
       switch style {
-      case let .linear(startPoint, endPoint):
+      case .linear(let startPoint, let endPoint):
         canvasGradient = canvas.createLinearGradient!(
           Double(bounds.origin.x + startPoint.x * bounds.width),
           Double(bounds.origin.y + startPoint.y * bounds.height),
           Double(bounds.origin.x + endPoint.x * bounds.width),
           Double(bounds.origin.y + endPoint.y * bounds.height)
         ).object!
-      case let .radial(center, startRadius, endRadius):
+      case .radial(let center, let startRadius, let endRadius):
         canvasGradient = canvas.createRadialGradient!(
           Double(bounds.origin.x + center.x * bounds.width),
           Double(bounds.origin.y + center.y * bounds.height),
@@ -293,7 +299,7 @@ extension _ResolvedStyle {
           Double(bounds.origin.y + center.y * bounds.height),
           Double(endRadius)
         ).object!
-      case let .elliptical(center, startRadiusFraction, endRadiusFraction):
+      case .elliptical(let center, let startRadiusFraction, let endRadiusFraction):
         canvasGradient = canvas.createRadialGradient!(
           Double(bounds.origin.x + center.x * bounds.width),
           Double(bounds.origin.y + center.y * bounds.height),
@@ -302,7 +308,7 @@ extension _ResolvedStyle {
           Double(bounds.origin.y + center.y * bounds.height),
           Double(endRadiusFraction * bounds.width)
         ).object!
-      case let .angular(center, _, endAngle):
+      case .angular(let center, _, let endAngle):
         canvasGradient = canvas.createConicGradient!(
           Double(endAngle.radians),
           Double(bounds.origin.x + center.x * bounds.width),

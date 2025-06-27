@@ -109,18 +109,18 @@ public enum Sanitizers {
       static func sanitize(_ input: String) -> String {
         """
         '\(
-          Parsers.string1.matches(input)
+          String(Parsers.string1.matches(input)
             ? Parsers.string1Content.filter(input)
-            : Parsers.string2Content.filter(input)
-            .replacingOccurrences(of: "\"", with: "&quot;"))'
+            : Parsers.string2Content.filter(input))
+            .replacing("\"", with: "&quot;"))'
         """
       }
     }
   }
 
   public enum HTML {
-    public static let encode = Encode.sanitize
-    public static let insecure = Insecure.sanitize
+    public static let encode: @MainActor @Sendable (String) -> String = Encode.sanitize
+    public static let insecure: @MainActor @Sendable (String) -> String = Insecure.sanitize
 
     typealias Default = Encode
 
@@ -130,15 +130,17 @@ public enum Sanitizers {
       }
 
       static func sanitize(_ input: String) -> String {
-        let controlCharacters = [("&", "&amp;"),
-                                 ("<", "&lt;"),
-                                 (">", "&gt;"),
-                                 ("\"", "&quot;"),
-                                 ("'", "&#x27;")]
+        let controlCharacters = [
+          ("&", "&amp;"),
+          ("<", "&lt;"),
+          (">", "&gt;"),
+          ("\"", "&quot;"),
+          ("'", "&#x27;"),
+        ]
 
         return controlCharacters.reduce(input) { input, replacement in
           let (from, to) = replacement
-          return input.replacingOccurrences(of: from, with: to)
+          return input.replacing(from, with: to)
         }
       }
     }
@@ -152,11 +154,11 @@ public enum Sanitizers {
 
 struct RegularExpression: ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
   let pattern: String
-  private let nsRegularExpression: NSRegularExpression?
+  private let nsRegularExpression: Regex<String>?
 
   init(_ pattern: String) {
     self.pattern = pattern
-    nsRegularExpression = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
+    nsRegularExpression = nil  // try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
   }
 
   init(stringLiteral value: String) {
@@ -168,25 +170,29 @@ struct RegularExpression: ExpressibleByStringLiteral, ExpressibleByStringInterpo
   }
 
   func matches(_ input: String) -> Bool {
-    guard let range = input.range(
-      of: pattern,
-      options: [.regularExpression, .caseInsensitive, .anchored]
-    ) else { return false }
-    return range.lowerBound == input.startIndex && range.upperBound == input.endIndex
+    return false
+    // guard
+    //   let range = input.range(
+    //     of: pattern,
+    //     options: [.regularExpression, .caseInsensitive, .anchored]
+    //   )
+    // else { return false }
+    // return range.lowerBound == input.startIndex && range.upperBound == input.endIndex
   }
 
   func filter(_ input: String) -> String {
-    nsRegularExpression?
-      .matches(
-        in: input,
-        options: [],
-        range: NSRange(location: 0, length: input.utf16.count)
-      )
-      .compactMap {
-        guard let range = Range($0.range, in: input) else { return nil }
-        return String(input[range])
-      }
-      .joined() ?? ""
+    ""
+    // nsRegularExpression?
+    //   .matches(
+    //     in: input,
+    //     options: [],
+    //     range: NSRange(location: 0, length: input.utf16.count)
+    //   )
+    //   .compactMap {
+    //     guard let range = Range($0.range, in: input) else { return nil }
+    //     return String(input[range])
+    //   }
+    //   .joined() ?? ""
   }
 
   struct StringInterpolation: StringInterpolationProtocol {

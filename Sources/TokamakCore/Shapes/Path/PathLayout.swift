@@ -17,12 +17,12 @@
 
 import Foundation
 
-public extension Path.Storage {
-  var elements: [Path.Element] {
+extension Path.Storage {
+  public var elements: [Path.Element] {
     switch self {
     case .empty:
       return []
-    case let .rect(rect):
+    case .rect(let rect):
       return [
         .move(to: rect.origin),
         .line(to: CGPoint(x: rect.size.width, y: 0).offset(by: rect.origin)),
@@ -31,7 +31,7 @@ public extension Path.Storage {
         .closeSubpath,
       ]
 
-    case let .ellipse(rect):
+    case .ellipse(let rect):
       // Scale down from a circle of max(width, height) in order to limit
       // precision loss. Scaling up from a unit circle also looked alright,
       // but scaling down is likely a bit better.
@@ -71,13 +71,14 @@ public extension Path.Storage {
           .transform(element: $0)
       }
 
-    case let .roundedRect(roundedRect):
+    case .roundedRect(let roundedRect):
       // A cornerSize of nil means that we are drawing a Capsule
       // In other words the corner size should be half of the min
       // of the size and width
       let rect = roundedRect.rect
-      let cornerSize = roundedRect.cornerSize ??
-        CGSize(
+      let cornerSize =
+        roundedRect.cornerSize
+        ?? CGSize(
           width: min(rect.size.width, rect.size.height) / 2,
           height: min(rect.size.width, rect.size.height) / 2
         )
@@ -147,10 +148,12 @@ public extension Path.Storage {
               endAngle: Angle(radians: Double.pi / 2),
               clockwise: false
             ),
-            [.line(
-              to: CGPoint(x: cornerSize.width, y: rect.size.height)
-                .offset(by: rect.origin)
-            )],
+            [
+              .line(
+                to: CGPoint(x: cornerSize.width, y: rect.size.height)
+                  .offset(by: rect.origin)
+              )
+            ],
             getArc(
               center: CGPoint(
                 x: cornerSize.width,
@@ -162,10 +165,12 @@ public extension Path.Storage {
               endAngle: Angle(radians: Double.pi),
               clockwise: false
             ),
-            [.line(
-              to: CGPoint(x: 0, y: cornerSize.height)
-                .offset(by: rect.origin)
-            )],
+            [
+              .line(
+                to: CGPoint(x: 0, y: cornerSize.height)
+                  .offset(by: rect.origin)
+              )
+            ],
             getArc(
               center: CGPoint(
                 x: cornerSize.width,
@@ -177,10 +182,12 @@ public extension Path.Storage {
               endAngle: Angle(radians: 3 * Double.pi / 2),
               clockwise: false
             ),
-            [.line(
-              to: CGPoint(x: rect.size.width - cornerSize.width, y: 0)
-                .offset(by: rect.origin)
-            )],
+            [
+              .line(
+                to: CGPoint(x: rect.size.width - cornerSize.width, y: 0)
+                  .offset(by: rect.origin)
+              )
+            ],
             getArc(
               center: CGPoint(
                 x: rect.size.width - cornerSize.width,
@@ -196,66 +203,66 @@ public extension Path.Storage {
           ].flatMap { $0 }
       }
 
-    case let .stroked(stroked):
+    case .stroked(let stroked):
       // TODO: This is not actually how stroking is implemented
       return stroked.path.storage.elements
 
-    case let .trimmed(trimmed):
+    case .trimmed(let trimmed):
       // TODO: This is not actually how trimmingis implemented
       return trimmed.path.storage.elements
 
-    case let .path(box):
+    case .path(let box):
       return box.elements
     }
   }
 }
 
-public extension Path {
-  var currentPoint: CGPoint? {
+extension Path {
+  public var currentPoint: CGPoint? {
     switch elements.last {
-    case let .move(to: point): return point
-    case let .line(to: point): return point
-    case let .curve(to: point, control1: _, control2: _): return point
-    case let .quadCurve(to: point, control: _): return point
+    case .move(to: let point): return point
+    case .line(to: let point): return point
+    case .curve(to: let point, control1: _, control2: _): return point
+    case .quadCurve(to: let point, control: _): return point
     default: return nil
     }
   }
 
-  func applying(_ transform: CGAffineTransform) -> Path {
+  public func applying(_ transform: CGAffineTransform) -> Path {
     guard transform != .identity else { return self }
     let elements = elements.map { transform.transform(element: $0) }
     let box = _PathBox(elements: elements)
     return Path(storage: .path(box), sizing: .fixed)
   }
 
-  func offsetBy(dx: CGFloat, dy: CGFloat) -> Path {
+  public func offsetBy(dx: CGFloat, dy: CGFloat) -> Path {
     applying(.init(translationX: dx, y: dy))
   }
 }
 
-extension Path: Shape {
+extension Path: @MainActor Shape {
   public func path(in rect: CGRect) -> Path {
     self
   }
 }
 
-public extension CGAffineTransform {
-  func transform(element: Path.Element) -> Path.Element {
+extension CGAffineTransform {
+  public func transform(element: Path.Element) -> Path.Element {
     switch element {
-    case let .move(to: p):
+    case .move(to: let p):
       return .move(to: transform(point: p))
 
-    case let .line(to: p):
+    case .line(to: let p):
       return .line(to: transform(point: p))
 
-    case let .curve(to: p, control1: c1, control2: c2):
+    case .curve(to: let p, control1: let c1, control2: let c2):
       return .curve(
         to: transform(point: p),
         control1: transform(point: c1),
         control2: transform(point: c2)
       )
 
-    case let .quadCurve(to: p, control: c):
+    case .quadCurve(to: let p, control: let c):
       return .quadCurve(to: transform(point: p), control: transform(point: c))
 
     case .closeSubpath:

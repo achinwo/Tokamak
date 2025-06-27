@@ -30,12 +30,12 @@ public struct _FrameLayout: ViewModifier {
   }
 }
 
-extension _FrameLayout: Animatable {
+extension _FrameLayout: @MainActor Animatable {
   public typealias AnimatableData = EmptyAnimatableData
 }
 
-public extension View {
-  func frame(
+extension View {
+  public func frame(
     width: CGFloat? = nil,
     height: CGFloat? = nil,
     alignment: Alignment = .center

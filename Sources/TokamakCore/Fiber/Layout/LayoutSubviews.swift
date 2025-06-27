@@ -18,7 +18,7 @@
 import Foundation
 
 /// A collection of `LayoutSubview` proxies.
-public struct LayoutSubviews: Equatable, RandomAccessCollection {
+public struct LayoutSubviews: @MainActor Equatable, @MainActor RandomAccessCollection {
   public var layoutDirection: LayoutDirection
   var storage: [LayoutSubview]
 
@@ -165,10 +165,11 @@ public struct LayoutSubview: Equatable {
       guard let fiber = fiber, let element = element else { return }
       let geometry = ViewGeometry(
         // Shift to the anchor point in the parent's coordinate space.
-        origin: .init(origin: .init(
-          x: position.x - (dimensions.width * anchor.x),
-          y: position.y - (dimensions.height * anchor.y)
-        )),
+        origin: .init(
+          origin: .init(
+            x: position.x - (dimensions.width * anchor.x),
+            y: position.y - (dimensions.height * anchor.y)
+          )),
         dimensions: dimensions,
         proposal: proposal
       )

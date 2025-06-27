@@ -1,11 +1,11 @@
-// swift-tools-version:5.6
+// swift-tools-version:6.2
 
 import PackageDescription
 
 let package = Package(
   name: "Tokamak",
   platforms: [
-    .macOS(.v11),
+    .macOS(.v15),
     .iOS(.v13),
   ],
   products: [
@@ -25,7 +25,7 @@ let package = Package(
     ),
     .executable(
       name: "TokamakStaticHTMLDemo",
-      targets: ["TokamakStaticHTMLDemo"]
+      targets: ["TokamakStaticHTMLDemo"],
     ),
     .library(
       name: "TokamakGTK",
@@ -51,11 +51,10 @@ let package = Package(
     ),
     .package(
       url: "https://github.com/OpenCombine/OpenCombine.git",
-      from: "0.12.0"
+      from: "0.14.0"
     ),
     .package(
-      url: "https://github.com/swiftwasm/OpenCombineJS.git",
-      from: "0.2.0"
+      path: "../OpenCombineJS"
     ),
     .package(
       url: "https://github.com/google/swift-benchmark",
@@ -65,6 +64,8 @@ let package = Package(
       url: "https://github.com/pointfreeco/swift-snapshot-testing.git",
       from: "1.9.0"
     ),
+    .package(url: "https://github.com/swiftlang/swift-foundation.git", branch: "main"),
+    .package(path: "../carton"),
   ],
   targets: [
     // Targets are the basic building blocks of a package. A target can define
@@ -72,19 +73,52 @@ let package = Package(
     // Targets can depend on other targets in this package, and on products
     // in packages which this package depends on.
     .target(
+      name: "Foundation",
+      dependencies: [
+        .product(
+          name: "FoundationEssentials",
+          package: "swift-foundation"
+        )
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self),
+        .unsafeFlags(["-strict-concurrency=minimal"]),
+      ],
+    ),
+    .target(
       name: "TokamakCore",
       dependencies: [
         .product(
           name: "OpenCombineShim",
           package: "OpenCombine"
         ),
-      ]
+        .target(
+          name: "Foundation",
+          condition: .when(platforms: [.wasi])
+        ),
+        //     .product(
+        //       name: "FoundationEssentials",
+        //       package: "swift-foundation"
+        //     )
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
+        //.unsafeFlags(["-strict-concurrency=minimal"]),
+      ],
     ),
     .target(
       name: "TokamakShim",
       dependencies: [
         .target(name: "TokamakDOM", condition: .when(platforms: [.wasi])),
         .target(name: "TokamakGTK", condition: .when(platforms: [.linux])),
+        .target(
+          name: "Foundation",
+          condition: .when(platforms: [.wasi])
+        ),
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
+        //.unsafeFlags(["-strict-concurrency=minimal"]),
       ]
     ),
     .systemLibrary(
@@ -127,7 +161,11 @@ let package = Package(
     .target(
       name: "TokamakStaticHTML",
       dependencies: [
-        "TokamakCore",
+        "TokamakCore"
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
+        //.unsafeFlags(["-strict-concurrency=minimal"]),
       ]
     ),
     .executableTarget(
@@ -165,6 +203,9 @@ let package = Package(
           condition: .when(platforms: [.wasi])
         ),
         "OpenCombineJS",
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .executableTarget(
@@ -178,22 +219,28 @@ let package = Package(
         ),
       ],
       resources: [.copy("logo-header.png")],
-      linkerSettings: [
-        .unsafeFlags(
-          ["-Xlinker", "--stack-first", "-Xlinker", "-z", "-Xlinker", "stack-size=16777216"],
-          .when(platforms: [.wasi])
-        ),
+      swiftSettings: [
+        .defaultIsolation(MainActor.self),
+        .unsafeFlags(["-strict-concurrency=minimal"]),
       ]
     ),
     .executableTarget(
       name: "TokamakStaticHTMLDemo",
       dependencies: [
-        "TokamakStaticHTML",
+        "TokamakStaticHTML"
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self),
+        .unsafeFlags(["-strict-concurrency=minimal"]),
       ]
     ),
     .target(
       name: "TokamakTestRenderer",
-      dependencies: ["TokamakCore"]
+      dependencies: ["TokamakCore"],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self),
+        .unsafeFlags(["-strict-concurrency=minimal"]),
+      ]
     ),
     .testTarget(
       name: "TokamakLayoutTests",

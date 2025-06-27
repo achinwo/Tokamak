@@ -14,7 +14,7 @@
 
 import Foundation
 
-public struct Rectangle: Shape {
+public struct Rectangle: @MainActor Shape {
   public func path(in rect: CGRect) -> Path {
     .init(storage: .rect(rect), sizing: .flexible)
   }
@@ -22,12 +22,12 @@ public struct Rectangle: Shape {
   public init() {}
 }
 
-extension Rectangle: InsettableShape {
+extension Rectangle: @MainActor InsettableShape {
   public func inset(by amount: CGFloat) -> _Inset {
     _Inset(amount: amount)
   }
 
-  public struct _Inset: InsettableShape {
+  public struct _Inset: @MainActor InsettableShape {
     public var amount: CGFloat
 
     init(amount: CGFloat) {
@@ -36,13 +36,14 @@ extension Rectangle: InsettableShape {
 
     public func path(in rect: CGRect) -> Path {
       .init(
-        storage: .rect(CGRect(
-          origin: rect.origin,
-          size: CGSize(
-            width: max(0, rect.size.width - (amount / 2)),
-            height: max(0, rect.size.height - (amount / 2))
-          )
-        )),
+        storage: .rect(
+          CGRect(
+            origin: rect.origin,
+            size: CGSize(
+              width: max(0, rect.size.width - (amount / 2)),
+              height: max(0, rect.size.height - (amount / 2))
+            )
+          )),
         sizing: .flexible
       )
     }
@@ -55,7 +56,7 @@ extension Rectangle: InsettableShape {
   }
 }
 
-public struct RoundedRectangle: Shape {
+public struct RoundedRectangle: @MainActor Shape {
   public var cornerSize: CGSize
   public var style: RoundedCornerStyle
 
@@ -71,24 +72,25 @@ public struct RoundedRectangle: Shape {
 
   public func path(in rect: CGRect) -> Path {
     .init(
-      storage: .roundedRect(.init(
-        rect: rect,
-        cornerSize: cornerSize,
-        style: style
-      )),
+      storage: .roundedRect(
+        .init(
+          rect: rect,
+          cornerSize: cornerSize,
+          style: style
+        )),
       sizing: .flexible
     )
   }
 }
 
-extension RoundedRectangle: InsettableShape {
+extension RoundedRectangle: @MainActor InsettableShape {
   @inlinable
   public func inset(by amount: CGFloat) -> some InsettableShape {
     _Inset(base: self, amount: amount)
   }
 
   @usableFromInline
-  struct _Inset: InsettableShape {
+  struct _Inset: @MainActor InsettableShape {
     @usableFromInline
     var base: RoundedRectangle
 
@@ -104,20 +106,21 @@ extension RoundedRectangle: InsettableShape {
     @usableFromInline
     func path(in rect: CGRect) -> Path {
       .init(
-        storage: .roundedRect(.init(
-          rect: CGRect(
-            origin: rect.origin,
-            size: CGSize(
-              width: max(0, rect.size.width - (amount / 2)),
-              height: max(0, rect.size.height - (amount / 2))
-            )
-          ),
-          cornerSize: CGSize(
-            width: max(0, base.cornerSize.width - (amount / 2)),
-            height: max(0, base.cornerSize.height - (amount / 2))
-          ),
-          style: base.style
-        )),
+        storage: .roundedRect(
+          .init(
+            rect: CGRect(
+              origin: rect.origin,
+              size: CGSize(
+                width: max(0, rect.size.width - (amount / 2)),
+                height: max(0, rect.size.height - (amount / 2))
+              )
+            ),
+            cornerSize: CGSize(
+              width: max(0, base.cornerSize.width - (amount / 2)),
+              height: max(0, base.cornerSize.height - (amount / 2))
+            ),
+            style: base.style
+          )),
         sizing: .flexible
       )
     }

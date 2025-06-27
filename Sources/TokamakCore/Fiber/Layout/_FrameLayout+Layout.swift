@@ -25,7 +25,7 @@ import Foundation
 /// Children request their own size, so they may overflow this container.
 ///
 /// If no fixed size is specified for a an axis, the container will use the size of its children.
-private struct FrameLayout: Layout {
+private struct FrameLayout: @MainActor Layout {
   let width: CGFloat?
   let height: CGFloat?
   let alignment: Alignment
@@ -94,10 +94,11 @@ private struct FrameLayout: Layout {
   }
 }
 
-public extension _FrameLayout {
-  func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor {
-    visitor.visit(FrameLayout(width: width, height: height, alignment: alignment).callAsFunction {
-      content
-    })
+extension _FrameLayout {
+  public func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor {
+    visitor.visit(
+      FrameLayout(width: width, height: height, alignment: alignment).callAsFunction {
+        content
+      })
   }
 }

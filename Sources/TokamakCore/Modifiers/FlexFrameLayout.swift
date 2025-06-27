@@ -56,12 +56,12 @@ public struct _FlexFrameLayout: ViewModifier {
   }
 }
 
-extension _FlexFrameLayout: Animatable {
+extension _FlexFrameLayout: @MainActor Animatable {
   public typealias AnimatableData = EmptyAnimatableData
 }
 
-public extension View {
-  func frame(
+extension View {
+  public func frame(
     minWidth: CGFloat? = nil,
     idealWidth: CGFloat? = nil,
     maxWidth: CGFloat? = nil,
@@ -79,8 +79,8 @@ public extension View {
       return min <= ideal && ideal <= max
     }
 
-    if !areInNondecreasingOrder(minWidth, idealWidth, maxWidth) ||
-      !areInNondecreasingOrder(minHeight, idealHeight, maxHeight)
+    if !areInNondecreasingOrder(minWidth, idealWidth, maxWidth)
+      || !areInNondecreasingOrder(minHeight, idealHeight, maxHeight)
     {
       fatalError("Contradictory frame constraints specified.")
     }

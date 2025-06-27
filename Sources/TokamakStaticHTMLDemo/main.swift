@@ -15,9 +15,10 @@
 //  Created by Carson Katri on 7/20/20.
 //
 
+import Foundation
 import TokamakStaticHTML
 
-struct TestApp: App {
+struct TestApp: @MainActor App {
   var body: some Scene {
     WindowGroup("TokamakStaticHTML Demo") {
       ContentView()
@@ -25,4 +26,12 @@ struct TestApp: App {
   }
 }
 
-print(StaticHTMLRenderer(TestApp()).render(shouldSortAttributes: true))
+let html = StaticHTMLRenderer(TestApp()).render(shouldSortAttributes: true)
+
+_ = FileManager.default.createFile(
+  atPath: "index.html",
+  contents: html.data(using: .utf8),
+  attributes: [.posixPermissions: 0o644]
+)
+
+print("Wrote HTML to index.html")

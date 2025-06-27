@@ -38,7 +38,7 @@ public struct _ShadowEffect: EnvironmentalModifier, Equatable {
     )
   }
 
-  public struct _Resolved: ViewModifier, Animatable {
+  public struct _Resolved: ViewModifier, @MainActor Animatable {
     public var color: AnyColorBox.ResolvedValue
     public var radius: CGFloat
     public var offset: CGSize
@@ -87,9 +87,9 @@ public struct _ShadowEffect: EnvironmentalModifier, Equatable {
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func shadow(
+  public func shadow(
     color: Color = Color(.sRGBLinear, white: 0, opacity: 0.33),
     radius: CGFloat,
     x: CGFloat = 0,

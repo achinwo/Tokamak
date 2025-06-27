@@ -17,6 +17,7 @@
 
 import Foundation
 
+@MainActor
 public protocol Animatable {
   associatedtype AnimatableData: VectorArithmetic
   var animatableData: Self.AnimatableData { get set }
@@ -24,16 +25,16 @@ public protocol Animatable {
 
 public protocol _PrimitiveAnimatable {}
 
-public extension Animatable where Self: VectorArithmetic {
-  var animatableData: Self {
+extension Animatable where Self: VectorArithmetic {
+  public var animatableData: Self {
     get { self }
     // swiftlint:disable:next unused_setter_value
     set {}
   }
 }
 
-public extension Animatable where Self.AnimatableData == EmptyAnimatableData {
-  var animatableData: EmptyAnimatableData {
+extension Animatable where Self.AnimatableData == EmptyAnimatableData {
+  public var animatableData: EmptyAnimatableData {
     @inlinable get { EmptyAnimatableData() }
     // swiftlint:disable:next unused_setter_value
     @inlinable set {}
@@ -41,7 +42,7 @@ public extension Animatable where Self.AnimatableData == EmptyAnimatableData {
 }
 
 @frozen
-public struct EmptyAnimatableData: VectorArithmetic {
+public struct EmptyAnimatableData: @MainActor VectorArithmetic {
   @inlinable
   public init() {}
 
@@ -74,9 +75,8 @@ public struct EmptyAnimatableData: VectorArithmetic {
 }
 
 @frozen
-public struct AnimatablePair<First, Second>: VectorArithmetic
-  where First: VectorArithmetic, Second: VectorArithmetic
-{
+public struct AnimatablePair<First, Second>: @MainActor VectorArithmetic
+where First: VectorArithmetic, Second: VectorArithmetic {
   public var first: First
   public var second: Second
   @inlinable
@@ -93,9 +93,7 @@ public struct AnimatablePair<First, Second>: VectorArithmetic
 
   @_transparent
   public static var zero: Self {
-    @_transparent get {
-      .init(First.zero, Second.zero)
-    }
+    .init(First.zero, Second.zero)
   }
 
   @_transparent
@@ -128,9 +126,7 @@ public struct AnimatablePair<First, Second>: VectorArithmetic
 
   @_transparent
   public var magnitudeSquared: Double {
-    @_transparent get {
-      first.magnitudeSquared + second.magnitudeSquared
-    }
+    first.magnitudeSquared + second.magnitudeSquared
   }
 
   public static func == (a: Self, b: Self) -> Bool {
@@ -139,21 +135,21 @@ public struct AnimatablePair<First, Second>: VectorArithmetic
   }
 }
 
-extension CGPoint: Animatable {
+extension CGPoint: @MainActor Animatable {
   public var animatableData: AnimatablePair<CGFloat, CGFloat> {
     @inlinable get { .init(x, y) }
     @inlinable set { (x, y) = newValue[] }
   }
 }
 
-extension CGSize: Animatable {
+extension CGSize: @MainActor Animatable {
   public var animatableData: AnimatablePair<CGFloat, CGFloat> {
     @inlinable get { .init(width, height) }
     @inlinable set { (width, height) = newValue[] }
   }
 }
 
-extension CGRect: Animatable {
+extension CGRect: @MainActor Animatable {
   public var animatableData: AnimatablePair<CGPoint.AnimatableData, CGSize.AnimatableData> {
     @inlinable get {
       .init(origin.animatableData, size.animatableData)

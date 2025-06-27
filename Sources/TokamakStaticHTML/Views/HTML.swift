@@ -16,14 +16,12 @@
 //
 
 import Foundation
-@_spi(TokamakCore)
-import TokamakCore
+@_spi(TokamakCore) import TokamakCore
 
-/** Represents an attribute of an HTML tag. To consume updates from updated attributes, the DOM
- renderer needs to know whether the attribute should be assigned via a DOM element property or the
- [`setAttribute`](https://developer.mozilla.org/en-US/docs/Web/API/Element/setAttribute) function.
- The `isUpdatedAsProperty` flag is used to disambiguate between these two cases.
- */
+/// Represents an attribute of an HTML tag. To consume updates from updated attributes, the DOM
+/// renderer needs to know whether the attribute should be assigned via a DOM element property or the
+/// [`setAttribute`](https://developer.mozilla.org/en-US/docs/Web/API/Element/setAttribute) function.
+/// The `isUpdatedAsProperty` flag is used to disambiguate between these two cases.
 public struct HTMLAttribute: Hashable {
   public let value: String
   public let isUpdatedAsProperty: Bool
@@ -54,8 +52,8 @@ public protocol AnyHTML {
   var attributes: [HTMLAttribute: String] { get }
 }
 
-public extension AnyHTML {
-  func outerHTML(
+extension AnyHTML {
+  public func outerHTML(
     shouldSortAttributes: Bool,
     additonalAttributes: [HTMLAttribute: String] = [:],
     children: [HTMLTarget]
@@ -65,7 +63,8 @@ public extension AnyHTML {
     if attributes.isEmpty {
       renderedAttributes = ""
     } else {
-      let mappedAttributes = attributes
+      let mappedAttributes =
+        attributes
         // Exclude empty values to avoid waste of space with `class=""`
         .filter { !$1.isEmpty }
         .map { #"\#($0)="\#($1)""# }
@@ -77,23 +76,23 @@ public extension AnyHTML {
     }
 
     return """
-    <\(tag)\(attributes.isEmpty ? "" : " ")\
-    \(renderedAttributes)>\
-    \(innerHTML(shouldSortAttributes: shouldSortAttributes) ?? "")\
-    \(children.map { $0.outerHTML(shouldSortAttributes: shouldSortAttributes) }
+      <\(tag)\(attributes.isEmpty ? "" : " ")\
+      \(renderedAttributes)>\
+      \(innerHTML(shouldSortAttributes: shouldSortAttributes) ?? "")\
+      \(children.map { $0.outerHTML(shouldSortAttributes: shouldSortAttributes) }
       .joined(separator: "\n"))\
-    </\(tag)>
-    """
+      </\(tag)>
+      """
   }
 }
 
-public struct HTML<Content>: View, AnyHTML, Layout {
+public struct HTML<Content>: View, AnyHTML, @MainActor Layout {
   public let tag: String
   public let namespace: String?
   public let attributes: [HTMLAttribute: String]
   let sizeThatFits: ((ProposedViewSize, LayoutSubviews) -> CGSize)?
   let content: Content
-  let visitContent: (ViewVisitor) -> ()
+  let visitContent: (ViewVisitor) -> Void
 
   fileprivate let cachedInnerHTML: String?
 
@@ -134,8 +133,8 @@ public struct HTML<Content>: View, AnyHTML, Layout {
   }
 }
 
-public extension HTML where Content: StringProtocol {
-  init(
+extension HTML where Content: StringProtocol {
+  public init(
     _ tag: String,
     namespace: String? = nil,
     _ attributes: [HTMLAttribute: String] = [:],
@@ -175,8 +174,8 @@ extension HTML: ParentView where Content: View {
   }
 }
 
-public extension HTML where Content == EmptyView {
-  init(
+extension HTML where Content == EmptyView {
+  public init(
     _ tag: String,
     namespace: String? = nil,
     _ attributes: [HTMLAttribute: String] = [:],
@@ -199,13 +198,13 @@ public protocol StylesConvertible {
   var styles: [String: String] { get }
 }
 
-public extension Dictionary
-  where Key: Comparable & CustomStringConvertible, Value: CustomStringConvertible
-{
-  func inlineStyles(shouldSortDeclarations: Bool = false) -> String {
+extension Dictionary
+where Key: Comparable & CustomStringConvertible, Value: CustomStringConvertible {
+  public func inlineStyles(shouldSortDeclarations: Bool = false) -> String {
     let declarations = map { "\($0.key): \($0.value);" }
     if shouldSortDeclarations {
-      return declarations
+      return
+        declarations
         .sorted()
         .joined(separator: " ")
     } else {

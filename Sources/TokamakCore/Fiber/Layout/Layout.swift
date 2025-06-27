@@ -87,28 +87,28 @@ public protocol Layout: Animatable, _AnyLayout {
   ) -> CGFloat?
 }
 
-public extension Layout {
-  func _erased() -> AnyLayout {
+extension Layout {
+  public func _erased() -> AnyLayout {
     .init(self)
   }
 }
 
-public extension Layout where Self.Cache == () {
-  func makeCache(subviews: Self.Subviews) -> Self.Cache {
+extension Layout where Self.Cache == () {
+  public func makeCache(subviews: Self.Subviews) -> Self.Cache {
     ()
   }
 }
 
-public extension Layout {
-  static var layoutProperties: LayoutProperties {
+extension Layout {
+  public static var layoutProperties: LayoutProperties {
     .init()
   }
 
-  func updateCache(_ cache: inout Self.Cache, subviews: Self.Subviews) {
+  public func updateCache(_ cache: inout Self.Cache, subviews: Self.Subviews) {
     cache = makeCache(subviews: subviews)
   }
 
-  func spacing(subviews: Self.Subviews, cache: inout Self.Cache) -> ViewSpacing {
+  public func spacing(subviews: Self.Subviews, cache: inout Self.Cache) -> ViewSpacing {
     subviews.reduce(
       into: subviews.first.map {
         .init(
@@ -122,7 +122,7 @@ public extension Layout {
     ) { $0.formUnion($1.spacing) }
   }
 
-  func explicitAlignment(
+  public func explicitAlignment(
     of guide: HorizontalAlignment,
     in bounds: CGRect,
     proposal: ProposedViewSize,
@@ -132,7 +132,7 @@ public extension Layout {
     nil
   }
 
-  func explicitAlignment(
+  public func explicitAlignment(
     of guide: VerticalAlignment,
     in bounds: CGRect,
     proposal: ProposedViewSize,
@@ -143,16 +143,16 @@ public extension Layout {
   }
 }
 
-public extension Layout {
+extension Layout {
   /// Render `content` using `self` as the layout container.
-  func callAsFunction<V>(@ViewBuilder _ content: () -> V) -> some View where V: View {
+  public func callAsFunction<V>(@ViewBuilder _ content: () -> V) -> some View where V: View {
     LayoutView(layout: self, content: content())
   }
 }
 
 /// A `View` that renders its children with a `Layout`.
 @_spi(TokamakCore)
-public struct LayoutView<L: Layout, Content: View>: View, Layout {
+public struct LayoutView<L: Layout, Content: View>: @MainActor View, @MainActor Layout {
   let layout: L
   let content: Content
 
@@ -217,7 +217,7 @@ public struct LayoutView<L: Layout, Content: View>: View, Layout {
 }
 
 /// A default `Layout` that fits to the first subview and places its children at its origin.
-struct DefaultLayout: Layout {
+struct DefaultLayout: @MainActor Layout {
   /// An erased `DefaultLayout` that is shared between all views.
   static let shared: AnyLayout = .init(Self())
 
@@ -390,7 +390,7 @@ final class ConcreteLayoutBox<L: Layout>: AnyLayoutBox {
 }
 
 @frozen
-public struct AnyLayout: Layout {
+public struct AnyLayout: @MainActor Layout {
   var storage: AnyLayoutBox
 
   public init<L>(_ layout: L) where L: Layout {

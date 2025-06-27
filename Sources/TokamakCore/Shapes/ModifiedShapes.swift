@@ -17,7 +17,7 @@
 
 import Foundation
 
-public struct _StrokedShape<S>: Shape, DynamicProperty where S: Shape {
+public struct _StrokedShape<S>: @MainActor Shape, DynamicProperty where S: Shape {
   @Environment(\.self)
   public var environment
 
@@ -48,7 +48,7 @@ public struct _StrokedShape<S>: Shape, DynamicProperty where S: Shape {
   }
 }
 
-public struct _TrimmedShape<S>: Shape where S: Shape {
+public struct _TrimmedShape<S>: @MainActor Shape where S: Shape {
   public var shape: S
   public var startFraction: CGFloat
   public var endFraction: CGFloat
@@ -80,7 +80,7 @@ public struct _TrimmedShape<S>: Shape where S: Shape {
   }
 }
 
-public struct OffsetShape<Content>: Shape where Content: Shape {
+public struct OffsetShape<Content>: @MainActor Shape where Content: Shape {
   public var shape: Content
   public var offset: CGSize
 
@@ -106,7 +106,7 @@ public struct OffsetShape<Content>: Shape where Content: Shape {
   }
 }
 
-extension OffsetShape: InsettableShape where Content: InsettableShape {
+extension OffsetShape: @MainActor InsettableShape where Content: InsettableShape {
   public func inset(by amount: CGFloat) -> OffsetShape<Content.InsetShape> {
     shape
       .inset(by: amount)
@@ -114,7 +114,7 @@ extension OffsetShape: InsettableShape where Content: InsettableShape {
   }
 }
 
-public struct ScaledShape<Content>: Shape where Content: Shape {
+public struct ScaledShape<Content>: @MainActor Shape where Content: Shape {
   public var shape: Content
   public var scale: CGSize
   public var anchor: UnitPoint
@@ -146,7 +146,7 @@ public struct ScaledShape<Content>: Shape where Content: Shape {
   }
 }
 
-public struct RotatedShape<Content>: Shape where Content: Shape {
+public struct RotatedShape<Content>: @MainActor Shape where Content: Shape {
   public var shape: Content
   public var angle: Angle
   public var anchor: UnitPoint
@@ -178,7 +178,7 @@ public struct RotatedShape<Content>: Shape where Content: Shape {
   }
 }
 
-extension RotatedShape: InsettableShape where Content: InsettableShape {
+extension RotatedShape: @MainActor InsettableShape where Content: InsettableShape {
   public func inset(by amount: CGFloat) -> RotatedShape<Content.InsetShape> {
     shape.inset(by: amount).rotation(angle, anchor: anchor)
   }
@@ -205,7 +205,7 @@ public struct TransformedShape<Content>: Shape where Content: Shape {
   }
 }
 
-public struct _SizedShape<S>: Shape where S: Shape {
+public struct _SizedShape<S>: @MainActor Shape where S: Shape {
   public var shape: S
   public var size: CGSize
 

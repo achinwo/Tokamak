@@ -23,7 +23,7 @@ import Foundation
 /// clamped to the specified minimum and maximum values.
 ///
 /// Then the children are placed with `alignment` in the container.
-private struct FlexFrameLayout: Layout {
+private struct FlexFrameLayout: @MainActor Layout {
   let minWidth: CGFloat?
   let idealWidth: CGFloat?
   let maxWidth: CGFloat?
@@ -75,22 +75,22 @@ private struct FlexFrameLayout: Layout {
 
     var size = CGSize.zero
     if let minWidth = minWidth,
-       bounds.width < subviewSizes.width
+      bounds.width < subviewSizes.width
     {
       size.width = max(bounds.width, minWidth)
     } else if let maxWidth = maxWidth,
-              bounds.width > subviewSizes.width
+      bounds.width > subviewSizes.width
     {
       size.width = min(bounds.width, maxWidth)
     } else {
       size.width = subviewSizes.width
     }
     if let minHeight = minHeight,
-       bounds.height < subviewSizes.height
+      bounds.height < subviewSizes.height
     {
       size.height = max(bounds.height, minHeight)
     } else if let maxHeight = maxHeight,
-              bounds.height > subviewSizes.height
+      bounds.height > subviewSizes.height
     {
       size.height = min(bounds.height, maxHeight)
     } else {
@@ -126,14 +126,15 @@ private struct FlexFrameLayout: Layout {
   }
 }
 
-public extension _FlexFrameLayout {
-  func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor {
-    visitor.visit(FlexFrameLayout(
-      minWidth: minWidth, idealWidth: idealWidth, maxWidth: maxWidth,
-      minHeight: minHeight, idealHeight: idealHeight, maxHeight: maxHeight,
-      alignment: alignment
-    ).callAsFunction {
-      content
-    })
+extension _FlexFrameLayout {
+  public func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor {
+    visitor.visit(
+      FlexFrameLayout(
+        minWidth: minWidth, idealWidth: idealWidth, maxWidth: maxWidth,
+        minHeight: minHeight, idealHeight: idealHeight, maxHeight: maxHeight,
+        alignment: alignment
+      ).callAsFunction {
+        content
+      })
   }
 }

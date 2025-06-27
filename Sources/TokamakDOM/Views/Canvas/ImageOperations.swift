@@ -45,23 +45,23 @@ extension _Canvas {
     in canvasContext: JSObject
   ) {
     switch image._resolved.storage {
-    case let .named(name, bundle):
+    case .named(let name, let bundle):
       let src = bundle?.path(forResource: name, ofType: nil) ?? name
 
       func draw(_ img: JSObject) {
         // Draw the image on the canvas.
         switch positioning {
-        case let .in(rect):
+        case .in(let rect):
           _ = canvasContext.drawImage!(
             img,
             Double(rect.origin.x), Double(rect.origin.y),
             Double(rect.size.width), Double(rect.size.height)
           )
-        case let .at(point, anchor):
+        case .at(let point, let anchor):
           _ = canvasContext.drawImage!(
             img,
-            Double(point.x - (anchor.x * CGFloat(img.naturalWidth.number!))),
-            Double(point.y - (anchor.y * CGFloat(img.naturalHeight.number!)))
+            Double(point.x - ((anchor ?? .center).x * CGFloat(img.naturalWidth.number!))),
+            Double(point.y - ((anchor ?? .center).y * CGFloat(img.naturalHeight.number!)))
           )
         }
       }
@@ -72,16 +72,17 @@ extension _Canvas {
         // Create an Image and draw it after it loads.
         let img = JSObject.global.Image.function!.new()
 
-        img.onload = .object(JSOneshotClosure { _ in
-          draw(img)
-          return .undefined
-        })
+        img.onload = .object(
+          JSOneshotClosure { _ in
+            draw(img)
+            return .undefined
+          })
 
         img.src = .string(src)
 
         ImageCache[src] = img
       }
-    case let .resizable(nested, _, _):
+    case .resizable(let nested, _, _):
       // Defer to nested.
       drawImage(
         ._resolved(

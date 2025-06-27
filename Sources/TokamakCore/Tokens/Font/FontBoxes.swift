@@ -69,6 +69,8 @@ public class AnyFontBox: AnyTokenBox, Hashable, Equatable {
     }
   }
 
+  init() {}  // dummy initializer for silencing compiler
+
   public static func == (lhs: AnyFontBox, rhs: AnyFontBox) -> Bool {
     lhs.equals(rhs)
   }
@@ -113,7 +115,7 @@ public class _ConcreteFontBox: AnyFontBox {
 
 public class _ModifiedFontBox: AnyFontBox {
   public let provider: AnyFontBox
-  public let modifier: (inout ResolvedValue) -> ()
+  public let modifier: (inout ResolvedValue) -> Void
 
   public static func == (lhs: _ModifiedFontBox, rhs: _ModifiedFontBox) -> Bool {
     lhs.resolve(in: EnvironmentValues()) == rhs.resolve(in: EnvironmentValues())
@@ -123,7 +125,9 @@ public class _ModifiedFontBox: AnyFontBox {
     hasher.combine(provider.resolve(in: EnvironmentValues()))
   }
 
-  init(previously provider: AnyFontBox, modifier: @escaping (inout ResolvedValue) -> ()) {
+  init(
+    previously provider: AnyFontBox, modifier: @escaping @MainActor (inout ResolvedValue) -> Void
+  ) {
     self.provider = provider
     self.modifier = modifier
   }
@@ -142,6 +146,7 @@ public class _ModifiedFontBox: AnyFontBox {
     other.modifier(&otherResolved)
     return other.provider.equals(provider) && resolved == otherResolved
   }
+
 }
 
 public class _SystemFontBox: AnyFontBox {
@@ -225,12 +230,12 @@ public class _CustomFontBox: AnyFontBox {
 
   override public func resolve(in environment: EnvironmentValues) -> ResolvedValue {
     switch size {
-    case let .dynamic(size):
+    case .dynamic(let size):
       return .init(
         name: .custom(name),
         size: size
       )
-    case let .fixed(size):
+    case .fixed(let size):
       return .init(
         name: .custom(name),
         size: size

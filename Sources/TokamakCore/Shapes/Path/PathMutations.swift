@@ -14,10 +14,14 @@
 //
 //  Created by Max Desiatov on 20/06/2021.
 //
+#if canImport(CoreGraphics)
+import CoreGraphics
+#endif
+
 
 import Foundation
 
-public extension Path {
+extension Path {
   private mutating func append(_ other: Storage, transform: CGAffineTransform = .identity) {
     guard other != .empty else { return }
 
@@ -43,7 +47,7 @@ public extension Path {
     }
 
     switch storage {
-    case let .path(pathBox):
+    case .path(let pathBox):
       pathBox.elements.append(contentsOf: elements_)
 
     default:
@@ -51,31 +55,31 @@ public extension Path {
     }
   }
 
-  mutating func move(to p: CGPoint) {
+  public mutating func move(to p: CGPoint) {
     append([.move(to: p)])
   }
 
-  mutating func addLine(to p: CGPoint) {
+  public mutating func addLine(to p: CGPoint) {
     append([.line(to: p)])
   }
 
-  mutating func addQuadCurve(to p: CGPoint, control cp: CGPoint) {
+  public mutating func addQuadCurve(to p: CGPoint, control cp: CGPoint) {
     append([.quadCurve(to: p, control: cp)])
   }
 
-  mutating func addCurve(to p: CGPoint, control1 cp1: CGPoint, control2 cp2: CGPoint) {
+  public mutating func addCurve(to p: CGPoint, control1 cp1: CGPoint, control2 cp2: CGPoint) {
     append([.curve(to: p, control1: cp1, control2: cp2)])
   }
 
-  mutating func closeSubpath() {
+  public mutating func closeSubpath() {
     append([.closeSubpath])
   }
 
-  mutating func addRect(_ rect: CGRect, transform: CGAffineTransform = .identity) {
+  public mutating func addRect(_ rect: CGRect, transform: CGAffineTransform = .identity) {
     append(.rect(rect), transform: transform)
   }
 
-  mutating func addRoundedRect(
+  public mutating func addRoundedRect(
     in rect: CGRect,
     cornerSize: CGSize,
     style: RoundedCornerStyle = .circular,
@@ -87,19 +91,19 @@ public extension Path {
     )
   }
 
-  mutating func addEllipse(in rect: CGRect, transform: CGAffineTransform = .identity) {
+  public mutating func addEllipse(in rect: CGRect, transform: CGAffineTransform = .identity) {
     append(.ellipse(rect), transform: transform)
   }
 
-  mutating func addRects(_ rects: [CGRect], transform: CGAffineTransform = .identity) {
+  public mutating func addRects(_ rects: [CGRect], transform: CGAffineTransform = .identity) {
     rects.forEach { addRect($0, transform: transform) }
   }
 
-  mutating func addLines(_ lines: [CGPoint]) {
+  public mutating func addLines(_ lines: [CGPoint]) {
     lines.forEach { addLine(to: $0) }
   }
 
-  mutating func addRelativeArc(
+  public mutating func addRelativeArc(
     center: CGPoint,
     radius: CGFloat,
     startAngle: Angle,
@@ -119,7 +123,7 @@ public extension Path {
   // There's a great article on bezier curves here:
   // https://pomax.github.io/bezierinfo
   // FIXME: Handle negative delta
-  mutating func addArc(
+  public mutating func addArc(
     center: CGPoint,
     radius: CGFloat,
     startAngle: Angle,
@@ -138,14 +142,14 @@ public extension Path {
   }
 
   // FIXME: How does this arc method work?
-  mutating func addArc(
+  public mutating func addArc(
     tangent1End p1: CGPoint,
     tangent2End p2: CGPoint,
     radius: CGFloat,
     transform: CGAffineTransform = .identity
   ) {}
 
-  mutating func addPath(_ path: Path, transform: CGAffineTransform = .identity) {
+  public mutating func addPath(_ path: Path, transform: CGAffineTransform = .identity) {
     append(path.storage, transform: transform)
   }
 }
@@ -176,8 +180,8 @@ func getArc(
         startAngle: startAngle,
         endAngle: chunk1,
         clockwise: clockwise
-      ) +
-        getArc(
+      )
+        + getArc(
           center: center,
           radius: radius,
           startAngle: chunk1,
@@ -202,7 +206,7 @@ func getArc(
           to: endPoint.rotate(startAngle, around: center),
           control1: c1.rotate(startAngle, around: center),
           control2: c2.rotate(startAngle, around: center)
-        ),
+        )
       ]
     }
   }

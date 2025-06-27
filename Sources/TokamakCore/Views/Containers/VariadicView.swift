@@ -20,8 +20,7 @@ public enum _VariadicView {
   public typealias Children = _VariadicView_Children
 
   public struct Tree<Root, Content>: View, _VariadicView_AnyTree
-    where Root: _VariadicView_ViewRoot, Content: View
-  {
+  where Root: _VariadicView_ViewRoot, Content: View {
     public var root: Root
     public var content: Content
 
@@ -48,8 +47,8 @@ public protocol _VariadicView_ViewRoot {
   func body(children: _VariadicView.Children) -> Self.Body
 }
 
-public extension _VariadicView_ViewRoot where Self.Body == Never {
-  func body(children: _VariadicView.Children) -> Never {
+extension _VariadicView_ViewRoot where Self.Body == Never {
+  public func body(children: _VariadicView.Children) -> Never {
     fatalError()
   }
 }
@@ -62,12 +61,12 @@ public struct _VariadicView_Children {
   }
 }
 
-extension _VariadicView_Children: RandomAccessCollection {
+extension _VariadicView_Children: @MainActor RandomAccessCollection {
   public struct Element: View, Identifiable {
     let view: AnyView
     public var id: AnyHashable
     let viewTraits: _ViewTraitStore
-    let onTraitsUpdated: (_ViewTraitStore) -> ()
+    let onTraitsUpdated: (_ViewTraitStore) -> Void
 
     public func id<ID>(as _: ID.Type = ID.self) -> ID? where ID: Hashable {
       id.base as? ID

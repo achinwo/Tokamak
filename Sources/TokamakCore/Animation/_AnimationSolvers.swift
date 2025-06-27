@@ -51,10 +51,13 @@ public enum _AnimationSolvers {
     public func solve(at t: Double) -> Double {
       let y: Double
       if ƛ < w0 {
-        y = pow(M_E, -(ƛ * t)) * ((s0 * cos(wd * t)) + ((v0 + s0) * sin(wd * t)))
-//      } else if ƛ > w0 { // Overdamping is unsupported on Apple platforms
+        let a = pow(M_E, -(ƛ * t))
+        let c = (s0 * cos(wd * t))
+        y = Double(a) * (c + ((v0 + s0) * sin(wd * t)))
+        //      } else if ƛ > w0 { // Overdamping is unsupported on Apple platforms
       } else {
-        y = pow(M_E, -(ƛ * t)) * (s0 + ((v0 + (ƛ * s0)) * t))
+        let b = pow(M_E, -(ƛ * t))
+        y = Double(b) * (s0 + ((v0 + (ƛ * s0)) * t))
       }
       return 1 - y
     }

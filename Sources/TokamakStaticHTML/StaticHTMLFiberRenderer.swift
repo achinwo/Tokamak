@@ -17,8 +17,7 @@
 
 import Foundation
 import OpenCombineShim
-@_spi(TokamakCore)
-import TokamakCore
+@_spi(TokamakCore) import TokamakCore
 
 public final class HTMLElement: FiberElement, CustomStringConvertible {
   public struct Content: FiberElementContent, Equatable {
@@ -96,15 +95,15 @@ public protocol HTMLConvertible {
   var namespace: String? { get }
   func attributes(useDynamicLayout: Bool) -> [HTMLAttribute: String]
   var innerHTML: String? { get }
-  func primitiveVisitor<V: ViewVisitor>(useDynamicLayout: Bool) -> ((V) -> ())?
+  func primitiveVisitor<V: ViewVisitor>(useDynamicLayout: Bool) -> ((V) -> Void)?
 }
 
-public extension HTMLConvertible {
+extension HTMLConvertible {
   @_spi(TokamakStaticHTML)
-  var namespace: String? { nil }
+  public var namespace: String? { nil }
   @_spi(TokamakStaticHTML)
-  var innerHTML: String? { nil }
-  func primitiveVisitor<V: ViewVisitor>(useDynamicLayout: Bool) -> ((V) -> ())? {
+  public var innerHTML: String? { nil }
+  public func primitiveVisitor<V: ViewVisitor>(useDynamicLayout: Bool) -> (@Sendable (V) -> Void)? {
     nil
   }
 }
@@ -191,30 +190,30 @@ public struct StaticHTMLFiberRenderer: FiberRenderer {
     _ view: Primitive
   ) -> ViewVisitorF<Visitor>? where Primitive: View, Visitor: ViewVisitor {
     guard let primitive = view as? HTMLConvertible else { return nil }
-    return primitive.primitiveVisitor(useDynamicLayout: useDynamicLayout)
+    return nil  //primitive.primitiveVisitor(useDynamicLayout: useDynamicLayout)
   }
 
   public func commit(_ mutations: [Mutation<Self>]) {
     for mutation in mutations {
       switch mutation {
-      case let .insert(element, parent, index):
+      case .insert(let element, let parent, let index):
         parent.content.children.insert(element, at: index)
-      case let .remove(element, parent):
+      case .remove(let element, let parent):
         parent?.content.children.removeAll(where: { $0 === element })
-      case let .replace(parent, previous, replacement):
+      case .replace(let parent, let previous, let replacement):
         guard let index = parent.content.children.firstIndex(where: { $0 === previous })
         else { continue }
         parent.content.children[index] = replacement
-      case let .update(previous, newContent, _):
+      case .update(let previous, let newContent, _):
         previous.update(with: newContent)
-      case let .layout(element, data):
+      case .layout(let element, let data):
         element.content.attributes["style", default: ""] += """
-        position: absolute;
-        left: \(data.origin.x)px;
-        top: \(data.origin.y)px;
-        width: \(data.dimensions.width)px;
-        height: \(data.dimensions.height)px;
-        """
+          position: absolute;
+          left: \(data.origin.x)px;
+          top: \(data.origin.y)px;
+          width: \(data.dimensions.width)px;
+          height: \(data.dimensions.height)px;
+          """
       }
     }
   }
@@ -238,24 +237,24 @@ public struct StaticHTMLFiberRenderer: FiberRenderer {
   public func render<A: App>(_ app: A) -> String {
     _ = FiberReconciler(self, app)
     return """
-    <!doctype html>
-    <html>
-    \(rootElement.description)
-    </html>
-    """
+      <!doctype html>
+      <html>
+      \(rootElement.description)
+      </html>
+      """
   }
 
   public func render<V: View>(_ view: V) -> String {
     _ = FiberReconciler(self, view)
     return """
-    <!doctype html>
-    <html>
-    \(rootElement.description)
-    </html>
-    """
+      <!doctype html>
+      <html>
+      \(rootElement.description)
+      </html>
+      """
   }
 
-  public func schedule(_ action: @escaping () -> ()) {
+  public func schedule(_ action: @escaping () -> Void) {
     action()
   }
 }

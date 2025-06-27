@@ -18,7 +18,7 @@
 import Foundation
 
 @frozen
-public struct _ScaleEffect: GeometryEffect, Equatable {
+public struct _ScaleEffect: @MainActor GeometryEffect, Equatable {
   public var scale: CGSize
   public var anchor: UnitPoint
 
@@ -37,19 +37,19 @@ public struct _ScaleEffect: GeometryEffect, Equatable {
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func scaleEffect(_ scale: CGSize, anchor: UnitPoint = .center) -> some View {
+  public func scaleEffect(_ scale: CGSize, anchor: UnitPoint = .center) -> some View {
     modifier(_ScaleEffect(scale: scale, anchor: anchor))
   }
 
   @inlinable
-  func scaleEffect(_ s: CGFloat, anchor: UnitPoint = .center) -> some View {
+  public func scaleEffect(_ s: CGFloat, anchor: UnitPoint = .center) -> some View {
     scaleEffect(CGSize(width: s, height: s), anchor: anchor)
   }
 
   @inlinable
-  func scaleEffect(
+  public func scaleEffect(
     x: CGFloat = 1.0,
     y: CGFloat = 1.0,
     anchor: UnitPoint = .center

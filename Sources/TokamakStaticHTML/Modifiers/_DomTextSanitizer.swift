@@ -17,20 +17,24 @@
 
 import TokamakCore
 
-typealias _DomTextSanitizer = (String) -> String
+typealias _DomTextSanitizer = @Sendable @MainActor (String) -> String
 
-public extension View {
-  func _domTextSanitizer(_ sanitizer: @escaping (String) -> String) -> some View {
+extension View {
+  public func _domTextSanitizer(_ sanitizer: @escaping @Sendable @MainActor (String) -> String)
+    -> some View
+  {
     environment(\.domTextSanitizer, sanitizer)
   }
 }
 
+@MainActor
 private struct DomTextSanitizerKey: EnvironmentKey {
   static let defaultValue: _DomTextSanitizer = Sanitizers.HTML.encode
 }
 
-public extension EnvironmentValues {
-  var domTextSanitizer: (String) -> String {
+@MainActor
+extension EnvironmentValues {
+  public var domTextSanitizer: @MainActor @Sendable (String) -> String {
     get {
       self[DomTextSanitizerKey.self]
     }

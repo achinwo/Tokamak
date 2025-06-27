@@ -13,47 +13,48 @@
 // limitations under the License.
 
 #if os(WASI)
-import JavaScriptKit
-import TokamakDOM
+  import JavaScriptKit
+  import TokamakDOM
 
-private let location = JSObject.global.location.object!
-private let window = JSObject.global.window.object!
+  private let location = JSObject.global.location.object!
+  private let window = JSObject.global.window.object!
 
-private final class HashState: ObservableObject {
-  var onHashChange: JSClosure!
+  private final class HashState: ObservableObject {
+    var onHashChange: JSClosure!
 
-  @Published
-  var currentHash = location["hash"].string!
+    @Published
+    var currentHash = location["hash"].string!
 
-  init() {
-    let onHashChange = JSClosure { [weak self] _ in
-      self?.currentHash = location["hash"].string!
-      return .undefined
-    }
-
-    window.onhashchange = .object(onHashChange)
-    self.onHashChange = onHashChange
-  }
-
-  deinit {
-    window.onhashchange = .undefined
-    #if JAVASCRIPTKIT_WITHOUT_WEAKREFS
-    onHashChange.release()
-    #endif
-  }
-}
-
-struct URLHashDemo: View {
-  @StateObject
-  private var hashState = HashState()
-
-  var body: some View {
-    VStack {
-      Button("Assign random location.hash") {
-        location["hash"] = .string("\(Int.random(in: 0...1000))")
+    init() {
+      let onHashChange = JSClosure { [weak self] _ in
+        self?.currentHash = location["hash"].string!
+        return .undefined
       }
-      Text("Current location.hash is \(hashState.currentHash)")
+
+      window.onhashchange = .object(onHashChange)
+      self.onHashChange = onHashChange
+    }
+
+    @MainActor
+    deinit {
+      window.onhashchange = .undefined
+      #if JAVASCRIPTKIT_WITHOUT_WEAKREFS
+        onHashChange.release()
+      #endif
     }
   }
-}
+
+  struct URLHashDemo: View {
+    @StateObject
+    private var hashState = HashState()
+
+    var body: some View {
+      VStack {
+        Button("Assign random location.hash") {
+          location["hash"] = .string("\(Int.random(in: 0...1000))")
+        }
+        Text("Current location.hash is \(hashState.currentHash)")
+      }
+    }
+  }
 #endif

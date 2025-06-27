@@ -78,7 +78,7 @@ private struct _TimelineView<Content: View, Schedule: TimelineSchedule>: View {
       // `inAnimatingTimelineView` environment value, such as `Canvas`, which updates without
       // DOM manipulation.
       guard !(Schedule.self == AnimationTimelineSchedule.self),
-            let next = iterator.next()
+        let next = iterator.next()
       else { return }
       timeoutID = JSObject.global.setTimeout!(
         JSOneshotClosure { [weak self] _ in
@@ -90,6 +90,7 @@ private struct _TimelineView<Content: View, Schedule: TimelineSchedule>: View {
       )
     }
 
+    @MainActor
     deinit {
       guard let timeoutID = timeoutID else { return }
       _ = JSObject.global.clearTimeout!(timeoutID)
@@ -114,8 +115,8 @@ private struct _TimelineView<Content: View, Schedule: TimelineSchedule>: View {
     )
     .environment(
       \.isAnimatingTimelineViewPaused,
-      ((parent.schedule as? AnimationTimelineSchedule)?._paused ?? false) &&
-        (!inAnimatingTimelineView || isAnimatingTimelineViewPaused)
+      ((parent.schedule as? AnimationTimelineSchedule)?._paused ?? false)
+        && (!inAnimatingTimelineView || isAnimatingTimelineViewPaused)
     )
   }
 }

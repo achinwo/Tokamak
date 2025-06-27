@@ -23,7 +23,7 @@ extension FiberReconciler {
     final class Result {
       // For references
       let fiber: Fiber?
-      let visitChildren: (TreeReducer.SceneVisitor) -> ()
+      let visitChildren: (TreeReducer.SceneVisitor) -> Void
       unowned var parent: Result?
       var child: Result?
       var sibling: Result?
@@ -38,7 +38,7 @@ extension FiberReconciler {
 
       init(
         fiber: Fiber?,
-        visitChildren: @escaping (TreeReducer.SceneVisitor) -> (),
+        visitChildren: @escaping @MainActor @Sendable (TreeReducer.SceneVisitor) -> Void,
         parent: Result?,
         child: Fiber?,
         alternateChild: Fiber?,
@@ -85,8 +85,8 @@ extension FiberReconciler {
         nextValue: nextView,
         createFiber: {
           view, element,
-            parent, elementParent, preferenceParent, elementIndex,
-            traits, reconciler in
+          parent, elementParent, preferenceParent, elementIndex,
+          traits, reconciler in
           Fiber(
             &view,
             element: element,
@@ -106,7 +106,7 @@ extension FiberReconciler {
           )
         },
         visitChildren: { reconciler, view in
-          reconciler?.renderer.viewVisitor(for: view) ?? view._visitChildren
+          reconciler?.renderer.viewVisitor(for: view) ?? { v in view._visitChildren(v) }
         }
       )
     }
@@ -125,7 +125,7 @@ extension FiberReconciler {
         FiberReconciler?
       ) -> Fiber,
       update: (Fiber, inout T, Int?, _ViewTraitStore) -> Renderer.ElementType.Content?,
-      visitChildren: (FiberReconciler?, T) -> (TreeReducer.SceneVisitor) -> ()
+      visitChildren: @escaping (FiberReconciler?, T) -> (TreeReducer.SceneVisitor) -> Void
     ) {
       // Create the node and its element.
       var nextValue = nextValue
@@ -145,23 +145,25 @@ extension FiberReconciler {
           key.map { partialResult.elementIndices[$0, default: 0] },
           partialResult.nextTraits
         )
-        resultChild = Result(
-          fiber: existing,
-          visitChildren: visitChildren(partialResult.fiber?.reconciler, nextValue),
-          parent: partialResult,
-          child: existing.child,
-          alternateChild: existing.alternate?.child,
-          newContent: newContent,
-          elementIndices: partialResult.elementIndices,
-          nextTraits: existing.element != nil ? .init() : partialResult.nextTraits
-        )
+        // resultChild = Result(
+        //   fiber: existing,
+        //   visitChildren: visitChildren(partialResult.fiber?.reconciler, nextValue),
+        //   parent: partialResult,
+        //   child: existing.child,
+        //   alternateChild: existing.alternate?.child,
+        //   newContent: newContent,
+        //   elementIndices: partialResult.elementIndices,
+        //   nextTraits: existing.element != nil ? .init() : partialResult.nextTraits
+        // )
         partialResult.nextExisting = existing.sibling
         partialResult.nextExistingAlternate = partialResult.nextExistingAlternate?.sibling
       } else {
-        let elementParent = partialResult.fiber?.element != nil
+        let elementParent =
+          partialResult.fiber?.element != nil
           ? partialResult.fiber
           : partialResult.fiber?.elementParent
-        let preferenceParent = partialResult.fiber?.preferences != nil
+        let preferenceParent =
+          partialResult.fiber?.preferences != nil
           ? partialResult.fiber
           : partialResult.fiber?.preferenceParent
         let key: ObjectIdentifier?
@@ -187,26 +189,26 @@ extension FiberReconciler {
           fiber.alternate = alternate
           partialResult.nextExistingAlternate = alternate.sibling
         }
-        resultChild = Result(
-          fiber: fiber,
-          visitChildren: visitChildren(partialResult.fiber?.reconciler, nextValue),
-          parent: partialResult,
-          child: nil,
-          alternateChild: fiber.alternate?.child,
-          elementIndices: partialResult.elementIndices,
-          nextTraits: fiber.element != nil ? .init() : partialResult.nextTraits
-        )
+        // resultChild = Result(
+        //   fiber: fiber,
+        //   visitChildren: visitChildren(partialResult.fiber?.reconciler, nextValue),
+        //   parent: partialResult,
+        //   child: nil,
+        //   alternateChild: fiber.alternate?.child,
+        //   elementIndices: partialResult.elementIndices,
+        //   nextTraits: fiber.element != nil ? .init() : partialResult.nextTraits
+        // )
       }
       // Get the last child element we've processed, and add the new child as its sibling.
-      if let lastSibling = partialResult.lastSibling {
-        lastSibling.fiber?.sibling = resultChild.fiber
-        lastSibling.sibling = resultChild
-      } else {
-        // Otherwise setup the first child
-        partialResult.fiber?.child = resultChild.fiber
-        partialResult.child = resultChild
-      }
-      partialResult.lastSibling = resultChild
+      // if let lastSibling = partialResult.lastSibling {
+      //   lastSibling.fiber?.sibling = resultChild.fiber
+      //   lastSibling.sibling = resultChild
+      // } else {
+      //   // Otherwise setup the first child
+      //   partialResult.fiber?.child = resultChild.fiber
+      //   partialResult.child = resultChild
+      // }
+      // partialResult.lastSibling = resultChild
     }
   }
 }

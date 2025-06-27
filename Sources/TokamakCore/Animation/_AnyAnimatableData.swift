@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /// A type-eraser for `VectorArithmetic`.
-public struct _AnyAnimatableData: VectorArithmetic {
+public struct _AnyAnimatableData: @MainActor VectorArithmetic {
   private var box: _AnyAnimatableDataBox?
 
   private init(_ box: _AnyAnimatableDataBox?) {
@@ -95,12 +95,12 @@ private struct _ConcreteAnyAnimatableDataBox<
   }
 }
 
-public extension _AnyAnimatableData {
+extension _AnyAnimatableData {
   // MARK: Equatable
 
-  static func == (lhs: Self, rhs: Self) -> Bool {
+  public static func == (lhs: Self, rhs: Self) -> Bool {
     switch (rhs.box, lhs.box) {
-    case let (rhsBox?, lhsBox?):
+    case (let rhsBox?, let lhsBox?):
       return rhsBox.equals(lhsBox.value)
 
     case (.some, nil), (nil, .some):
@@ -113,9 +113,9 @@ public extension _AnyAnimatableData {
 
   // MARK: AdditiveArithmetic
 
-  static func + (lhs: Self, rhs: Self) -> Self {
+  public static func + (lhs: Self, rhs: Self) -> Self {
     switch (rhs.box, lhs.box) {
-    case let (rhsBox?, lhsBox?):
+    case (let rhsBox?, let lhsBox?):
       return Self(rhsBox.add(lhsBox.value))
 
     case (let box?, nil), (nil, let box?):
@@ -126,9 +126,9 @@ public extension _AnyAnimatableData {
     }
   }
 
-  static func - (lhs: Self, rhs: Self) -> Self {
+  public static func - (lhs: Self, rhs: Self) -> Self {
     switch (rhs.box, lhs.box) {
-    case let (rhsBox?, lhsBox?):
+    case (let rhsBox?, let lhsBox?):
       return Self(rhsBox.subtract(lhsBox.value))
 
     case (let box?, nil), (nil, let box?):
@@ -139,27 +139,27 @@ public extension _AnyAnimatableData {
     }
   }
 
-  static var zero: _AnyAnimatableData {
+  public static var zero: _AnyAnimatableData {
     _AnyAnimatableData(nil)
   }
 
   // MARK: VectorArithmetic
 
-  mutating func scale(by rhs: Double) {
+  public mutating func scale(by rhs: Double) {
     box?.scale(by: rhs)
   }
 
-  var magnitudeSquared: Double {
+  public var magnitudeSquared: Double {
     box?.magnitudeSquared ?? 0
   }
 }
 
-public extension _AnyAnimatableData {
-  init<Data: VectorArithmetic>(_ data: Data) {
+extension _AnyAnimatableData {
+  public init<Data: VectorArithmetic>(_ data: Data) {
     box = _ConcreteAnyAnimatableDataBox(base: data)
   }
 
-  var value: Any {
+  public var value: Any {
     box?.value ?? ()
   }
 }

@@ -57,8 +57,8 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
 
     var environment: EnvironmentValues {
       var environment = reconciler.renderer.defaultEnvironment
-      environment.measureText = reconciler.renderer.measureText
-      environment.measureImage = reconciler.renderer.measureImage
+      // environment.measureText = reconciler.renderer.measureText
+      // environment.measureImage = reconciler.renderer.measureImage
       environment.afterReconcile = reconciler.afterReconcile
       return environment
     }
@@ -74,7 +74,7 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
   /// The `Layout` container for the root of a `View` hierarchy.
   ///
   /// Simply places each `View` in the center of its bounds.
-  struct RootLayout: Layout {
+  struct RootLayout: @MainActor Layout {
     let renderer: Renderer
 
     func sizeThatFits(
@@ -138,8 +138,8 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
     }
     caches = Caches()
     var environment = renderer.defaultEnvironment
-    environment.measureText = renderer.measureText
-    environment.measureImage = renderer.measureImage
+    // environment.measureText = renderer.measureText
+    // environment.measureImage = renderer.measureImage
     environment.afterReconcile = afterReconcile
     var app = app
     current = .init(
@@ -185,7 +185,7 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
 
     private func visitAny(
       _ content: Any,
-      _ visitChildren: @escaping (TreeReducer.SceneVisitor) -> ()
+      _ visitChildren: @escaping @MainActor (TreeReducer.SceneVisitor) -> Void
     ) {
       let alternateRoot: Fiber?
       if let alternate = root.alternate {
@@ -194,7 +194,7 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
         alternateRoot = root.createAndBindAlternate?()
       }
       let rootResult = TreeReducer.Result(
-        fiber: alternateRoot, // The alternate is the WIP node.
+        fiber: alternateRoot,  // The alternate is the WIP node.
         visitChildren: visitChildren,
         parent: nil,
         child: alternateRoot?.child,
@@ -215,7 +215,7 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
     }
   }
 
-  func afterReconcile(_ action: @escaping () -> ()) {
+  func afterReconcile(_ action: @escaping () -> Void) {
     guard isReconciling == true
     else {
       action()
@@ -249,11 +249,11 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
     // Create a list of mutations.
     let visitor = ReconcilerVisitor(root: current, changedFibers: changedFibers, reconciler: self)
     switch current.content {
-    case let .view(_, visit):
+    case .view(_, let visit):
       visit(visitor)
-    case let .scene(_, visit):
+    case .scene(_, let visit):
       visit(visitor)
-    case let .app(_, visit):
+    case .app(_, let visit):
       visit(visitor)
     case .none:
       break
@@ -278,12 +278,12 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
   }
 }
 
-public extension EnvironmentValues {
+extension EnvironmentValues {
   private enum AfterReconcileKey: EnvironmentKey {
-    static let defaultValue: (@escaping () -> ()) -> () = { _ in }
+    static let defaultValue: (@escaping () -> Void) -> Void = { _ in }
   }
 
-  var afterReconcile: (@escaping () -> ()) -> () {
+  public var afterReconcile: (@escaping () -> Void) -> Void {
     get { self[AfterReconcileKey.self] }
     set { self[AfterReconcileKey.self] = newValue }
   }

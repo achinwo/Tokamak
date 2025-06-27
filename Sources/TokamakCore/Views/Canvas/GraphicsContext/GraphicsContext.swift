@@ -25,7 +25,7 @@ public struct GraphicsContext {
     public var transform: CGAffineTransform
     public var clipBoundingRect: CGRect
 
-    public var operationHandler: (Self, _Operation) -> ()
+    public var operationHandler: (Self, _Operation) -> Void
     public var imageResolver: (Image, EnvironmentValues) -> ResolvedImage
     public var textResolver: (Text, EnvironmentValues) -> ResolvedText
     let symbols: AnyView
@@ -33,7 +33,7 @@ public struct GraphicsContext {
 
     init(
       in environment: EnvironmentValues,
-      with operationHandler: @escaping (Self, _Operation) -> (),
+      with operationHandler: @escaping (Self, _Operation) -> Void,
       imageResolver: @escaping (Image, EnvironmentValues) -> ResolvedImage,
       textResolver: @escaping (Text, EnvironmentValues) -> ResolvedText,
       symbols: AnyView,
@@ -64,13 +64,13 @@ public struct GraphicsContext {
       case endLayer
       case fill(Path, with: Shading, style: FillStyle)
       case stroke(Path, with: Shading, style: StrokeStyle)
-      case drawImage(ResolvedImage, _ResolvedPositioning, style: FillStyle? = .init())
+      case drawImage(ResolvedImage, _ResolvedPositioning, style: FillStyle?)  //= .init())
       case drawText(ResolvedText, _ResolvedPositioning)
       case drawSymbol(ResolvedSymbol, _ResolvedPositioning)
 
       public enum _ResolvedPositioning {
         case `in`(CGRect)
-        case at(CGPoint, anchor: UnitPoint = .center)
+        case at(CGPoint, anchor: UnitPoint?)  //= .center)
       }
     }
   }
@@ -140,7 +140,7 @@ public struct GraphicsContext {
   public mutating func clipToLayer(
     opacity: Double = 1,
     options: ClipOptions = ClipOptions(),
-    content: (inout GraphicsContext) throws -> ()
+    content: (inout GraphicsContext) throws -> Void
   ) rethrows {
     var layer = GraphicsContext(_storage: _storage)
     _storage.perform(.beginClipLayer(layer, opacity: opacity))
@@ -148,7 +148,7 @@ public struct GraphicsContext {
     _storage.perform(.endClipLayer)
   }
 
-  public func drawLayer(content: (inout GraphicsContext) throws -> ()) rethrows {
+  public func drawLayer(content: (inout GraphicsContext) throws -> Void) rethrows {
     var layer = GraphicsContext(_storage: _storage)
     _storage.perform(.beginLayer(layer))
     try content(&layer)
@@ -167,5 +167,5 @@ public struct GraphicsContext {
     stroke(path, with: shading, style: .init(lineWidth: lineWidth))
   }
 
-//  public func withCGContext(content: (CGContext) throws -> ()) rethrows
+  //  public func withCGContext(content: (CGContext) throws -> ()) rethrows
 }

@@ -17,7 +17,7 @@
 
 import Foundation
 
-public struct ContainerRelativeShape: Shape, EnvironmentReader {
+public struct ContainerRelativeShape: @MainActor Shape, @MainActor EnvironmentReader {
   var containerShape: (CGRect, GeometryProxy) -> Path? = { _, _ in nil }
 
   public func path(in rect: CGRect) -> Path {
@@ -31,7 +31,7 @@ public struct ContainerRelativeShape: Shape, EnvironmentReader {
   }
 }
 
-extension ContainerRelativeShape: InsettableShape {
+extension ContainerRelativeShape: @MainActor InsettableShape {
   @inlinable
   public func inset(by amount: CGFloat) -> some InsettableShape {
     _Inset(amount: amount)
@@ -39,7 +39,7 @@ extension ContainerRelativeShape: InsettableShape {
 
   @usableFromInline
   @frozen
-  internal struct _Inset: InsettableShape, DynamicProperty {
+  internal struct _Inset: @MainActor InsettableShape, DynamicProperty {
     @usableFromInline
     internal var amount: CGFloat
     @inlinable
@@ -62,12 +62,12 @@ extension ContainerRelativeShape: InsettableShape {
   }
 }
 
-private extension EnvironmentValues {
-  enum ContainerShapeKey: EnvironmentKey {
+extension EnvironmentValues {
+  fileprivate enum ContainerShapeKey: EnvironmentKey {
     static let defaultValue: (CGRect, GeometryProxy) -> Path? = { _, _ in nil }
   }
 
-  var _containerShape: (CGRect, GeometryProxy) -> Path? {
+  fileprivate var _containerShape: (CGRect, GeometryProxy) -> Path? {
     get {
       self[ContainerShapeKey.self]
     }
@@ -95,16 +95,16 @@ public struct _ContainerShapeModifier<Shape>: ViewModifier where Shape: Insettab
       content
         .environment(\._containerShape) { rect, proxy in
           shape
-            .inset(by: proxy.size.width) // TODO: Calculate the offset using content's geometry
+            .inset(by: proxy.size.width)  // TODO: Calculate the offset using content's geometry
             .path(in: rect)
         }
     }
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func containerShape<T>(_ shape: T) -> some View where T: InsettableShape {
+  public func containerShape<T>(_ shape: T) -> some View where T: InsettableShape {
     modifier(_ContainerShapeModifier(shape: shape))
   }
 }

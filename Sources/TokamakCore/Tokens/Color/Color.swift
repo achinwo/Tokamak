@@ -188,6 +188,6 @@ extension Color: ShapeStyle {
   public static func _apply(to type: inout _ShapeStyle_ShapeType) {}
 }
 
-extension Color: View {
+extension Color: @MainActor View {
   public typealias Body = _ShapeView<Rectangle, Self>
 }

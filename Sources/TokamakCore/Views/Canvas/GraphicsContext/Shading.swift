@@ -1,3 +1,5 @@
+import Foundation
+
 // Copyright 2020-2021 Tokamak contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,17 +16,18 @@
 //
 //  Created by Carson Katri on 9/18/21.
 //
+#if canImport(CoreGraphics)
+  import CoreGraphics
+#endif
 
-import Foundation
-
-public extension GraphicsContext {
-  enum _GradientGeometry {
+extension GraphicsContext {
+  public enum _GradientGeometry {
     case axial(CGPoint, CGPoint)
     case conic(CGPoint, Angle)
     case radial(CGPoint, CGFloat, CGFloat)
   }
 
-  enum _ResolvedShading {
+  public enum _ResolvedShading {
     case levels([Self])
     case style(_ResolvedStyle)
     case gradient(Gradient, geometry: _GradientGeometry, options: GradientOptions)
@@ -36,7 +39,7 @@ public extension GraphicsContext {
     )
   }
 
-  struct Shading {
+  public struct Shading {
     public enum _Storage {
       case backdrop
       case foreground
@@ -65,15 +68,18 @@ public extension GraphicsContext {
         return Self.style(BackgroundStyle())._resolve(in: environment)
       case .foreground:
         return Self.style(ForegroundStyle())._resolve(in: environment)
-      case let .levels(colors):
-        return .init(.resolved(.levels(colors.compactMap {
-          guard case let .resolved(resolved) = $0._resolve(in: environment)._storage
-          else { return nil }
-          return resolved
-        })))
-      case let .color(color):
+      case .levels(let colors):
+        return .init(
+          .resolved(
+            .levels(
+              colors.compactMap {
+                guard case .resolved(let resolved) = $0._resolve(in: environment)._storage
+                else { return nil }
+                return resolved
+              })))
+      case .color(let color):
         return Self.style(color)._resolve(in: environment)
-      case let .style(shapeStyle):
+      case .style(let shapeStyle):
         var shape = _ShapeStyle_Shape(
           for: .resolveStyle(levels: 0..<1),
           in: environment,
@@ -82,24 +88,30 @@ public extension GraphicsContext {
         shapeStyle._apply(to: &shape)
         guard let style = shape.result.resolvedStyle(on: shape, in: environment)
         else {
-          return .init(.resolved(.style(.color(.init(
-            red: 0,
-            green: 0,
-            blue: 0,
-            opacity: 1,
-            space: .sRGB
-          )))))
+          return .init(
+            .resolved(
+              .style(
+                .color(
+                  .init(
+                    red: 0,
+                    green: 0,
+                    blue: 0,
+                    opacity: 1,
+                    space: .sRGB
+                  )))))
         }
         return .init(.resolved(.style(style)))
-      case let .gradient(gradient, geometry, options):
+      case .gradient(let gradient, let geometry, let options):
         return .init(.resolved(.gradient(gradient, geometry: geometry, options: options)))
-      case let .tiledImage(image, origin, sourceRect, scale):
-        return .init(.resolved(.tiledImage(
-          image,
-          origin: origin,
-          sourceRect: sourceRect,
-          scale: scale
-        )))
+      case .tiledImage(let image, let origin, let sourceRect, let scale):
+        return .init(
+          .resolved(
+            .tiledImage(
+              image,
+              origin: origin,
+              sourceRect: sourceRect,
+              scale: scale
+            )))
       case .resolved:
         return self
       }
@@ -149,11 +161,12 @@ public extension GraphicsContext {
       endRadius: CGFloat,
       options: GradientOptions = GradientOptions()
     ) -> Shading {
-      .init(.gradient(
-        gradient,
-        geometry: .radial(center, startRadius, endRadius),
-        options: options
-      ))
+      .init(
+        .gradient(
+          gradient,
+          geometry: .radial(center, startRadius, endRadius),
+          options: options
+        ))
     }
 
     public static func conicGradient(
@@ -176,7 +189,7 @@ public extension GraphicsContext {
   }
 
   @frozen
-  struct GradientOptions: OptionSet {
+  public struct GradientOptions: OptionSet {
     public let rawValue: UInt32
 
     @inlinable
@@ -192,7 +205,7 @@ public extension GraphicsContext {
     public static var linearColor: Self { Self(rawValue: 1 << 2) }
   }
 
-  func resolve(_ shading: Shading) -> Shading {
+  public func resolve(_ shading: Shading) -> Shading {
     shading._resolve(in: _storage.environment)
   }
 }

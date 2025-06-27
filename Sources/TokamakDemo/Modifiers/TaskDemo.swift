@@ -13,50 +13,56 @@
 // limitations under the License.
 
 #if os(WASI) && compiler(>=5.5) && (canImport(Concurrency) || canImport(_Concurrency))
-import JavaScriptKit
-import TokamakDOM
+  import JavaScriptKit
+  import TokamakDOM
 
-private let jsFetch = JSObject.global.fetch.function!
-private func fetch(_ url: String) -> JSPromise {
-  JSPromise(jsFetch(url).object!)!
-}
-
-private struct Response: Decodable {
-  let uuid: String
-}
-
-struct TaskDemo: View {
-  @State
-  private var response: Result<Response, Error>?
-
-  var body: some View {
-    VStack {
-      switch response {
-      case let .success(response):
-        Text("Fetched UUID is \(response.uuid)")
-      case let .failure(error):
-        Text("Error is \(error)")
-      default:
-        Text("Response not available yet")
-      }
-
-      Button("Fetch new UUID asynchronously") {
-        response = nil
-        Task { await fetchResponse() }
-      }
-    }.task {
-      await fetchResponse()
-    }
+  private let jsFetch = JSObject.global.fetch.function!
+  private func fetch(_ url: String) -> JSPromise {
+    JSPromise(jsFetch(url).object!)!
   }
 
-  func fetchResponse() async {
-    do {
-      let fetchResult = try await fetch("https://httpbin.org/uuid").value
-      let json = try await JSPromise(fetchResult.json().object!)!.value
-      response = Result { try JSValueDecoder().decode(Response.self, from: json) }
-    } catch {
-      response = .failure(error)
+  private struct Response: Decodable {
+    let uuid: String
+  }
+
+  struct TaskDemo: View {
+    @State
+    private var response: Result<Response, Error>?
+
+    var body: some View {
+      VStack {
+        switch response {
+        case .success(let response):
+          Text("Fetched UUID is \(response.uuid)")
+        case .failure(let error):
+          Text("Error is \(error)")
+        default:
+          Text("Response not available yet")
+        }
+
+        Button("Fetch new UUID asynchronously") {
+          response = nil
+          Task { await fetchResponse() }
+        }
+      }.task {
+        await fetchResponse()
+      }
+    }
+
+    func fetchResponse() async {
+      // do {
+      //   Task { @MainActor in
+      //     let fetchResult = try await fetch("https://httpbin.org/uuid").value
+      //     let json = try await JSPromise(fetchResult.json().object!)!.value
+
+      //     response = Result { try JSValueDecoder().decode(Response.self, from: json) }
+      //   }
+
+      // } catch {
+      //   await MainActor.run {
+      //     response = .failure(error)
+      //   }
+      // }
     }
   }
-}
 #endif

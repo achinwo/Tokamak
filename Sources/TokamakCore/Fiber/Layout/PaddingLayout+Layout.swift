@@ -17,8 +17,8 @@
 
 import Foundation
 
-private extension EdgeInsets {
-  init(applying edges: Edge.Set, to insets: EdgeInsets) {
+extension EdgeInsets {
+  fileprivate init(applying edges: Edge.Set, to insets: EdgeInsets) {
     self.init(
       top: edges.contains(.top) ? insets.top : 0,
       leading: edges.contains(.leading) ? insets.leading : 0,
@@ -28,7 +28,7 @@ private extension EdgeInsets {
   }
 }
 
-private struct PaddingLayout: Layout {
+private struct PaddingLayout: @MainActor Layout {
   let edges: Edge.Set
   let insets: EdgeInsets?
 
@@ -43,12 +43,13 @@ private struct PaddingLayout: Layout {
   ) -> CGSize {
     let proposal = proposal.replacingUnspecifiedDimensions()
     let insets = EdgeInsets(applying: edges, to: insets ?? .init(_all: 10))
-    let subviewSize = subviews.first?.sizeThatFits(
-      .init(
-        width: proposal.width - insets.leading - insets.trailing,
-        height: proposal.height - insets.top - insets.bottom
-      )
-    ) ?? .zero
+    let subviewSize =
+      subviews.first?.sizeThatFits(
+        .init(
+          width: proposal.width - insets.leading - insets.trailing,
+          height: proposal.height - insets.top - insets.bottom
+        )
+      ) ?? .zero
     return .init(
       width: subviewSize.width + insets.leading + insets.trailing,
       height: subviewSize.height + insets.top + insets.bottom
@@ -75,10 +76,11 @@ private struct PaddingLayout: Layout {
   }
 }
 
-public extension _PaddingLayout {
-  func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor {
-    visitor.visit(PaddingLayout(edges: edges, insets: insets).callAsFunction {
-      content
-    })
+extension _PaddingLayout {
+  public func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor {
+    visitor.visit(
+      PaddingLayout(edges: edges, insets: insets).callAsFunction {
+        content
+      })
   }
 }

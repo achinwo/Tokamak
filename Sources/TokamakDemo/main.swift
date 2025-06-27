@@ -15,7 +15,7 @@
 import TokamakShim
 
 @available(OSX 10.16, iOS 14.0, *)
-struct CustomScene: Scene {
+struct CustomScene: @preconcurrency Scene {
   @Environment(\.scenePhase)
   private var scenePhase
 
@@ -28,7 +28,7 @@ struct CustomScene: Scene {
 }
 
 @available(OSX 10.16, iOS 14.0, *)
-struct TokamakDemoApp: App {
+struct TokamakDemoApp: @MainActor App {
   var body: some Scene {
     CustomScene()
   }

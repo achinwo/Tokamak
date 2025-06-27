@@ -18,7 +18,7 @@
 import Foundation
 
 @frozen
-public struct _OffsetEffect: GeometryEffect, Equatable {
+public struct _OffsetEffect: @MainActor GeometryEffect, @MainActor Equatable {
   public var offset: CGSize
 
   @inlinable
@@ -44,14 +44,14 @@ public struct _OffsetEffect: GeometryEffect, Equatable {
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func offset(_ offset: CGSize) -> some View {
+  public func offset(_ offset: CGSize) -> some View {
     modifier(_OffsetEffect(offset: offset))
   }
 
   @inlinable
-  func offset(x: CGFloat = 0, y: CGFloat = 0) -> some View {
+  public func offset(x: CGFloat = 0, y: CGFloat = 0) -> some View {
     offset(CGSize(width: x, height: y))
   }
 }

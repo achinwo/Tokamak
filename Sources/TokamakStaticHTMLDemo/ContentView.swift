@@ -19,6 +19,17 @@ import TokamakStaticHTML
 
 struct ContentView: View {
   var body: some View {
-    Text("Hello, world!")
+    HStack {
+      Text("Hello, world! 1")
+        .foregroundColor(.blue)
+      Spacer()
+      Text("Hello, world! 2")
+        .foregroundColor(.green)
+      Text("Hello, world! 3")
+        .foregroundColor(.red)
+    }
+    .padding()
+    .background(Color.yellow)
+    .animation(.easeInOut, value: 1)
   }
 }

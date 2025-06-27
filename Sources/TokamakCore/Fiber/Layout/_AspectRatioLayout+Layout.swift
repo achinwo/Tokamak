@@ -17,7 +17,7 @@
 
 import Foundation
 
-private struct AspectRatioLayout: Layout {
+private struct AspectRatioLayout: @MainActor Layout {
   let aspectRatio: CGFloat?
   let contentMode: ContentMode
 
@@ -91,8 +91,8 @@ private struct AspectRatioLayout: Layout {
   }
 }
 
-public extension _AspectRatioLayout {
-  func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor {
+extension _AspectRatioLayout {
+  public func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor {
     visitor.visit(
       AspectRatioLayout(
         aspectRatio: aspectRatio,

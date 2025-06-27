@@ -20,22 +20,22 @@ extension Color {
   }
 }
 
-public extension AnyColorBox.ResolvedValue {
-  var cssValue: String {
+extension AnyColorBox.ResolvedValue {
+  public var cssValue: String {
     "rgba(\(red * 255), \(green * 255), \(blue * 255), \(opacity))"
   }
 }
 
-extension GridItem: CustomStringConvertible {
+extension GridItem: @preconcurrency CustomStringConvertible {
   public var description: String {
     switch size {
-    case let .adaptive(minimum: min, maximum: max):
+    case .adaptive(minimum: let min, maximum: let max):
       let min = min == .infinity ? "1fr" : "\(min)px"
       let max = max == .infinity ? "1fr" : "\(max)px"
       return "repeat(auto-fill, minmax(\(min), \(max)))"
-    case let .fixed(size):
+    case .fixed(let size):
       return "\(size)px"
-    case let .flexible(minimum: min, maximum: max):
+    case .flexible(minimum: let min, maximum: let max):
       let min = min == .infinity ? "1fr" : min.description
       let max = max == .infinity ? "1fr" : max.description
       return "minmax(\(min), \(max))"
