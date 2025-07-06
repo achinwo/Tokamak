@@ -1,5 +1,7 @@
 # OS X
 .DS_Store
+external_dependencies/carton/.build/
+external_dependencies/OpenCombineJS/.build/
 
 # Xcode
 build/

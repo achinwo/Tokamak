@@ -26,12 +26,12 @@ public struct Link<Label>: _PrimitiveView where Label: View {
   }
 }
 
-public extension Link where Label == Text {
-  init<S: StringProtocol>(_ titleKey: S, destination: URL) {
+extension Link where Label == Text {
+  public init<S: StringProtocol>(_ titleKey: S, destination: URL) {
     self.init(destination: destination) { Text(titleKey) }
   }
 }
-
+@MainActor
 public struct _LinkProxy<Label> where Label: View {
   public let subject: Link<Label>
 

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+@MainActor
 public protocol ViewModifier {
   typealias Content = _ViewModifier_Content<Self>
   associatedtype Body: View
@@ -21,12 +22,12 @@ public protocol ViewModifier {
   func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor
 }
 
-public extension ViewModifier {
-  static func _makeView(_ inputs: ViewInputs<Self>) -> ViewOutputs {
+extension ViewModifier {
+  public static func _makeView(_ inputs: ViewInputs<Self>) -> ViewOutputs {
     .init(inputs: inputs)
   }
 
-  func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor {
+  public func _visitChildren<V>(_ visitor: V, content: Content) where V: ViewVisitor {
     if Body.self == Never.self {
       content.visitChildren(visitor)
     } else {
@@ -36,11 +37,10 @@ public extension ViewModifier {
 }
 
 public struct _ViewModifier_Content<Modifier>: View
-  where Modifier: ViewModifier
-{
+where Modifier: ViewModifier {
   public let modifier: Modifier
   public let view: AnyView
-  let visitChildren: (ViewVisitor) -> ()
+  let visitChildren: (ViewVisitor) -> Void
 
   public init(modifier: Modifier, view: AnyView) {
     self.modifier = modifier
@@ -63,14 +63,14 @@ public struct _ViewModifier_Content<Modifier>: View
   }
 }
 
-public extension View {
-  func modifier<Modifier>(_ modifier: Modifier) -> ModifiedContent<Self, Modifier> {
+extension View {
+  public func modifier<Modifier>(_ modifier: Modifier) -> ModifiedContent<Self, Modifier> {
     .init(content: self, modifier: modifier)
   }
 }
 
-public extension ViewModifier where Body == Never {
-  func body(content: Content) -> Body {
+extension ViewModifier where Body == Never {
+  public func body(content: Content) -> Body {
     fatalError(
       "\(Self.self) is a primitive `ViewModifier`, you're not supposed to run `body(content:)`"
     )

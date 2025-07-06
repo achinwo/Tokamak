@@ -21,7 +21,7 @@ public struct _PickerContainer<
   SelectionValue: Hashable,
   Content: View
 >: _PrimitiveView,
-  _PickerContainerProtocol
+  @MainActor _PickerContainerProtocol
 {
   @Binding
   public var selection: SelectionValue
@@ -79,7 +79,7 @@ public struct Picker<Label: View, SelectionValue: Hashable, Content: View>: View
       // update the binding.
       ForEach(0..<children.count) { index in
         if let forEach = mapAnyView(children[index], transform: { (v: ForEachProtocol) in v }),
-           forEach.elementType == SelectionValue.self
+          forEach.elementType == SelectionValue.self
         {
           let nestedChildren = forEach.children
 
@@ -94,9 +94,9 @@ public struct Picker<Label: View, SelectionValue: Hashable, Content: View>: View
   }
 }
 
-public extension Picker where Label == Text {
+extension Picker where Label == Text {
   @_disfavoredOverload
-  init<S: StringProtocol>(
+  public init<S: StringProtocol>(
     _ title: S,
     selection: Binding<SelectionValue>,
     @ViewBuilder content: () -> Content
@@ -115,7 +115,7 @@ extension Picker: ParentView {
 }
 
 @_spi(TokamakCore)
-extension Picker: _PickerContainerProtocol {
+extension Picker: @MainActor _PickerContainerProtocol {
   @_spi(TokamakCore)
   public var elements: [_AnyIDView] {
     (content as? ForEachProtocol)?.children

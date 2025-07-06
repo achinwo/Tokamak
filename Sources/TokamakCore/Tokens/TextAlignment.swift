@@ -15,15 +15,15 @@
 //  Created by Max Desiatov on 30/12/2018.
 //
 
-public enum TextAlignment: Hashable, CaseIterable {
+public enum TextAlignment: Hashable, CaseIterable, Sendable {
   case leading,
-       center,
-       trailing
+    center,
+    trailing
 }
 
 extension EnvironmentValues {
   private struct _MultilineTextAlignmentKey: EnvironmentKey {
-    static var defaultValue: TextAlignment = .leading
+    static let defaultValue: TextAlignment = .leading
   }
 
   public var multilineTextAlignment: TextAlignment {
@@ -36,9 +36,9 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func multilineTextAlignment(_ alignment: TextAlignment) -> some View {
+  public func multilineTextAlignment(_ alignment: TextAlignment) -> some View {
     environment(\.multilineTextAlignment, alignment)
   }
 }

@@ -40,8 +40,9 @@ public struct AnyView: _PrimitiveView {
    */
   let bodyType: Any.Type
 
-  let visitChildren: (ViewVisitor, Any) -> ()
+  let visitChildren: (ViewVisitor, Any) -> Void
 
+  @MainActor
   public init<V>(_ view: V) where V: View {
     if let anyView = view as? AnyView {
       self = anyView
@@ -63,7 +64,7 @@ public struct AnyView: _PrimitiveView {
     visitChildren(visitor, view)
   }
 }
-
+@MainActor
 public func mapAnyView<T, V>(_ anyView: AnyView, transform: (V) -> T) -> T? {
   guard let view = anyView.view as? V else { return nil }
 
@@ -77,6 +78,7 @@ extension AnyView: ParentView {
   }
 }
 
+@MainActor
 public struct _AnyViewProxy {
   public var subject: AnyView
 

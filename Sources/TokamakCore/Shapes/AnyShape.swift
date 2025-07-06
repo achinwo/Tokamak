@@ -22,7 +22,8 @@ protocol AnyShapeBox {
   func sizeThatFits(_ proposal: ProposedViewSize) -> CGSize
 }
 
-private struct ConcreteAnyShapeBox<Base: Shape>: AnyShapeBox {
+@MainActor
+private struct ConcreteAnyShapeBox<Base: Shape>: @MainActor AnyShapeBox {
   var base: Base
 
   var animatableDataBox: _AnyAnimatableData {

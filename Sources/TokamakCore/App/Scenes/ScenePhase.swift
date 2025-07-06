@@ -15,7 +15,7 @@
 //  Created by Carson Katri on 7/19/20.
 //
 
-public enum ScenePhase: @MainActor Comparable {
+public enum ScenePhase: Comparable, Sendable {
   case active
   case inactive
   case background

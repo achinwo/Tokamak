@@ -59,7 +59,7 @@ import Foundation
 ///   │       │Text│
 ///   └───────┴────┘
 /// ```
-struct ReconcilePass: FiberReconcilerPass {
+@MainActor struct ReconcilePass: FiberReconcilerPass {
   func run<R>(
     in reconciler: FiberReconciler<R>,
     root: FiberReconciler<R>.TreeReducer.Result,
@@ -74,11 +74,11 @@ struct ReconcilePass: FiberReconcilerPass {
     while true {
       if !shouldReconcile {
         if let fiber = node.fiber,
-           changedFibers.contains(ObjectIdentifier(fiber))
+          changedFibers.contains(ObjectIdentifier(fiber))
         {
           shouldReconcile = true
         } else if let alternate = node.fiber?.alternate,
-                  changedFibers.contains(ObjectIdentifier(alternate))
+          changedFibers.contains(ObjectIdentifier(alternate))
         {
           shouldReconcile = true
         }
@@ -87,14 +87,14 @@ struct ReconcilePass: FiberReconcilerPass {
       // If this fiber has an element, set its `elementIndex`
       // and increment the `elementIndices` value for its `elementParent`.
       if node.fiber?.element != nil,
-         let elementParent = node.fiber?.elementParent
+        let elementParent = node.fiber?.elementParent
       {
         node.fiber?.elementIndex = caches.elementIndex(for: elementParent, increment: true)
       }
 
       // Perform work on the node.
       if shouldReconcile,
-         let mutation = reconcile(node, in: reconciler, caches: caches)
+        let mutation = reconcile(node, in: reconciler, caches: caches)
       {
         caches.mutations.append(mutation)
       }
@@ -103,7 +103,7 @@ struct ReconcilePass: FiberReconcilerPass {
       node.elementIndices = caches.elementIndices
       // Pass view traits down to the nearest element fiber.
       if let traits = node.fiber?.outputs.traits,
-         !traits.values.isEmpty
+        !traits.values.isEmpty
       {
         node.nextTraits.values.merge(traits.values, uniquingKeysWith: { $1 })
       }
@@ -117,10 +117,10 @@ struct ReconcilePass: FiberReconcilerPass {
       node.fiber?.preferences?.reset()
 
       if reconciler.renderer.useDynamicLayout,
-         let fiber = node.fiber
+        let fiber = node.fiber
       {
         if let element = fiber.element,
-           let elementParent = fiber.elementParent
+          let elementParent = fiber.elementParent
         {
           let parentKey = ObjectIdentifier(elementParent)
           let subview = LayoutSubview(
@@ -150,7 +150,7 @@ struct ReconcilePass: FiberReconcilerPass {
         }
         walk(alternateChild) { node in
           if let element = node.element,
-             let parent = node.elementParent?.element
+            let parent = node.elementParent?.element
           {
             // Removals must happen in reverse order, so a child element
             // is removed before its parent.
@@ -173,7 +173,7 @@ struct ReconcilePass: FiberReconcilerPass {
       // Now walk back up the tree until we find a sibling.
       while node.sibling == nil {
         if let fiber = node.fiber,
-           fiber.element != nil
+          fiber.element != nil
         {
           propagateCacheInvalidation(for: fiber, in: reconciler, caches: caches)
         }
@@ -194,7 +194,7 @@ struct ReconcilePass: FiberReconcilerPass {
             invalidateCache(for: fiber, in: reconciler, caches: caches)
           }
           if let element = alternateSibling?.element,
-             let parent = alternateSibling?.elementParent?.element
+            let parent = alternateSibling?.elementParent?.element
           {
             // Removals happen in reverse order, so a child element is removed before
             // its parent.
@@ -224,16 +224,16 @@ struct ReconcilePass: FiberReconcilerPass {
     caches: FiberReconciler<R>.Caches
   ) -> Mutation<R>? {
     if let element = node.fiber?.element,
-       let index = node.fiber?.elementIndex,
-       let parent = node.fiber?.elementParent?.element
+      let index = node.fiber?.elementIndex,
+      let parent = node.fiber?.elementParent?.element
     {
-      if node.fiber?.alternate == nil { // This didn't exist before (no alternate)
+      if node.fiber?.alternate == nil {  // This didn't exist before (no alternate)
         if let fiber = node.fiber {
           invalidateCache(for: fiber, in: reconciler, caches: caches)
         }
         return .insert(element: element, parent: parent, index: index)
       } else if node.fiber?.typeInfo?.type != node.fiber?.alternate?.typeInfo?.type,
-                let previous = node.fiber?.alternate?.element
+        let previous = node.fiber?.alternate?.element
       {
         if let fiber = node.fiber {
           invalidateCache(for: fiber, in: reconciler, caches: caches)
@@ -241,7 +241,7 @@ struct ReconcilePass: FiberReconcilerPass {
         // This is a completely different type of view.
         return .replace(parent: parent, previous: previous, replacement: element)
       } else if let newContent = node.newContent,
-                newContent != element.content
+        newContent != element.content
       {
         if let fiber = node.fiber {
           invalidateCache(for: fiber, in: reconciler, caches: caches)
@@ -250,11 +250,12 @@ struct ReconcilePass: FiberReconcilerPass {
         return .update(
           previous: element,
           newContent: newContent,
-          geometry: node.fiber?.geometry ?? .init(
-            origin: .init(origin: .zero),
-            dimensions: .init(size: .zero, alignmentGuides: [:]),
-            proposal: .unspecified
-          )
+          geometry: node.fiber?.geometry
+            ?? .init(
+              origin: .init(origin: .zero),
+              dimensions: .init(size: .zero, alignmentGuides: [:]),
+              proposal: .unspecified
+            )
         )
       }
     }
@@ -285,7 +286,7 @@ struct ReconcilePass: FiberReconcilerPass {
     caches: FiberReconciler<R>.Caches
   ) {
     guard caches.layoutCache(for: fiber)?.isDirty ?? false,
-          let elementParent = fiber.elementParent
+      let elementParent = fiber.elementParent
     else { return }
     invalidateCache(for: elementParent, in: reconciler, caches: caches)
   }

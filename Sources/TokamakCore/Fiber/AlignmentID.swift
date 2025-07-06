@@ -42,7 +42,7 @@ import Foundation
 ///         .alignmentGuide(.myAlignmentGuide) { $0[.trailing] }
 ///     }
 ///     .border(.green)
-public protocol AlignmentID {
+public protocol AlignmentID: Sendable {
   /// The default value for this alignment guide
   /// when not set via the `alignmentGuide` modifier.
   static func defaultValue(in context: ViewDimensions) -> CGFloat
@@ -50,7 +50,7 @@ public protocol AlignmentID {
 
 /// An alignment position along the horizontal axis.
 @frozen
-public struct HorizontalAlignment: Equatable {
+public struct HorizontalAlignment: Equatable, Sendable {
   public static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.id == rhs.id
   }
@@ -129,7 +129,7 @@ extension VerticalAlignment {
 }
 
 /// An alignment in both axes.
-public struct Alignment: Equatable {
+public struct Alignment: Equatable, Sendable {
   public var horizontal: HorizontalAlignment
   public var vertical: VerticalAlignment
 

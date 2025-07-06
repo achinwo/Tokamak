@@ -17,8 +17,8 @@
 
 import Foundation
 
-public extension GraphicsContext {
-  struct ResolvedImage {
+extension GraphicsContext {
+  public struct ResolvedImage {
     public let _resolved: _AnyImageProviderBox.ResolvedValue
 
     public let size: CGSize
@@ -35,27 +35,27 @@ public extension GraphicsContext {
     }
   }
 
-  func resolve(_ image: Image) -> ResolvedImage {
+  public func resolve(_ image: Image) -> ResolvedImage {
     _storage.imageResolver(image, _storage.environment)
   }
 
-  func draw(_ image: ResolvedImage, in rect: CGRect, style: FillStyle = FillStyle()) {
+  public func draw(_ image: ResolvedImage, in rect: CGRect, style: FillStyle = FillStyle()) {
     _storage.perform(.drawImage(image, .in(rect), style: style))
   }
 
-  func draw(_ image: ResolvedImage, at point: CGPoint, anchor: UnitPoint = .center) {
+  public func draw(_ image: ResolvedImage, at point: CGPoint, anchor: UnitPoint = .center) {
     _storage.perform(.drawImage(image, .at(point, anchor: anchor), style: nil))
   }
 
-  func draw(_ image: Image, in rect: CGRect, style: FillStyle = FillStyle()) {
+  public func draw(_ image: Image, in rect: CGRect, style: FillStyle = FillStyle()) {
     draw(resolve(image), in: rect, style: style)
   }
 
-  func draw(_ image: Image, at point: CGPoint, anchor: UnitPoint = .center) {
+  public func draw(_ image: Image, at point: CGPoint, anchor: UnitPoint = .center) {
     draw(resolve(image), at: point, anchor: anchor)
   }
 
-  struct ResolvedText {
+  public struct ResolvedText {
     public let _text: Text
     public var shading: Shading
 
@@ -94,27 +94,27 @@ public extension GraphicsContext {
     }
   }
 
-  func resolve(_ text: Text) -> ResolvedText {
+  public func resolve(_ text: Text) -> ResolvedText {
     _storage.textResolver(text, _storage.environment)
   }
 
-  func draw(_ text: ResolvedText, in rect: CGRect) {
+  public func draw(_ text: ResolvedText, in rect: CGRect) {
     _storage.perform(.drawText(text, .in(rect)))
   }
 
-  func draw(_ text: ResolvedText, at point: CGPoint, anchor: UnitPoint = .center) {
+  public func draw(_ text: ResolvedText, at point: CGPoint, anchor: UnitPoint = .center) {
     _storage.perform(.drawText(text, .at(point, anchor: anchor)))
   }
 
-  func draw(_ text: Text, in rect: CGRect) {
+  public func draw(_ text: Text, in rect: CGRect) {
     draw(resolve(text), in: rect)
   }
 
-  func draw(_ text: Text, at point: CGPoint, anchor: UnitPoint = .center) {
+  public func draw(_ text: Text, at point: CGPoint, anchor: UnitPoint = .center) {
     draw(resolve(text), at: point, anchor: anchor)
   }
 
-  struct ResolvedSymbol {
+  public struct ResolvedSymbol {
     /// The renderer-specific resolved `View` data.
     public let _resolved: Any
     public let _id: AnyHashable
@@ -125,8 +125,9 @@ public extension GraphicsContext {
     }
   }
 
+  @MainActor
   /// Resolves a symbol marked with the tag `id`.
-  func resolveSymbol<ID>(id: ID) -> ResolvedSymbol? where ID: Hashable {
+  public func resolveSymbol<ID>(id: ID) -> ResolvedSymbol? where ID: Hashable {
     _storage.symbolResolver(
       AnyHashable(id),
       AnyView(
@@ -138,13 +139,14 @@ public extension GraphicsContext {
     )
   }
 
-  private struct SymbolResolverLayout<ID: Hashable>: _VariadicView.ViewRoot {
+  private struct SymbolResolverLayout<ID: Hashable>: @MainActor _VariadicView.ViewRoot {
     let id: ID
 
+    @MainActor
     func body(children: _VariadicView.Children) -> some View {
       ForEach(children) {
-        if case let .tagged(tag) = $0[TagValueTraitKey<ID>.self],
-           tag == id
+        if case .tagged(let tag) = $0[TagValueTraitKey<ID>.self],
+          tag == id
         {
           $0
         }
@@ -152,11 +154,11 @@ public extension GraphicsContext {
     }
   }
 
-  func draw(_ symbol: ResolvedSymbol, in rect: CGRect) {
+  public func draw(_ symbol: ResolvedSymbol, in rect: CGRect) {
     _storage.perform(.drawSymbol(symbol, .in(rect)))
   }
 
-  func draw(_ symbol: ResolvedSymbol, at point: CGPoint, anchor: UnitPoint = .center) {
+  public func draw(_ symbol: ResolvedSymbol, at point: CGPoint, anchor: UnitPoint = .center) {
     _storage.perform(.drawSymbol(symbol, .at(point, anchor: anchor)))
   }
 }

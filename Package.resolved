@@ -1,13 +1,13 @@
 {
-  "originHash" : "21480b450d7e28d2db530c8fedc774c5ae927ce2ce76d28d2620219d9ef6bedc",
+  "originHash" : "27469b7b6692761dfc7c0f6ad20b87ddce1d0b8791f4420b8f89c7c1045788a5",
   "pins" : [
     {
       "identity" : "javascriptkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftwasm/JavaScriptKit.git",
       "state" : {
-        "revision" : "2aec44be49d57c9ddbfa4cd8a02048d4cd05200c",
-        "version" : "0.31.0"
+        "revision" : "387347ac51b133b801c23f124dd8fe64cc4298c7",
+        "version" : "0.31.1"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "34d486b01cd891297ac615e40d5999536a1e138d",
-        "version" : "2.83.0"
+        "revision" : "ad6b5f17270a7008f60d35ec5378e6144a575162",
+        "version" : "2.84.0"
       }
     },
     {

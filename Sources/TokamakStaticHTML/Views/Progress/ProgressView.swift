@@ -17,18 +17,20 @@
 
 import TokamakCore
 
-extension _FractionalProgressView: _HTMLPrimitive {
+extension _FractionalProgressView: @MainActor _HTMLPrimitive {
   public var renderedBody: AnyView {
     AnyView(
-      HTML("progress", [
-        "value": "\(fractionCompleted)",
-        "style": "width: 100%;",
-      ])
+      HTML(
+        "progress",
+        [
+          "value": "\(fractionCompleted)",
+          "style": "width: 100%;",
+        ])
     )
   }
 }
 
-extension _IndeterminateProgressView: _HTMLPrimitive {
+extension _IndeterminateProgressView: @MainActor _HTMLPrimitive {
   public var renderedBody: AnyView {
     AnyView(
       HTML("progress", ["style": "width: 100%;"])

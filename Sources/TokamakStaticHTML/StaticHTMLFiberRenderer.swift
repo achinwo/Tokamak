@@ -109,7 +109,7 @@ extension HTMLConvertible {
 }
 
 @_spi(TokamakStaticHTML)
-extension VStack: HTMLConvertible {
+extension VStack: @MainActor HTMLConvertible {
   @_spi(TokamakStaticHTML)
   public var tag: String { "div" }
 
@@ -130,7 +130,7 @@ extension VStack: HTMLConvertible {
 }
 
 @_spi(TokamakStaticHTML)
-extension HStack: HTMLConvertible {
+extension HStack: @MainActor HTMLConvertible {
   @_spi(TokamakStaticHTML)
   public var tag: String { "div" }
 
@@ -151,14 +151,15 @@ extension HStack: HTMLConvertible {
 }
 
 @_spi(TokamakCore)
-extension LayoutView: HTMLConvertible {
+extension LayoutView: @MainActor HTMLConvertible {
   public var tag: String { "div" }
   public func attributes(useDynamicLayout: Bool) -> [HTMLAttribute: String] {
     [:]
   }
 }
 
-public struct StaticHTMLFiberRenderer: FiberRenderer {
+@MainActor
+public struct StaticHTMLFiberRenderer: @MainActor FiberRenderer {
   public let rootElement: HTMLElement
   public let defaultEnvironment: EnvironmentValues
   public let sceneSize: CurrentValueSubject<CGSize, Never>
@@ -190,7 +191,7 @@ public struct StaticHTMLFiberRenderer: FiberRenderer {
     _ view: Primitive
   ) -> ViewVisitorF<Visitor>? where Primitive: View, Visitor: ViewVisitor {
     guard let primitive = view as? HTMLConvertible else { return nil }
-    return nil  //primitive.primitiveVisitor(useDynamicLayout: useDynamicLayout)
+    return primitive.primitiveVisitor(useDynamicLayout: useDynamicLayout)
   }
 
   public func commit(_ mutations: [Mutation<Self>]) {

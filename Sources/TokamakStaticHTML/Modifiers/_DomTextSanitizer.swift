@@ -28,7 +28,7 @@ extension View {
 }
 
 @MainActor
-private struct DomTextSanitizerKey: EnvironmentKey {
+private struct DomTextSanitizerKey: @MainActor EnvironmentKey {
   static let defaultValue: _DomTextSanitizer = Sanitizers.HTML.encode
 }
 

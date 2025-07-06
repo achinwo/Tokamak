@@ -17,7 +17,7 @@ import Foundation
 /// This default is specified in SwiftUI on `Animation.timingCurve` as `0.35`.
 public let defaultDuration = 0.35
 
-public struct Animation: Equatable {
+public struct Animation: Equatable, Sendable {
   fileprivate var box: _AnimationBoxBase
 
   private init(_ box: _AnimationBoxBase) {
@@ -50,7 +50,7 @@ public struct Animation: Equatable {
     dampingFraction: Double = 0.825,
     blendDuration: Double = 0
   ) -> Animation {
-    if response == 0 { // Infinitely stiff spring
+    if response == 0 {  // Infinitely stiff spring
       // (well, not .infinity, but a very high number)
       return interpolatingSpring(stiffness: 999, damping: 999)
     } else {
@@ -80,12 +80,15 @@ public struct Animation: Equatable {
     damping: Double,
     initialVelocity: Double = 0.0
   ) -> Animation {
-    .init(StyleAnimationBox(style: .solver(_AnimationSolvers.Spring(
-      mass: mass,
-      stiffness: stiffness,
-      damping: damping,
-      initialVelocity: initialVelocity
-    ))))
+    .init(
+      StyleAnimationBox(
+        style: .solver(
+          _AnimationSolvers.Spring(
+            mass: mass,
+            stiffness: stiffness,
+            damping: damping,
+            initialVelocity: initialVelocity
+          ))))
   }
 
   public static func easeInOut(duration: Double) -> Animation {
@@ -140,9 +143,8 @@ public struct _AnimationProxy {
 }
 
 @frozen
-public struct _AnimationModifier<Value>: ViewModifier, Equatable
-  where Value: Equatable
-{
+public struct _AnimationModifier<Value>: ViewModifier, @MainActor Equatable
+where Value: Equatable {
   public var animation: Animation?
   public var value: Value
 
@@ -152,7 +154,17 @@ public struct _AnimationModifier<Value>: ViewModifier, Equatable
     self.value = value
   }
 
-  private struct ContentWrapper: View, Equatable {
+  @MainActor
+  private struct ContentWrapper: View, @MainActor Equatable {
+
+    @MainActor init(
+      content: _AnimationModifier<Value>.Content, animation: Animation? = nil, value: Value
+    ) {
+      self.content = content
+      self.animation = animation
+      self.value = value
+    }
+
     let content: Content
     let animation: Animation?
     let value: Value
@@ -173,6 +185,7 @@ public struct _AnimationModifier<Value>: ViewModifier, Equatable
     }
   }
 
+  @MainActor
   public func body(content: Content) -> some View {
     ContentWrapper(content: content, animation: animation, value: value)
   }
@@ -185,8 +198,7 @@ public struct _AnimationModifier<Value>: ViewModifier, Equatable
 
 @frozen
 public struct _AnimationView<Content>: View
-  where Content: Equatable, Content: View
-{
+where Content: Equatable, Content: View {
   public var content: Content
   public var animation: Animation?
 
@@ -202,9 +214,9 @@ public struct _AnimationView<Content>: View
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func animation<V>(
+  public func animation<V>(
     _ animation: Animation?,
     value: V
   ) -> some View where V: Equatable {
@@ -212,9 +224,9 @@ public extension View {
   }
 }
 
-public extension View where Self: Equatable {
+extension View where Self: Equatable {
   @inlinable
-  func animation(_ animation: Animation?) -> some View {
+  public func animation(_ animation: Animation?) -> some View {
     _AnimationView(content: self, animation: animation)
   }
 }

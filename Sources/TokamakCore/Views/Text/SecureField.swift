@@ -38,13 +38,13 @@
 public struct SecureField<Label>: _PrimitiveView where Label: View {
   let label: Label
   let textBinding: Binding<String>
-  let onCommit: () -> ()
+  let onCommit: () -> Void
 }
 
-public extension SecureField where Label == Text {
-  init<S>(
+extension SecureField where Label == Text {
+  public init<S>(
     _ title: S, text: Binding<String>,
-    onCommit: @escaping () -> () = {}
+    onCommit: @escaping () -> Void = {}
   ) where S: StringProtocol {
     label = Text(title)
     textBinding = text.projectedValue
@@ -60,12 +60,12 @@ extension SecureField: ParentView {
 }
 
 /// This is a helper type that works around absence of "package private" access control in Swift
-public struct _SecureFieldProxy {
+@MainActor public struct _SecureFieldProxy {
   public let subject: SecureField<Text>
 
   public init(_ subject: SecureField<Text>) { self.subject = subject }
 
   public var label: _TextProxy { _TextProxy(subject.label) }
   public var textBinding: Binding<String> { subject.textBinding }
-  public var onCommit: () -> () { subject.onCommit }
+  public var onCommit: () -> Void { subject.onCommit }
 }

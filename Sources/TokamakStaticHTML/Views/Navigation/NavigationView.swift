@@ -14,7 +14,7 @@
 
 import TokamakCore
 
-extension NavigationView: _HTMLPrimitive {
+extension NavigationView: @MainActor _HTMLPrimitive {
   private struct NavBody: View {
     let toolbarContent: [AnyToolbarItem]
     let title: AnyView?

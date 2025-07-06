@@ -12,32 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+@MainActor
 protocol AppearanceActionType {
-  var appear: (() -> ())? { get }
-  var disappear: (() -> ())? { get }
+  var appear: (() -> Void)? { get }
+  var disappear: (() -> Void)? { get }
 }
 
 /// Underscore is present in the name for SwiftUI compatibility.
+@MainActor
 struct _AppearanceActionModifier: ViewModifier {
-  var appear: (() -> ())?
-  var disappear: (() -> ())?
+  var appear: (() -> Void)?
+  var disappear: (() -> Void)?
 
   typealias Body = Never
 }
 
 extension ModifiedContent: AppearanceActionType
-  where Content: View, Modifier == _AppearanceActionModifier
-{
-  var appear: (() -> ())? { modifier.appear }
-  var disappear: (() -> ())? { modifier.disappear }
+where Content: View, Modifier == _AppearanceActionModifier {
+  var appear: (() -> Void)? { modifier.appear }
+  var disappear: (() -> Void)? { modifier.disappear }
 }
 
-public extension View {
-  func onAppear(perform action: (() -> ())? = nil) -> some View {
+extension View {
+  public func onAppear(perform action: (() -> Void)? = nil) -> some View {
     modifier(_AppearanceActionModifier(appear: action))
   }
 
-  func onDisappear(perform action: (() -> ())? = nil) -> some View {
+  public func onDisappear(perform action: (() -> Void)? = nil) -> some View {
     modifier(_AppearanceActionModifier(disappear: action))
   }
 }

@@ -35,14 +35,14 @@ public struct Slider<Label, ValueLabel>: _PrimitiveView where Label: View, Value
   let valueBinding: Binding<Double>
   let bounds: ClosedRange<Double>
   let step: _SliderStep
-  let onEditingChanged: (Bool) -> ()
+  let onEditingChanged: (Bool) -> Void
 }
 
-public extension Slider where Label == EmptyView, ValueLabel == EmptyView {
-  init<V>(
+extension Slider where Label == EmptyView, ValueLabel == EmptyView {
+  public init<V>(
     value: Binding<V>,
     in bounds: ClosedRange<V> = 0...1,
-    onEditingChanged: @escaping (Bool) -> () = { _ in }
+    onEditingChanged: @escaping (Bool) -> Void = { _ in }
   ) where V: BinaryFloatingPoint, V.Stride: BinaryFloatingPoint {
     label = EmptyView()
     minValueLabel = EmptyView()
@@ -53,11 +53,11 @@ public extension Slider where Label == EmptyView, ValueLabel == EmptyView {
     self.onEditingChanged = onEditingChanged
   }
 
-  init<V>(
+  public init<V>(
     value: Binding<V>,
     in bounds: ClosedRange<V>,
     step: V.Stride = 1,
-    onEditingChanged: @escaping (Bool) -> () = { _ in }
+    onEditingChanged: @escaping (Bool) -> Void = { _ in }
   ) where V: BinaryFloatingPoint, V.Stride: BinaryFloatingPoint {
     label = EmptyView()
     minValueLabel = EmptyView()
@@ -69,11 +69,11 @@ public extension Slider where Label == EmptyView, ValueLabel == EmptyView {
   }
 }
 
-public extension Slider where ValueLabel == EmptyView {
-  init<V>(
+extension Slider where ValueLabel == EmptyView {
+  public init<V>(
     value: Binding<V>,
     in bounds: ClosedRange<V> = 0...1,
-    onEditingChanged: @escaping (Bool) -> () = { _ in },
+    onEditingChanged: @escaping (Bool) -> Void = { _ in },
     label: () -> Label
   ) where V: BinaryFloatingPoint, V.Stride: BinaryFloatingPoint {
     self.label = label()
@@ -85,11 +85,11 @@ public extension Slider where ValueLabel == EmptyView {
     self.onEditingChanged = onEditingChanged
   }
 
-  init<V>(
+  public init<V>(
     value: Binding<V>,
     in bounds: ClosedRange<V>,
     step: V.Stride = 1,
-    onEditingChanged: @escaping (Bool) -> () = { _ in },
+    onEditingChanged: @escaping (Bool) -> Void = { _ in },
     label: () -> Label
   ) where V: BinaryFloatingPoint, V.Stride: BinaryFloatingPoint {
     self.label = label()
@@ -102,11 +102,11 @@ public extension Slider where ValueLabel == EmptyView {
   }
 }
 
-public extension Slider {
-  init<V>(
+extension Slider {
+  public init<V>(
     value: Binding<V>,
     in bounds: ClosedRange<V> = 0...1,
-    onEditingChanged: @escaping (Bool) -> () = { _ in },
+    onEditingChanged: @escaping (Bool) -> Void = { _ in },
     minimumValueLabel: ValueLabel,
     maximumValueLabel: ValueLabel,
     label: () -> Label
@@ -120,11 +120,11 @@ public extension Slider {
     self.onEditingChanged = onEditingChanged
   }
 
-  init<V>(
+  public init<V>(
     value: Binding<V>,
     in bounds: ClosedRange<V>,
     step: V.Stride = 1,
-    onEditingChanged: @escaping (Bool) -> () = { _ in },
+    onEditingChanged: @escaping (Bool) -> Void = { _ in },
     minimumValueLabel: ValueLabel,
     maximumValueLabel: ValueLabel,
     label: () -> Label
@@ -149,7 +149,7 @@ extension Slider: ParentView {
 }
 
 /// This is a helper type that works around absence of "package private" access control in Swift
-public struct _SliderProxy<Label, ValueLabel> where Label: View, ValueLabel: View {
+@MainActor public struct _SliderProxy<Label, ValueLabel> where Label: View, ValueLabel: View {
   public let subject: Slider<Label, ValueLabel>
 
   public init(_ subject: Slider<Label, ValueLabel>) { self.subject = subject }
@@ -160,5 +160,5 @@ public struct _SliderProxy<Label, ValueLabel> where Label: View, ValueLabel: Vie
   public var valueBinding: Binding<Double> { subject.valueBinding }
   public var bounds: ClosedRange<Double> { subject.bounds }
   public var step: _SliderStep { subject.step }
-  public var onEditingChanged: (Bool) -> () { subject.onEditingChanged }
+  public var onEditingChanged: (Bool) -> Void { subject.onEditingChanged }
 }

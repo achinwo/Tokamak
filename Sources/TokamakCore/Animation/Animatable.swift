@@ -17,7 +17,6 @@
 
 import Foundation
 
-@MainActor
 public protocol Animatable {
   associatedtype AnimatableData: VectorArithmetic
   var animatableData: Self.AnimatableData { get set }
@@ -42,7 +41,7 @@ extension Animatable where Self.AnimatableData == EmptyAnimatableData {
 }
 
 @frozen
-public struct EmptyAnimatableData: @MainActor VectorArithmetic {
+public struct EmptyAnimatableData: VectorArithmetic {
   @inlinable
   public init() {}
 
@@ -75,7 +74,7 @@ public struct EmptyAnimatableData: @MainActor VectorArithmetic {
 }
 
 @frozen
-public struct AnimatablePair<First, Second>: @MainActor VectorArithmetic
+nonisolated public struct AnimatablePair<First, Second>: VectorArithmetic
 where First: VectorArithmetic, Second: VectorArithmetic {
   public var first: First
   public var second: Second
@@ -135,7 +134,7 @@ where First: VectorArithmetic, Second: VectorArithmetic {
   }
 }
 
-extension CGPoint: @MainActor Animatable {
+extension CGPoint: Animatable {
   public var animatableData: AnimatablePair<CGFloat, CGFloat> {
     @inlinable get { .init(x, y) }
     @inlinable set { (x, y) = newValue[] }

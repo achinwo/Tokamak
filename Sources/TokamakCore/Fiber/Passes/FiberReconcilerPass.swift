@@ -18,12 +18,15 @@
 import Foundation
 
 extension FiberReconciler {
+
+  @MainActor
   final class Caches {
     var elementIndices = [ObjectIdentifier: Int]()
     var layoutCaches = [ObjectIdentifier: LayoutCache]()
     var layoutSubviews = [ObjectIdentifier: LayoutSubviews]()
     var mutations = [Mutation<Renderer>]()
 
+    @MainActor
     struct LayoutCache {
       /// The erased `Layout.Cache` value.
       var cache: AnyLayout.Cache
@@ -116,7 +119,7 @@ extension FiberReconciler {
   }
 }
 
-protocol FiberReconcilerPass {
+@MainActor protocol FiberReconcilerPass {
   /// Run this pass with the given inputs.
   ///
   /// - Parameter reconciler: The `FiberReconciler` running this pass.

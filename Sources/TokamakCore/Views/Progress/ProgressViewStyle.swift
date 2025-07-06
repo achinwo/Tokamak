@@ -17,6 +17,7 @@
 
 import Foundation
 
+@MainActor
 public protocol ProgressViewStyle {
   associatedtype Body: View
   typealias Configuration = ProgressViewStyleConfiguration
@@ -39,6 +40,7 @@ public struct ProgressViewStyleConfiguration {
   public var currentValueLabel: ProgressViewStyleConfiguration.CurrentValueLabel?
 }
 
+@MainActor
 public struct DefaultProgressViewStyle: ProgressViewStyle {
   public init() {}
   public func makeBody(configuration: Configuration) -> some View {
@@ -59,6 +61,7 @@ public struct DefaultProgressViewStyle: ProgressViewStyle {
   }
 }
 
+@MainActor
 public struct _AnyProgressViewStyle: ProgressViewStyle {
   public typealias Body = AnyView
 
@@ -78,10 +81,13 @@ public struct _AnyProgressViewStyle: ProgressViewStyle {
 }
 
 extension EnvironmentValues {
-  private enum ProgressViewStyleKey: EnvironmentKey {
+
+  @MainActor
+  private enum ProgressViewStyleKey: @MainActor EnvironmentKey {
     static let defaultValue = _AnyProgressViewStyle(DefaultProgressViewStyle())
   }
 
+  @MainActor
   var progressViewStyle: _AnyProgressViewStyle {
     get {
       self[ProgressViewStyleKey.self]
@@ -92,8 +98,8 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
-  func progressViewStyle<S>(_ style: S) -> some View where S: ProgressViewStyle {
+extension View {
+  public func progressViewStyle<S>(_ style: S) -> some View where S: ProgressViewStyle {
     environment(\.progressViewStyle, .init(style))
   }
 }

@@ -13,7 +13,7 @@
 
 public typealias CGFloat = Float
 
-public struct Bundle {
+public struct Bundle: Sendable {
     public static let main = Bundle(path: FileManager.default.currentDirectoryPath)!
 
     public init?(path: String) {

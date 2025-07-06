@@ -14,7 +14,7 @@
 //
 //  Created by Jed Fox on 06/30/2020.
 //
-
+@MainActor
 final class NavigationLinkDestination {
   let view: AnyView
   init<V: View>(_ destination: V) {
@@ -22,7 +22,9 @@ final class NavigationLinkDestination {
   }
 }
 
-public struct NavigationLink<Label, Destination>: _PrimitiveView where Label: View,
+public struct NavigationLink<Label, Destination>: _PrimitiveView
+where
+  Label: View,
   Destination: View
 {
   @State
@@ -53,10 +55,10 @@ public struct NavigationLink<Label, Destination>: _PrimitiveView where Label: Vi
   //   ) where V : Hashable
 }
 
-public extension NavigationLink where Label == Text {
+extension NavigationLink where Label == Text {
   /// Creates an instance that presents `destination`, with a `Text` label
   /// generated from a title string.
-  init<S>(_ title: S, destination: Destination) where S: StringProtocol {
+  public init<S>(_ title: S, destination: Destination) where S: StringProtocol {
     self.init(destination: destination) { Text(title) }
   }
 
@@ -76,6 +78,7 @@ public extension NavigationLink where Label == Text {
 }
 
 /// This is a helper type that works around absence of "package private" access control in Swift
+@MainActor
 public struct _NavigationLinkProxy<Label, Destination> where Label: View, Destination: View {
   public let subject: NavigationLink<Label, Destination>
 
@@ -84,10 +87,11 @@ public struct _NavigationLinkProxy<Label, Destination> where Label: View, Destin
   }
 
   public var label: some View {
-    subject.style.makeBody(configuration: .init(
-      body: AnyView(subject.label),
-      isSelected: isSelected
-    ))
+    subject.style.makeBody(
+      configuration: .init(
+        body: AnyView(subject.label),
+        isSelected: isSelected
+      ))
     // subject.label
   }
 

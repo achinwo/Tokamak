@@ -26,15 +26,15 @@ public protocol _EnvironmentModifier {
   func modifyEnvironment(_ values: inout EnvironmentValues)
 }
 
-public extension ViewModifier where Self: _EnvironmentModifier {
-  static func _makeView(_ inputs: ViewInputs<Self>) -> ViewOutputs {
+extension ViewModifier where Self: _EnvironmentModifier {
+  public static func _makeView(_ inputs: ViewInputs<Self>) -> ViewOutputs {
     var environment = inputs.environment.environment
     inputs.content.modifyEnvironment(&environment)
     return .init(inputs: inputs, environment: environment)
   }
 }
 
-public struct _EnvironmentKeyWritingModifier<Value>: ViewModifier, _EnvironmentModifier {
+public struct _EnvironmentKeyWritingModifier<Value>: ViewModifier, @MainActor _EnvironmentModifier {
   public let keyPath: WritableKeyPath<EnvironmentValues, Value>
   public let value: Value
 
@@ -50,8 +50,8 @@ public struct _EnvironmentKeyWritingModifier<Value>: ViewModifier, _EnvironmentM
   }
 }
 
-public extension View {
-  func environment<V>(
+extension View {
+  public func environment<V>(
     _ keyPath: WritableKeyPath<EnvironmentValues, V>,
     _ value: V
   ) -> some View {

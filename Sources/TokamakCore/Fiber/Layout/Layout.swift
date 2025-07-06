@@ -28,6 +28,7 @@ public protocol _AnyLayout {
 ///
 /// Any `View` or `Scene` that implements this protocol will be used to compute layout in
 /// a `FiberRenderer` with `useDynamicLayout` set to `true`.
+@MainActor
 public protocol Layout: Animatable, _AnyLayout {
   static var layoutProperties: LayoutProperties { get }
 
@@ -143,14 +144,17 @@ extension Layout {
   }
 }
 
+@MainActor
 extension Layout {
   /// Render `content` using `self` as the layout container.
-  public func callAsFunction<V>(@ViewBuilder _ content: () -> V) -> some View where V: View {
+  public func callAsFunction<V>(@ViewBuilder _ content: () -> V) -> some View
+  where V: View {
     LayoutView(layout: self, content: content())
   }
 }
 
 /// A `View` that renders its children with a `Layout`.
+@MainActor
 @_spi(TokamakCore)
 public struct LayoutView<L: Layout, Content: View>: @MainActor View, @MainActor Layout {
   let layout: L
@@ -217,6 +221,7 @@ public struct LayoutView<L: Layout, Content: View>: @MainActor View, @MainActor 
 }
 
 /// A default `Layout` that fits to the first subview and places its children at its origin.
+@MainActor
 struct DefaultLayout: @MainActor Layout {
   /// An erased `DefaultLayout` that is shared between all views.
   static let shared: AnyLayout = .init(Self())
@@ -286,7 +291,8 @@ protocol AnyLayoutBox: AnyObject {
   var animatableData: _AnyAnimatableData { get set }
 }
 
-final class ConcreteLayoutBox<L: Layout>: AnyLayoutBox {
+@MainActor
+final class ConcreteLayoutBox<L: Layout>: @MainActor AnyLayoutBox {
   var base: L
 
   init(_ base: L) {
@@ -389,6 +395,7 @@ final class ConcreteLayoutBox<L: Layout>: AnyLayoutBox {
   }
 }
 
+@MainActor
 @frozen
 public struct AnyLayout: @MainActor Layout {
   var storage: AnyLayoutBox

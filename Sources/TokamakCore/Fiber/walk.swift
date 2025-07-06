@@ -30,6 +30,7 @@ public enum WalkResult<Renderer: FiberRenderer, Success> {
 }
 
 /// Walk a fiber tree from `root` until the `work` predicate returns `false`.
+@MainActor
 @_spi(TokamakCore)
 @discardableResult
 public func walk<Renderer: FiberRenderer>(
@@ -51,6 +52,7 @@ public func walk<Renderer: FiberRenderer>(
 /// 4. Walk across to the sibling.
 ///
 /// When the `root` is reached, the loop exits.
+@MainActor
 @_spi(TokamakCore)
 public func walk<Renderer: FiberRenderer, Success>(
   _ root: FiberReconciler<Renderer>.Fiber,
@@ -61,7 +63,7 @@ public func walk<Renderer: FiberRenderer, Success>(
     // Perform work on the node
     switch try work(current) {
     case .continue: break
-    case let .break(success): return .success(success)
+    case .break(let success): return .success(success)
     case .pause: return .paused(at: current)
     }
     // Walk into the child
@@ -77,7 +79,8 @@ public func walk<Renderer: FiberRenderer, Success>(
     while current.sibling == nil {
       // When we walk back to the root, exit
       guard let parent = current.parent,
-            parent !== root else { return .finished }
+        parent !== root
+      else { return .finished }
       current = parent
     }
     // Walk the sibling

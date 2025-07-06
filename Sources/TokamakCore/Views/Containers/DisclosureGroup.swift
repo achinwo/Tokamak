@@ -43,23 +43,22 @@ public struct DisclosureGroup<Label, Content>: _PrimitiveView where Label: View,
   }
 }
 
-public extension DisclosureGroup where Label == Text {
+extension DisclosureGroup where Label == Text {
   // FIXME: Implement LocalizedStringKey
-//  public init(_ titleKey: LocalizedStringKey,
-//              @ViewBuilder content: @escaping () -> Content)
-//  public init(_ titleKey: SwiftUI.LocalizedStringKey,
-//              isExpanded: SwiftUI.Binding<Swift.Bool>,
-//              @SwiftUI.ViewBuilder content: @escaping () -> Content)
+  //  public init(_ titleKey: LocalizedStringKey,
+  //              @ViewBuilder content: @escaping () -> Content)
+  //  public init(_ titleKey: SwiftUI.LocalizedStringKey,
+  //              isExpanded: SwiftUI.Binding<Swift.Bool>,
+  //              @SwiftUI.ViewBuilder content: @escaping () -> Content)
 
   @_disfavoredOverload
-  init<S>(_ label: S, @ViewBuilder content: @escaping () -> Content)
-    where S: StringProtocol
-  {
+  public init<S>(_ label: S, @ViewBuilder content: @escaping () -> Content)
+  where S: StringProtocol {
     self.init(content: content, label: { Text(label) })
   }
 
   @_disfavoredOverload
-  init<S>(
+  public init<S>(
     _ label: S,
     isExpanded: Binding<Bool>,
     @ViewBuilder content: @escaping () -> Content
@@ -67,10 +66,9 @@ public extension DisclosureGroup where Label == Text {
     self.init(isExpanded: isExpanded, content: content, label: { Text(label) })
   }
 }
-
+@MainActor
 public struct _DisclosureGroupProxy<Label, Content>
-  where Label: View, Content: View
-{
+where Label: View, Content: View {
   public var subject: DisclosureGroup<Label, Content>
 
   public init(_ subject: DisclosureGroup<Label, Content>) { self.subject = subject }

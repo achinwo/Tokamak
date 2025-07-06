@@ -14,7 +14,7 @@
 //
 //  Created by Carson Katri on 7/10/21.
 //
-
+@MainActor
 public struct _ViewTraitStore {
   public var values = [ObjectIdentifier: Any]()
 
@@ -23,14 +23,12 @@ public struct _ViewTraitStore {
   }
 
   public func value<Key>(forKey key: Key.Type = Key.self) -> Key.Value
-    where Key: _ViewTraitKey
-  {
+  where Key: _ViewTraitKey {
     values[ObjectIdentifier(key)] as? Key.Value ?? Key.defaultValue
   }
 
   public mutating func insert<Key>(_ value: Key.Value, forKey key: Key.Type = Key.self)
-    where Key: _ViewTraitKey
-  {
+  where Key: _ViewTraitKey {
     values[ObjectIdentifier(key)] = value
   }
 }

@@ -13,19 +13,19 @@
 // limitations under the License.
 /// Underscore is present in the name for SwiftUI compatibility.
 public struct _HoverActionModifier: ViewModifier {
-  public var hover: ((Bool) -> ())?
+  public var hover: ((Bool) -> Void)?
 
   public typealias Body = Never
 }
 
+@MainActor
 extension ModifiedContent
-  where Content: View, Modifier == _HoverActionModifier
-{
-  var hover: ((Bool) -> ())? { modifier.hover }
+where Content: View, Modifier == _HoverActionModifier {
+  var hover: ((Bool) -> Void)? { modifier.hover }
 }
 
-public extension View {
-  func onHover(perform action: ((Bool) -> ())?) -> some View {
+extension View {
+  public func onHover(perform action: ((Bool) -> Void)?) -> some View {
     modifier(_HoverActionModifier(hover: action))
   }
 }

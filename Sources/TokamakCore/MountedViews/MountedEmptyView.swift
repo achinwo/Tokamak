@@ -34,5 +34,5 @@ final class MountedEmptyView<R: Renderer>: MountedElement<R> {
     super.unmount(in: reconciler, with: transaction, parentTask: parentTask)
   }
 
-  override func update(in reconciler: StackReconciler<R>, with transaction: Transaction?) {}
+  override func update(in reconciler: StackReconciler<R>, with transaction: Transaction?) async {}
 }

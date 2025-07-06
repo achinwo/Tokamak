@@ -14,12 +14,14 @@
 
 import TokamakCore
 
+@MainActor
 public protocol _AnyModifiedContent {
   var anyContent: AnyView { get }
   var anyModifier: DOMViewModifier { get }
 }
 
-extension ModifiedContent: _AnyModifiedContent where Modifier: DOMViewModifier, Content: View {
+extension ModifiedContent: @MainActor _AnyModifiedContent
+where Modifier: DOMViewModifier, Content: View {
   public var anyContent: AnyView {
     AnyView(content)
   }
@@ -29,12 +31,12 @@ extension ModifiedContent: _AnyModifiedContent where Modifier: DOMViewModifier, 
   }
 }
 
-extension ModifiedContent: _HTMLPrimitive where Content: View, Modifier: ViewModifier {
+extension ModifiedContent: @MainActor _HTMLPrimitive where Content: View, Modifier: ViewModifier {
   @_spi(TokamakStaticHTML)
   public var renderedBody: AnyView {
     if let domModifier = modifier as? DOMViewModifier {
       if let adjacentModifier = content as? _AnyModifiedContent,
-         !(adjacentModifier.anyModifier.isOrderDependent || domModifier.isOrderDependent)
+        !(adjacentModifier.anyModifier.isOrderDependent || domModifier.isOrderDependent)
       {
         // Flatten non-order-dependent modifiers
         var attr = domModifier.attributes
@@ -43,13 +45,15 @@ extension ModifiedContent: _HTMLPrimitive where Content: View, Modifier: ViewMod
             attr[key] = prev + val
           }
         }
-        return AnyView(HTML("div", attr) {
-          adjacentModifier.anyContent
-        })
+        return AnyView(
+          HTML("div", attr) {
+            adjacentModifier.anyContent
+          })
       } else {
-        return AnyView(HTML("div", domModifier.attributes) {
-          content
-        })
+        return AnyView(
+          HTML("div", domModifier.attributes) {
+            content
+          })
       }
     } else if Modifier.Body.self == Never.self {
       return AnyView(content)

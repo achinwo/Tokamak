@@ -15,9 +15,9 @@
 //  Created by Carson Katri on 7/4/20.
 //
 
-public protocol _OutlineGroupStyle {}
+public protocol _OutlineGroupStyle: Sendable {}
 
-public struct _DefaultOutlineGroupStyle: _OutlineGroupStyle {
+public struct _DefaultOutlineGroupStyle: _OutlineGroupStyle, Sendable {
   public init() {}
 }
 
@@ -25,7 +25,7 @@ public struct _ListOutlineGroupStyle: _OutlineGroupStyle {
   public init() {}
 }
 
-enum _OutlineGroupStyleKey: EnvironmentKey {
+enum _OutlineGroupStyleKey: EnvironmentKey, Sendable {
   static let defaultValue: _OutlineGroupStyle = _DefaultOutlineGroupStyle()
 }
 

@@ -22,8 +22,8 @@ public struct Font: Hashable {
   }
 }
 
-public extension Font {
-  struct Weight: Hashable {
+extension Font {
+  public struct Weight: Hashable, Sendable {
     public let value: Int
 
     public static let ultraLight: Self = .init(value: 100)
@@ -38,21 +38,23 @@ public extension Font {
   }
 }
 
-public extension Font {
-  enum Leading {
+extension Font {
+  public enum Leading: Sendable {
     case standard
     case tight
     case loose
   }
 }
 
-public enum _FontNames: Hashable {
+public enum _FontNames: Hashable, Sendable {
   case system
   case custom(String)
 }
 
-public extension Font {
-  static func system(
+extension Font {
+
+  @MainActor
+  public static func system(
     size: CGFloat,
     weight: Weight = .regular,
     design: Design = .default
@@ -74,7 +76,7 @@ public extension Font {
     )
   }
 
-  enum Design: Hashable {
+  public enum Design: Hashable, Sendable {
     case `default`
     case serif
     case rounded
@@ -82,26 +84,28 @@ public extension Font {
   }
 }
 
-public extension Font {
-  static let largeTitle: Self = .init(_SystemFontBox(.largeTitle))
-  static let title: Self = .init(_SystemFontBox(.title))
-  static let title2: Self = .init(_SystemFontBox(.title2))
-  static let title3: Self = .init(_SystemFontBox(.title3))
-  static let headline: Font = .init(_SystemFontBox(.headline))
-  static let subheadline: Self = .init(_SystemFontBox(.subheadline))
-  static let body: Self = .init(_SystemFontBox(.body))
-  static let callout: Self = .init(_SystemFontBox(.callout))
-  static let footnote: Self = .init(_SystemFontBox(.footnote))
-  static let caption: Self = .init(_SystemFontBox(.caption))
-  static let caption2: Self = .init(_SystemFontBox(.caption2))
+@MainActor
+extension Font {
+  public static let largeTitle: Self = .init(_SystemFontBox(.largeTitle))
+  public static let title: Self = .init(_SystemFontBox(.title))
+  public static let title2: Self = .init(_SystemFontBox(.title2))
+  public static let title3: Self = .init(_SystemFontBox(.title3))
+  public static let headline: Font = .init(_SystemFontBox(.headline))
+  public static let subheadline: Self = .init(_SystemFontBox(.subheadline))
+  public static let body: Self = .init(_SystemFontBox(.body))
+  public static let callout: Self = .init(_SystemFontBox(.callout))
+  public static let footnote: Self = .init(_SystemFontBox(.footnote))
+  public static let caption: Self = .init(_SystemFontBox(.caption))
+  public static let caption2: Self = .init(_SystemFontBox(.caption2))
 
-  static func system(_ style: TextStyle, design: Design = .default) -> Self {
-    .init(_ModifiedFontBox(previously: style.font.provider) {
-      $0._design = design
-    })
+  public static func system(_ style: TextStyle, design: Design = .default) -> Self {
+    .init(
+      _ModifiedFontBox(previously: style.font.provider) {
+        $0._design = design
+      })
   }
 
-  enum TextStyle: Hashable, CaseIterable {
+  public enum TextStyle: Hashable, CaseIterable {
     case largeTitle
     case title
     case title2
@@ -114,6 +118,7 @@ public extension Font {
     case caption
     case caption2
 
+    @MainActor
     var font: Font {
       switch self {
       case .largeTitle: return .largeTitle
@@ -132,16 +137,18 @@ public extension Font {
   }
 }
 
-public extension Font {
-  static func custom(_ name: String, size: CGFloat) -> Self {
+@MainActor
+extension Font {
+  public static func custom(_ name: String, size: CGFloat) -> Self {
     .init(_CustomFontBox(name, size: .dynamic(size)))
   }
 
-  static func custom(_ name: String, size: CGFloat, relativeTo textStyle: TextStyle) -> Self {
+  public static func custom(_ name: String, size: CGFloat, relativeTo textStyle: TextStyle) -> Self
+  {
     .init(_CustomFontBox(name, size: .dynamic(size), relativeTo: textStyle))
   }
 
-  static func custom(_ name: String, fixedSize: CGFloat) -> Self {
+  public static func custom(_ name: String, fixedSize: CGFloat) -> Self {
     .init(_CustomFontBox(name, size: .fixed(fixedSize)))
   }
 }
@@ -152,6 +159,7 @@ public struct _FontProxy {
 
   public var provider: AnyFontBox { subject.provider }
 
+  @MainActor
   public func resolve(in environment: EnvironmentValues) -> AnyFontBox.ResolvedValue {
     if let deferred = subject.provider as? AnyFontBoxDeferredToRenderer {
       return deferred.deferredResolve(in: environment)
@@ -161,12 +169,14 @@ public struct _FontProxy {
   }
 }
 
-enum FontPathKey: EnvironmentKey {
+@MainActor
+enum FontPathKey: @MainActor EnvironmentKey {
   static let defaultValue: [Font] = []
 }
 
-public extension EnvironmentValues {
-  var _fontPath: [Font] {
+@MainActor
+extension EnvironmentValues {
+  public var _fontPath: [Font] {
     get {
       self[FontPathKey.self]
     }
@@ -175,7 +185,7 @@ public extension EnvironmentValues {
     }
   }
 
-  var font: Font? {
+  public var font: Font? {
     get {
       _fontPath.first
     }
@@ -189,8 +199,8 @@ public extension EnvironmentValues {
   }
 }
 
-public extension View {
-  func font(_ font: Font?) -> some View {
+extension View {
+  public func font(_ font: Font?) -> some View {
     environment(\.font, font)
   }
 }

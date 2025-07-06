@@ -16,8 +16,7 @@
 //
 
 public struct List<SelectionValue, Content>: View
-  where SelectionValue: Hashable, Content: View
-{
+where SelectionValue: Hashable, Content: View {
   public enum _Selection {
     case one(Binding<SelectionValue?>?)
     case many(Binding<Set<SelectionValue>>?)
@@ -46,9 +45,11 @@ public struct List<SelectionValue, Content>: View
       for child in contentContainer.children {
         if child.view is SectionView {
           if currentSection.count > 0 {
-            sections.append(AnyView(Section {
-              ForEach(Array(currentSection.enumerated()), id: \.offset) { _, view in view }
-            }))
+            sections.append(
+              AnyView(
+                Section {
+                  ForEach(Array(currentSection.enumerated()), id: \.offset) { _, view in view }
+                }))
             currentSection = []
           }
           sections.append(child)
@@ -61,17 +62,20 @@ public struct List<SelectionValue, Content>: View
         }
       }
       if currentSection.count > 0 {
-        sections.append(AnyView(Section {
-          ForEach(Array(currentSection.enumerated()), id: \.offset) { _, view in view }
-        }))
+        sections.append(
+          AnyView(
+            Section {
+              ForEach(Array(currentSection.enumerated()), id: \.offset) { _, view in view }
+            }))
       }
-      return AnyView(_ListRow.buildItems(sections) { view, isLast in
-        if let section = view.view as? SectionView {
-          section.listRow(style)
-        } else {
-          _ListRow.listRow(view, style, isLast: isLast)
-        }
-      })
+      return AnyView(
+        _ListRow.buildItems(sections) { view, isLast in
+          if let section = view.view as? SectionView {
+            section.listRow(style)
+          } else {
+            _ListRow.listRow(view, style, isLast: isLast)
+          }
+        })
     } else {
       return AnyView(content)
     }
@@ -85,11 +89,12 @@ public struct List<SelectionValue, Content>: View
   public var body: some View {
     if let style = style as? ListStyleDeferredToRenderer {
       ScrollView {
-        style.listBody(Group {
-          HStack { Spacer() }
-          listStack
-            .environment(\._outlineGroupStyle, _ListOutlineGroupStyle())
-        })
+        style.listBody(
+          Group {
+            HStack { Spacer() }
+            listStack
+              .environment(\._outlineGroupStyle, _ListOutlineGroupStyle())
+          })
       }
       .frame(maxHeight: .infinity, alignment: .topLeading)
     } else {
@@ -102,6 +107,7 @@ public struct List<SelectionValue, Content>: View
   }
 }
 
+@MainActor
 public enum _ListRow {
   static func buildItems<RowView>(
     _ children: [AnyView],
@@ -117,8 +123,8 @@ public enum _ListRow {
 
   @ViewBuilder
   public static func listRow<V: View>(_ view: V, _ style: ListStyle, isLast: Bool) -> some View {
-    (style as? ListStyleDeferredToRenderer)?.listRow(view) ??
-      AnyView(view.padding([.trailing, .top, .bottom]))
+    (style as? ListStyleDeferredToRenderer)?.listRow(view)
+      ?? AnyView(view.padding([.trailing, .top, .bottom]))
     if !isLast && style.hasDividers {
       Divider()
     }
@@ -126,9 +132,8 @@ public enum _ListRow {
 }
 
 /// This is a helper type that works around absence of "package private" access control in Swift
-public struct _ListProxy<SelectionValue, Content>
-  where SelectionValue: Hashable, Content: View
-{
+@MainActor public struct _ListProxy<SelectionValue, Content>
+where SelectionValue: Hashable, Content: View {
   public let subject: List<SelectionValue, Content>
 
   public init(_ subject: List<SelectionValue, Content>) {

@@ -30,12 +30,13 @@ import Foundation
 ///       }
 ///     }
 ///
+
 public protocol AnyFontBoxDeferredToRenderer: AnyFontBox {
   func deferredResolve(in environment: EnvironmentValues) -> AnyFontBox.ResolvedValue
 }
 
-public class AnyFontBox: AnyTokenBox, Hashable, Equatable {
-  public struct _Font: Hashable, Equatable {
+public class AnyFontBox: AnyTokenBox, Hashable, Equatable, @unchecked Sendable {
+  public struct _Font: Hashable, Equatable, Sendable {
     public var _name: _FontNames
     public var _size: CGFloat
     public var _design: Font.Design
@@ -88,7 +89,7 @@ public class AnyFontBox: AnyTokenBox, Hashable, Equatable {
   }
 }
 
-public class _ConcreteFontBox: AnyFontBox {
+public class _ConcreteFontBox: AnyFontBox, @unchecked Sendable {
   public let font: ResolvedValue
 
   public static func == (lhs: _ConcreteFontBox, rhs: _ConcreteFontBox) -> Bool {
@@ -113,9 +114,9 @@ public class _ConcreteFontBox: AnyFontBox {
   }
 }
 
-public class _ModifiedFontBox: AnyFontBox {
+public class _ModifiedFontBox: AnyFontBox, @unchecked Sendable {
   public let provider: AnyFontBox
-  public let modifier: (inout ResolvedValue) -> Void
+  public let modifier: @MainActor (inout ResolvedValue) -> Void
 
   public static func == (lhs: _ModifiedFontBox, rhs: _ModifiedFontBox) -> Bool {
     lhs.resolve(in: EnvironmentValues()) == rhs.resolve(in: EnvironmentValues())
@@ -132,25 +133,25 @@ public class _ModifiedFontBox: AnyFontBox {
     self.modifier = modifier
   }
 
-  override public func resolve(in environment: EnvironmentValues) -> ResolvedValue {
-    var font = provider.resolve(in: environment)
-    modifier(&font)
-    return font
-  }
+  // override public func resolve(in environment: EnvironmentValues) -> ResolvedValue {
+  //   var font = provider.resolve(in: environment)
+  //   modifier(&font)
+  //   return font
+  // }
 
-  override public func equals(_ other: AnyFontBox) -> Bool {
-    guard let other = other as? _ModifiedFontBox else { return false }
-    var resolved = provider.resolve(in: .init())
-    modifier(&resolved)
-    var otherResolved = other.provider.resolve(in: .init())
-    other.modifier(&otherResolved)
-    return other.provider.equals(provider) && resolved == otherResolved
-  }
+  // override public func equals(_ other: AnyFontBox) -> Bool {
+  //   guard let other = other as? _ModifiedFontBox else { return false }
+  //   var resolved = provider.resolve(in: .init())
+  //   modifier(&resolved)
+  //   var otherResolved = other.provider.resolve(in: .init())
+  //   other.modifier(&otherResolved)
+  //   return other.provider.equals(provider) && resolved == otherResolved
+  // }
 
 }
 
-public class _SystemFontBox: AnyFontBox {
-  public enum SystemFont: Equatable, Hashable {
+public class _SystemFontBox: AnyFontBox, @unchecked Sendable {
+  public enum SystemFont: Equatable, Hashable, Sendable {
     case largeTitle
     case title
     case title2
@@ -200,7 +201,7 @@ public class _SystemFontBox: AnyFontBox {
   }
 }
 
-public class _CustomFontBox: AnyFontBox {
+public class _CustomFontBox: AnyFontBox, @unchecked Sendable {
   public let name: String
   public let size: Size
   public enum Size: Hashable {

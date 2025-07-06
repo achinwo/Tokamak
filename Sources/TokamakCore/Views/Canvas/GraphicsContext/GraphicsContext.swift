@@ -17,8 +17,8 @@
 
 import Foundation
 
-public struct GraphicsContext {
-  public struct _Storage {
+@MainActor public struct GraphicsContext {
+  @MainActor public struct _Storage {
     public var opacity: Double
     public var blendMode: BlendMode
     public var environment: EnvironmentValues

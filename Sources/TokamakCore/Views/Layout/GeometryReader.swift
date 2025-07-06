@@ -14,7 +14,7 @@
 
 import Foundation
 
-public struct GeometryProxy {
+public struct GeometryProxy: Sendable {
   public let size: CGSize
 }
 

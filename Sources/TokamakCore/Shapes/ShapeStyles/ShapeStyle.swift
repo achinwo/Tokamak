@@ -17,18 +17,20 @@
 
 import Foundation
 
+@MainActor
 public protocol ShapeStyle {
   func _apply(to shape: inout _ShapeStyle_Shape)
   static func _apply(to type: inout _ShapeStyle_ShapeType)
 }
 
 public struct AnyShapeStyle: ShapeStyle {
-  let styles: (
-    primary: ShapeStyle,
-    secondary: ShapeStyle,
-    tertiary: ShapeStyle,
-    quaternary: ShapeStyle
-  )
+  let styles:
+    (
+      primary: ShapeStyle,
+      secondary: ShapeStyle,
+      tertiary: ShapeStyle,
+      quaternary: ShapeStyle
+    )
   var stylesArray: [ShapeStyle] {
     [styles.primary, styles.secondary, styles.tertiary, styles.quaternary]
   }
@@ -47,16 +49,16 @@ public struct AnyShapeStyle: ShapeStyle {
       .resolved(.array(results.compactMap { $0.resolvedStyle(on: shape, in: environment) }))
 
     switch shape.operation {
-    case let .prepare(text, level):
+    case .prepare(let text, let level):
       var modifiers = text.modifiers
       if let color = shape.result.resolvedStyle(on: shape, in: environment)?.color(at: level) {
         modifiers.insert(.color(color), at: 0)
       }
       shape.result = .prepared(Text(storage: text.storage, modifiers: modifiers))
-    case let .resolveStyle(levels):
-      if case let .resolved(resolved) = shape.result {
-        if case let .array(children) = resolved,
-           children.count >= levels.upperBound
+    case .resolveStyle(let levels):
+      if case .resolved(let resolved) = shape.result {
+        if case .array(let children) = resolved,
+          children.count >= levels.upperBound
         {
           shape.result = .resolved(.array(.init(children[levels])))
         }
@@ -72,6 +74,7 @@ public struct AnyShapeStyle: ShapeStyle {
   public static func _apply(to type: inout _ShapeStyle_ShapeType) {}
 }
 
+@MainActor
 public struct _ShapeStyle_Shape {
   public let operation: Operation
   public var result: Result
@@ -103,6 +106,7 @@ public struct _ShapeStyle_Shape {
     case modifyBackground
   }
 
+  @MainActor
   public enum Result {
     case prepared(Text)
     case resolved(_ResolvedStyle)
@@ -116,12 +120,12 @@ public struct _ShapeStyle_Shape {
       in environment: EnvironmentValues
     ) -> _ResolvedStyle? {
       switch self {
-      case let .resolved(resolved): return resolved
-      case let .style(anyStyle):
+      case .resolved(let resolved): return resolved
+      case .style(let anyStyle):
         var copy = shape
         anyStyle._apply(to: &copy)
         return copy.result.resolvedStyle(on: shape, in: environment)
-      case let .color(color):
+      case .color(let color):
         return .color(color.provider.resolve(in: environment))
       default:
         return nil
@@ -132,28 +136,29 @@ public struct _ShapeStyle_Shape {
 
 public struct _ShapeStyle_ShapeType {}
 
+@MainActor
 public indirect enum _ResolvedStyle {
   case color(AnyColorBox.ResolvedValue)
-//  case paint(AnyResolvedPaint) // I think is used for Image as a ShapeStyle (SwiftUI.ImagePaint).
+  //  case paint(AnyResolvedPaint) // I think is used for Image as a ShapeStyle (SwiftUI.ImagePaint).
   case foregroundMaterial(AnyColorBox.ResolvedValue, _MaterialStyle)
-//  case backgroundMaterial(AnyColorBox.ResolvedValue)
+  //  case backgroundMaterial(AnyColorBox.ResolvedValue)
   case array([_ResolvedStyle])
   case opacity(Float, _ResolvedStyle)
-//  case multicolor(ResolvedMulticolorStyle)
+  //  case multicolor(ResolvedMulticolorStyle)
   case gradient(Gradient, style: _GradientStyle)
 
   public func color(at level: Int) -> Color? {
     switch self {
-    case let .color(resolved):
+    case .color(let resolved):
       return Color(_ConcreteColorBox(resolved))
-    case let .foregroundMaterial(resolved, _):
+    case .foregroundMaterial(let resolved, _):
       return Color(_ConcreteColorBox(resolved))
-    case let .array(children):
+    case .array(let children):
       return children[level].color(at: level)
-    case let .opacity(opacity, resolved):
+    case .opacity(let opacity, let resolved):
       guard let color = resolved.color(at: level) else { return nil }
       return color.opacity(Double(opacity))
-    case let .gradient(gradient, _):
+    case .gradient(let gradient, _):
       return gradient.stops.first?.color
     }
   }

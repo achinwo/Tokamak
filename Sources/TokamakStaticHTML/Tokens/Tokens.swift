@@ -15,7 +15,7 @@
 import TokamakCore
 
 extension Color {
-  func cssValue(_ environment: EnvironmentValues) -> String {
+  @MainActor func cssValue(_ environment: EnvironmentValues) -> String {
     _ColorProxy(self).resolve(in: environment).cssValue
   }
 }
@@ -26,7 +26,7 @@ extension AnyColorBox.ResolvedValue {
   }
 }
 
-extension GridItem: @preconcurrency CustomStringConvertible {
+extension GridItem: CustomStringConvertible {
   public var description: String {
     switch size {
     case .adaptive(minimum: let min, maximum: let max):

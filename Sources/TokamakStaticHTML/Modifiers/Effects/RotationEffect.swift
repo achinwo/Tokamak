@@ -17,13 +17,13 @@
 
 import TokamakCore
 
-extension _RotationEffect: DOMViewModifier {
+extension _RotationEffect: @MainActor DOMViewModifier {
   public var attributes: [HTMLAttribute: String] {
     [
       "style": """
       transform: rotate(\(angle.degrees)deg);
       transform-origin: \(anchor.cssValue);
-      """,
+      """
     ]
   }
 }

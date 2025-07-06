@@ -15,8 +15,8 @@
 import Foundation
 import TokamakCore
 
-private extension DOMViewModifier {
-  func unwrapToStyle<T>(
+extension DOMViewModifier {
+  fileprivate func unwrapToStyle<T>(
     _ key: KeyPath<Self, T?>,
     property: String? = nil,
     defaultValue: String = ""
@@ -33,8 +33,8 @@ private extension DOMViewModifier {
   }
 }
 
-private extension VerticalAlignment {
-  var flexAlignment: String {
+extension VerticalAlignment {
+  fileprivate var flexAlignment: String {
     switch self {
     case .top: return "flex-start"
     case .center: return "center"
@@ -44,8 +44,8 @@ private extension VerticalAlignment {
   }
 }
 
-private extension HorizontalAlignment {
-  var flexAlignment: String {
+extension HorizontalAlignment {
+  fileprivate var flexAlignment: String {
     switch self {
     case .leading: return "flex-start"
     case .center: return "center"
@@ -55,26 +55,28 @@ private extension HorizontalAlignment {
   }
 }
 
-extension _FrameLayout: DOMViewModifier {
+extension _FrameLayout: @MainActor DOMViewModifier {
   public var isOrderDependent: Bool { true }
   public var attributes: [HTMLAttribute: String] {
-    ["style": """
-    \(unwrapToStyle(\.width, property: "width"))
-    \(unwrapToStyle(\.height, property: "height"))
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex-grow: 0;
-    flex-shrink: 0;
-    display: flex;
-    align-items: \(alignment.vertical.flexAlignment);
-    justify-content: \(alignment.horizontal.flexAlignment);
-    """]
+    [
+      "style": """
+      \(unwrapToStyle(\.width, property: "width"))
+      \(unwrapToStyle(\.height, property: "height"))
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex-grow: 0;
+      flex-shrink: 0;
+      display: flex;
+      align-items: \(alignment.vertical.flexAlignment);
+      justify-content: \(alignment.horizontal.flexAlignment);
+      """
+    ]
   }
 }
 
 @_spi(TokamakStaticHTML)
-extension _FrameLayout: HTMLConvertible {
+extension _FrameLayout: @MainActor HTMLConvertible {
   public var tag: String { "div" }
   public func attributes(useDynamicLayout: Bool) -> [HTMLAttribute: String] {
     guard !useDynamicLayout else { return [:] }
@@ -82,30 +84,32 @@ extension _FrameLayout: HTMLConvertible {
   }
 }
 
-extension _FlexFrameLayout: DOMViewModifier {
+extension _FlexFrameLayout: @MainActor DOMViewModifier {
   public var isOrderDependent: Bool { true }
   public var attributes: [HTMLAttribute: String] {
-    ["style": """
-    \(unwrapToStyle(\.minWidth, property: "min-width"))
-    width: \(unwrapToStyle(\.idealWidth, defaultValue: fillWidth ? "100%" : "auto"));
-    \(unwrapToStyle(\.maxWidth, property: "max-width"))
-    \(unwrapToStyle(\.minHeight, property: "min-height"))
-    height: \(unwrapToStyle(\.idealHeight, defaultValue: fillHeight ? "100%" : "auto"));
-    \(unwrapToStyle(\.maxHeight, property: "max-height"))
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex-grow: 0;
-    flex-shrink: 0;
-    display: flex;
-    align-items: \(alignment.vertical.flexAlignment);
-    justify-content: \(alignment.horizontal.flexAlignment);
-    """]
+    [
+      "style": """
+      \(unwrapToStyle(\.minWidth, property: "min-width"))
+      width: \(unwrapToStyle(\.idealWidth, defaultValue: fillWidth ? "100%" : "auto"));
+      \(unwrapToStyle(\.maxWidth, property: "max-width"))
+      \(unwrapToStyle(\.minHeight, property: "min-height"))
+      height: \(unwrapToStyle(\.idealHeight, defaultValue: fillHeight ? "100%" : "auto"));
+      \(unwrapToStyle(\.maxHeight, property: "max-height"))
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex-grow: 0;
+      flex-shrink: 0;
+      display: flex;
+      align-items: \(alignment.vertical.flexAlignment);
+      justify-content: \(alignment.horizontal.flexAlignment);
+      """
+    ]
   }
 }
 
 @_spi(TokamakStaticHTML)
-extension _FlexFrameLayout: HTMLConvertible {
+extension _FlexFrameLayout: @MainActor HTMLConvertible {
   public var tag: String { "div" }
   public func attributes(useDynamicLayout: Bool) -> [HTMLAttribute: String] {
     guard !useDynamicLayout else { return [:] }
@@ -113,8 +117,8 @@ extension _FlexFrameLayout: HTMLConvertible {
   }
 }
 
-private extension Edge {
-  var cssValue: String {
+extension Edge {
+  fileprivate var cssValue: String {
     switch self {
     case .top: return "top"
     case .trailing: return "right"
@@ -124,8 +128,8 @@ private extension Edge {
   }
 }
 
-private extension EdgeInsets {
-  func inset(for edge: Edge) -> CGFloat {
+extension EdgeInsets {
+  fileprivate func inset(for edge: Edge) -> CGFloat {
     switch edge {
     case .top: return top
     case .trailing: return trailing
@@ -135,7 +139,7 @@ private extension EdgeInsets {
   }
 }
 
-extension _PaddingLayout: DOMViewModifier {
+extension _PaddingLayout: @MainActor DOMViewModifier {
   public var isOrderDependent: Bool { true }
   public var attributes: [HTMLAttribute: String] {
     var padding = [(String, CGFloat)]()
@@ -145,14 +149,17 @@ extension _PaddingLayout: DOMViewModifier {
         padding.append((edge.cssValue, insets.inset(for: edge)))
       }
     }
-    return ["style": padding
-      .map { "padding-\($0.0): \($0.1)px;" }
-      .joined(separator: " ")]
+    return [
+      "style":
+        padding
+        .map { "padding-\($0.0): \($0.1)px;" }
+        .joined(separator: " ")
+    ]
   }
 }
 
 @_spi(TokamakStaticHTML)
-extension _PaddingLayout: HTMLConvertible {
+extension _PaddingLayout: @MainActor HTMLConvertible {
   public var tag: String { "div" }
   public func attributes(useDynamicLayout: Bool) -> [HTMLAttribute: String] {
     guard !useDynamicLayout else { return [:] }
@@ -160,19 +167,19 @@ extension _PaddingLayout: HTMLConvertible {
   }
 }
 
-extension _ShadowEffect._Resolved: DOMViewModifier {
+extension _ShadowEffect._Resolved: @MainActor DOMViewModifier {
   public var attributes: [HTMLAttribute: String] {
     [
       "style": """
       box-shadow: \(offset.width)px \(offset.height)px \(radius * 2)px 0px \(color.cssValue);
-      """,
+      """
     ]
   }
 
   public var isOrderDependent: Bool { true }
 }
 
-extension _AspectRatioLayout: DOMViewModifier {
+extension _AspectRatioLayout: @MainActor DOMViewModifier {
   public var isOrderDependent: Bool { true }
   public var attributes: [HTMLAttribute: String] {
     [
@@ -186,7 +193,7 @@ extension _AspectRatioLayout: DOMViewModifier {
   }
 }
 
-extension _BackgroundLayout: _HTMLPrimitive {
+extension _BackgroundLayout: @MainActor _HTMLPrimitive {
   public var renderedBody: AnyView {
     AnyView(
       HTML(
@@ -195,16 +202,18 @@ extension _BackgroundLayout: _HTMLPrimitive {
       ) {
         HTML(
           "div",
-          ["style": """
-          display: flex;
-          justify-content: \(alignment.horizontal.flexAlignment);
-          align-items: \(alignment.vertical.flexAlignment);
-          grid-area: a;
+          [
+            "style": """
+            display: flex;
+            justify-content: \(alignment.horizontal.flexAlignment);
+            align-items: \(alignment.vertical.flexAlignment);
+            grid-area: a;
 
-          width: 0; min-width: 100%;
-          height: 0; min-height: 100%;
-          overflow: hidden;
-          """]
+            width: 0; min-width: 100%;
+            height: 0; min-height: 100%;
+            overflow: hidden;
+            """
+          ]
         ) {
           background
         }
@@ -217,7 +226,7 @@ extension _BackgroundLayout: _HTMLPrimitive {
 }
 
 @_spi(TokamakStaticHTML)
-extension _BackgroundLayout: HTMLConvertible {
+extension _BackgroundLayout: @MainActor HTMLConvertible {
   public var tag: String {
     "div"
   }
@@ -227,32 +236,36 @@ extension _BackgroundLayout: HTMLConvertible {
     return ["style": "display: inline-grid; grid-template-columns: auto auto;"]
   }
 
-  public func primitiveVisitor<V>(useDynamicLayout: Bool) -> ((V) -> ())? where V: ViewVisitor {
+  public func primitiveVisitor<V>(useDynamicLayout: Bool) -> ((V) -> Void)? where V: ViewVisitor {
     guard !useDynamicLayout else { return nil }
     return {
-      $0.visit(HTML(
-        "div",
-        ["style": """
-        display: flex;
-        justify-content: \(alignment.horizontal.flexAlignment);
-        align-items: \(alignment.vertical.flexAlignment);
-        grid-area: a;
+      $0.visit(
+        HTML(
+          "div",
+          [
+            "style": """
+            display: flex;
+            justify-content: \(alignment.horizontal.flexAlignment);
+            align-items: \(alignment.vertical.flexAlignment);
+            grid-area: a;
 
-        width: 0; min-width: 100%;
-        height: 0; min-height: 100%;
-        overflow: hidden;
-        """]
-      ) {
-        background
-      })
-      $0.visit(HTML("div", ["style": "grid-area: a;"]) {
-        content
-      })
+            width: 0; min-width: 100%;
+            height: 0; min-height: 100%;
+            overflow: hidden;
+            """
+          ]
+        ) {
+          background
+        })
+      $0.visit(
+        HTML("div", ["style": "grid-area: a;"]) {
+          content
+        })
     }
   }
 }
 
-extension _OverlayLayout: _HTMLPrimitive {
+extension _OverlayLayout: @MainActor _HTMLPrimitive {
   public var renderedBody: AnyView {
     AnyView(
       HTML(
@@ -264,16 +277,18 @@ extension _OverlayLayout: _HTMLPrimitive {
         }
         HTML(
           "div",
-          ["style": """
-          display: flex;
-          justify-content: \(alignment.horizontal.flexAlignment);
-          align-items: \(alignment.vertical.flexAlignment);
-          grid-area: a;
+          [
+            "style": """
+            display: flex;
+            justify-content: \(alignment.horizontal.flexAlignment);
+            align-items: \(alignment.vertical.flexAlignment);
+            grid-area: a;
 
-          width: 0; min-width: 100%;
-          height: 0; min-height: 100%;
-          overflow: hidden;
-          """]
+            width: 0; min-width: 100%;
+            height: 0; min-height: 100%;
+            overflow: hidden;
+            """
+          ]
         ) {
           overlay
         }
@@ -283,32 +298,35 @@ extension _OverlayLayout: _HTMLPrimitive {
 }
 
 @_spi(TokamakStaticHTML)
-extension _OverlayLayout: HTMLConvertible {
+extension _OverlayLayout: @MainActor HTMLConvertible {
   public var tag: String { "div" }
   public func attributes(useDynamicLayout: Bool) -> [HTMLAttribute: String] {
     guard !useDynamicLayout else { return [:] }
     return ["style": "display: inline-grid; grid-template-columns: auto auto;"]
   }
 
-  public func primitiveVisitor<V>(useDynamicLayout: Bool) -> ((V) -> ())? where V: ViewVisitor {
+  public func primitiveVisitor<V>(useDynamicLayout: Bool) -> ((V) -> Void)? where V: ViewVisitor {
     guard !useDynamicLayout else { return nil }
     return {
-      $0.visit(HTML("div", ["style": "grid-area: a;"]) {
-        content
-      })
+      $0.visit(
+        HTML("div", ["style": "grid-area: a;"]) {
+          content
+        })
       $0.visit(
         HTML(
           "div",
-          ["style": """
-          display: flex;
-          justify-content: \(alignment.horizontal.flexAlignment);
-          align-items: \(alignment.vertical.flexAlignment);
-          grid-area: a;
+          [
+            "style": """
+            display: flex;
+            justify-content: \(alignment.horizontal.flexAlignment);
+            align-items: \(alignment.vertical.flexAlignment);
+            grid-area: a;
 
-          width: 0; min-width: 100%;
-          height: 0; min-height: 100%;
-          overflow: hidden;
-          """]
+            width: 0; min-width: 100%;
+            height: 0; min-height: 100%;
+            overflow: hidden;
+            """
+          ]
         ) {
           overlay
         }

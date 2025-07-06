@@ -51,13 +51,10 @@
 
     func fetchResponse() async {
       // do {
-      //   Task { @MainActor in
-      //     let fetchResult = try await fetch("https://httpbin.org/uuid").value
-      //     let json = try await JSPromise(fetchResult.json().object!)!.value
+      //   let fetchResult = try await fetch("https://httpbin.org/uuid").value
+      //   let json = try await JSPromise(fetchResult.json().object!)!.value
 
-      //     response = Result { try JSValueDecoder().decode(Response.self, from: json) }
-      //   }
-
+      //   response = Result { try JSValueDecoder().decode(Response.self, from: json) }
       // } catch {
       //   await MainActor.run {
       //     response = .failure(error)

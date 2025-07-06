@@ -14,48 +14,55 @@
 
 import Foundation
 
-public extension Font {
-  func italic() -> Self {
-    .init(_ModifiedFontBox(previously: provider) {
-      $0._italic = true
-    })
+@MainActor
+extension Font {
+  public func italic() -> Self {
+    .init(
+      _ModifiedFontBox(previously: provider) {
+        $0._italic = true
+      })
   }
 
-  func smallCaps() -> Self {
-    .init(_ModifiedFontBox(previously: provider) {
-      $0._smallCaps = true
-    })
+  public func smallCaps() -> Self {
+    .init(
+      _ModifiedFontBox(previously: provider) {
+        $0._smallCaps = true
+      })
   }
 
-  func lowercaseSmallCaps() -> Self {
+  public func lowercaseSmallCaps() -> Self {
     smallCaps()
   }
 
-  func uppercaseSmallCaps() -> Self {
+  public func uppercaseSmallCaps() -> Self {
     smallCaps()
   }
 
-  func monospacedDigit() -> Self {
-    .init(_ModifiedFontBox(previously: provider) {
-      $0._monospaceDigit = true
-    })
+  public func monospacedDigit() -> Self {
+    .init(
+      _ModifiedFontBox(previously: provider) {
+        $0._monospaceDigit = true
+      })
   }
 
-  func weight(_ weight: Weight) -> Self {
-    .init(_ModifiedFontBox(previously: provider) {
-      $0._weight = weight
-    })
+  public func weight(_ weight: Weight) -> Self {
+    .init(
+      _ModifiedFontBox(previously: provider) {
+        $0._weight = weight
+      })
   }
 
-  func bold() -> Self {
-    .init(_ModifiedFontBox(previously: provider) {
-      $0._bold = true
-    })
+  public func bold() -> Self {
+    .init(
+      _ModifiedFontBox(previously: provider) {
+        $0._bold = true
+      })
   }
 
-  func leading(_ leading: Leading) -> Self {
-    .init(_ModifiedFontBox(previously: provider) {
-      $0._leading = leading
-    })
+  public func leading(_ leading: Leading) -> Self {
+    .init(
+      _ModifiedFontBox(previously: provider) {
+        $0._leading = leading
+      })
   }
 }

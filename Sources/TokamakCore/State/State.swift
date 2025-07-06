@@ -20,9 +20,10 @@ protocol ValueStorage {
 }
 
 protocol WritableValueStorage: ValueStorage {
-  var setter: ((Any, Transaction) -> ())? { get set }
+  var setter: ((Any, Transaction) -> Void)? { get set }
 }
 
+@MainActor
 @propertyWrapper
 public struct State<Value>: DynamicProperty {
   private let initialValue: Value
@@ -30,7 +31,7 @@ public struct State<Value>: DynamicProperty {
   var anyInitialValue: Any { initialValue }
 
   var getter: (() -> Any)?
-  var setter: ((Any, Transaction) -> ())?
+  var setter: ((Any, Transaction) -> Void)?
 
   public init(wrappedValue value: Value) {
     initialValue = value
@@ -56,9 +57,9 @@ public struct State<Value>: DynamicProperty {
   }
 }
 
-extension State: WritableValueStorage {}
+extension State: @MainActor WritableValueStorage {}
 
-public extension State where Value: ExpressibleByNilLiteral {
+extension State where Value: ExpressibleByNilLiteral {
   @inlinable
-  init() { self.init(wrappedValue: nil) }
+  public init() { self.init(wrappedValue: nil) }
 }

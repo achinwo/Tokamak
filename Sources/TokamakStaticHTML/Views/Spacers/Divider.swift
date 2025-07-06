@@ -14,7 +14,7 @@
 
 @_spi(TokamakCore) import TokamakCore
 
-extension Divider: AnyHTML {
+extension Divider: @MainActor AnyHTML {
   public func innerHTML(shouldSortAttributes: Bool) -> String? { nil }
   public var tag: String { "hr" }
   public var attributes: [HTMLAttribute: String] {
@@ -30,7 +30,7 @@ extension Divider: AnyHTML {
         }
       }.cssValue(environment));
       border-left: none;
-      """,
+      """
     ]
   }
 }

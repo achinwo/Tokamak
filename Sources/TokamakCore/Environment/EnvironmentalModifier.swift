@@ -22,9 +22,8 @@ public protocol EnvironmentalModifier: ViewModifier {
   static var _requiresMainThread: Bool { get }
 }
 
-private struct EnvironmentalModifierResolver<M>: ViewModifier, EnvironmentReader
-  where M: EnvironmentalModifier
-{
+private struct EnvironmentalModifierResolver<M>: ViewModifier, @MainActor EnvironmentReader
+where M: EnvironmentalModifier {
   let modifier: M
   var resolved: M.ResolvedModifier!
 
@@ -37,10 +36,10 @@ private struct EnvironmentalModifierResolver<M>: ViewModifier, EnvironmentReader
   }
 }
 
-public extension EnvironmentalModifier {
-  static var _requiresMainThread: Bool { true }
+extension EnvironmentalModifier {
+  public static var _requiresMainThread: Bool { true }
 
-  func body(content: _ViewModifier_Content<Self>) -> some View {
+  public func body(content: _ViewModifier_Content<Self>) -> some View {
     content.modifier(EnvironmentalModifierResolver(modifier: self))
   }
 }

@@ -16,8 +16,7 @@
 //
 
 import Foundation
-@_spi(TokamakCore)
-import TokamakCore
+@_spi(TokamakCore) import TokamakCore
 
 extension StrokeStyle {
   static var zero: Self {
@@ -25,14 +24,15 @@ extension StrokeStyle {
   }
 }
 
-extension Path: _HTMLPrimitive {
+extension Path: @MainActor _HTMLPrimitive {
   // TODO: Support transformations
+  @MainActor
   func svgFrom(
     storage: Storage,
     strokeStyle: StrokeStyle = .zero
   ) -> HTML<EmptyView>? {
     let stroke: [HTMLAttribute: String] = [
-      "stroke-width": "\(strokeStyle.lineWidth)",
+      "stroke-width": "\(strokeStyle.lineWidth)"
     ]
     let uniqueKeys = { (first: String, _: String) in first }
     let flexibleWidth: String? = sizing == .flexible ? "100%" : nil
@@ -42,7 +42,7 @@ extension Path: _HTMLPrimitive {
     switch storage {
     case .empty:
       return nil
-    case let .rect(rect):
+    case .rect(let rect):
       return HTML(
         "rect",
         namespace: namespace,
@@ -55,19 +55,21 @@ extension Path: _HTMLPrimitive {
       ) { proposal, _ in
         proposal.replacingUnspecifiedDimensions()
       }
-    case let .ellipse(rect):
+    case .ellipse(let rect):
       return HTML(
         "ellipse",
         namespace: namespace,
-        ["cx": flexibleCenterX ?? "\(rect.origin.x)",
-         "cy": flexibleCenterY ?? "\(rect.origin.y)",
-         "rx": flexibleCenterX ?? "\(rect.size.width)",
-         "ry": flexibleCenterY ?? "\(rect.size.height)"]
-          .merging(stroke, uniquingKeysWith: uniqueKeys)
+        [
+          "cx": flexibleCenterX ?? "\(rect.origin.x)",
+          "cy": flexibleCenterY ?? "\(rect.origin.y)",
+          "rx": flexibleCenterX ?? "\(rect.size.width)",
+          "ry": flexibleCenterY ?? "\(rect.size.height)",
+        ]
+        .merging(stroke, uniquingKeysWith: uniqueKeys)
       ) { proposal, _ in
         proposal.replacingUnspecifiedDimensions()
       }
-    case let .roundedRect(roundedRect):
+    case .roundedRect(let roundedRect):
       // When cornerRadius is nil we use 50% rx.
       let size = roundedRect.rect.size
       let cornerRadius: [HTMLAttribute: String]
@@ -95,18 +97,19 @@ extension Path: _HTMLPrimitive {
       ) { proposal, _ in
         proposal.replacingUnspecifiedDimensions()
       }
-    case let .stroked(stroked):
+    case .stroked(let stroked):
       return stroked.path.svgBody(strokeStyle: stroked.style)
-    case let .trimmed(trimmed):
+    case .trimmed(let trimmed):
       return trimmed.path.svgFrom(
         storage: trimmed.path.storage,
         strokeStyle: strokeStyle
-      ) // TODO: Trim the path
+      )  // TODO: Trim the path
     case .path:
       return svgFrom(elements: elements, strokeStyle: strokeStyle)
     }
   }
 
+  @MainActor
   func svgFrom(
     elements: [Element],
     strokeStyle: StrokeStyle = .zero
@@ -115,26 +118,29 @@ extension Path: _HTMLPrimitive {
     var d = [String]()
     for element in elements {
       switch element {
-      case let .move(to: pos):
+      case .move(to: let pos):
         d.append("M\(pos.x),\(pos.y)")
-      case let .line(to: pos):
+      case .line(to: let pos):
         d.append("L\(pos.x),\(pos.y)")
-      case let .curve(to: pos, control1: c1, control2: c2):
+      case .curve(to: let pos, control1: let c1, control2: let c2):
         d.append("C\(c1.x),\(c1.y),\(c2.x),\(c2.y),\(pos.x),\(pos.y)")
-      case let .quadCurve(to: pos, control: c1):
+      case .quadCurve(to: let pos, control: let c1):
         d.append("Q\(c1.x),\(c1.y),\(pos.x),\(pos.y)")
       case .closeSubpath:
         d.append("Z")
       }
     }
-    return HTML("path", namespace: namespace, [
-      "style": "stroke-width: \(strokeStyle.lineWidth);",
-      "d": d.joined(separator: "\n"),
-    ])
+    return HTML(
+      "path", namespace: namespace,
+      [
+        "style": "stroke-width: \(strokeStyle.lineWidth);",
+        "d": d.joined(separator: "\n"),
+      ])
   }
 
   var size: CGSize { boundingRect.size }
 
+  @MainActor
   @ViewBuilder
   func svgBody(
     strokeStyle: StrokeStyle = .zero
@@ -143,30 +149,37 @@ extension Path: _HTMLPrimitive {
   }
 
   var sizeStyle: String {
-    sizing == .flexible ?
-      """
+    sizing == .flexible
+      ? """
       width: 100%;
       height: 100%;
-      """ :
       """
+      : """
       width: \(max(0, size.width));
       height: \(max(0, size.height));
       """
   }
 
+  @MainActor
   @_spi(TokamakStaticHTML)
   public var renderedBody: AnyView {
-    AnyView(HTML("svg", ["style": """
-    \(sizeStyle)
-    overflow: visible;
-    """]) {
-      svgBody()
-    })
+    AnyView(
+      HTML(
+        "svg",
+        [
+          "style": """
+          \(sizeStyle)
+          overflow: visible;
+          """
+        ]
+      ) {
+        svgBody()
+      })
   }
 }
 
 @_spi(TokamakStaticHTML)
-extension Path: HTMLConvertible {
+extension Path: @MainActor HTMLConvertible {
   public var tag: String { "svg" }
   public var namespace: String? { "http://www.w3.org/2000/svg" }
   public func attributes(useDynamicLayout: Bool) -> [HTMLAttribute: String] {
@@ -174,10 +187,11 @@ extension Path: HTMLConvertible {
     return [
       "style": """
       \(sizeStyle)
-      """,
+      """
     ]
   }
 
+  @MainActor
   public var innerHTML: String? {
     svgBody()?.outerHTML(shouldSortAttributes: false, children: [])
   }

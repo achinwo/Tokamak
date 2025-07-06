@@ -15,10 +15,10 @@
 //  Created by Carson Katri on 1/19/21.
 //
 
-public struct NavigationBarItem: Equatable {
+public struct NavigationBarItem: Equatable, Sendable {
   let displayMode: TitleDisplayMode
 
-  public enum TitleDisplayMode: Hashable {
+  public enum TitleDisplayMode: Hashable, Sendable {
     case automatic
     case inline
     case large

@@ -30,8 +30,8 @@ public struct DatePicker<Label>: _PrimitiveView where Label: View {
   public typealias Components = DatePickerComponents
 }
 
-public extension DatePicker {
-  init(
+extension DatePicker {
+  public init(
     selection: Binding<Date>,
     in range: ClosedRange<Date>,
     displayedComponents: DatePickerComponents = [.hourAndMinute, .date],
@@ -46,7 +46,7 @@ public extension DatePicker {
     )
   }
 
-  init(
+  public init(
     selection: Binding<Date>,
     displayedComponents: DatePickerComponents = [.hourAndMinute, .date],
     @ViewBuilder label: () -> Label
@@ -60,7 +60,7 @@ public extension DatePicker {
     )
   }
 
-  init(
+  public init(
     selection: Binding<Date>,
     in range: PartialRangeFrom<Date>,
     displayedComponents: DatePickerComponents = [.hourAndMinute, .date],
@@ -75,7 +75,7 @@ public extension DatePicker {
     )
   }
 
-  init(
+  public init(
     selection: Binding<Date>,
     in range: PartialRangeThrough<Date>,
     displayedComponents: DatePickerComponents = [.hourAndMinute, .date],
@@ -91,8 +91,8 @@ public extension DatePicker {
   }
 }
 
-public extension DatePicker where Label == Text {
-  init<S>(
+extension DatePicker where Label == Text {
+  public init<S>(
     _ title: S,
     selection: Binding<Date>,
     in range: ClosedRange<Date>,
@@ -107,7 +107,7 @@ public extension DatePicker where Label == Text {
     )
   }
 
-  init<S>(
+  public init<S>(
     _ title: S,
     selection: Binding<Date>,
     displayedComponents: DatePickerComponents = [.hourAndMinute, .date]
@@ -121,7 +121,7 @@ public extension DatePicker where Label == Text {
     )
   }
 
-  init<S>(
+  public init<S>(
     _ title: S,
     selection: Binding<Date>,
     in range: PartialRangeFrom<Date>,
@@ -136,7 +136,7 @@ public extension DatePicker where Label == Text {
     )
   }
 
-  init<S>(
+  public init<S>(
     _ title: S,
     selection: Binding<Date>,
     in range: PartialRangeThrough<Date>,
@@ -152,7 +152,7 @@ public extension DatePicker where Label == Text {
   }
 }
 
-public struct DatePickerComponents: OptionSet {
+public struct DatePickerComponents: OptionSet, Sendable {
   public static let hourAndMinute = DatePickerComponents(rawValue: 1 << 0)
   public static let date = DatePickerComponents(rawValue: 1 << 1)
 
@@ -164,7 +164,7 @@ public struct DatePickerComponents: OptionSet {
 }
 
 /// This is a helper type that works around absence of "package private" access control in Swift
-public struct _DatePickerProxy<Label> where Label: View {
+@MainActor public struct _DatePickerProxy<Label> where Label: View {
   public let subject: DatePicker<Label>
 
   public init(_ subject: DatePicker<Label>) { self.subject = subject }

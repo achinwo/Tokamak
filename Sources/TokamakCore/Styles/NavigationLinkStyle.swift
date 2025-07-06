@@ -20,6 +20,7 @@ public struct _NavigationLinkStyleConfiguration: View {
   public let isSelected: Bool
 }
 
+@MainActor
 public protocol _NavigationLinkStyle {
   associatedtype Body: View
   typealias Configuration = _NavigationLinkStyleConfiguration
@@ -50,14 +51,14 @@ public struct _AnyNavigationLinkStyle: _NavigationLinkStyle {
   }
 }
 
-public enum _NavigationLinkStyleKey: EnvironmentKey {
-  public static var defaultValue: _AnyNavigationLinkStyle {
+public enum _NavigationLinkStyleKey: @MainActor EnvironmentKey {
+  @MainActor public static var defaultValue: _AnyNavigationLinkStyle {
     _AnyNavigationLinkStyle(_DefaultNavigationLinkStyle())
   }
 }
 
 extension EnvironmentValues {
-  var _navigationLinkStyle: _AnyNavigationLinkStyle {
+  @MainActor var _navigationLinkStyle: _AnyNavigationLinkStyle {
     get {
       self[_NavigationLinkStyleKey.self]
     }
@@ -67,9 +68,9 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
+extension View {
   @_spi(TokamakCore)
-  func _navigationLinkStyle<S: _NavigationLinkStyle>(_ style: S) -> some View {
+  public func _navigationLinkStyle<S: _NavigationLinkStyle>(_ style: S) -> some View {
     environment(\._navigationLinkStyle, _AnyNavigationLinkStyle(style))
   }
 }

@@ -14,8 +14,8 @@
 //
 //  Created by Carson Katri on 7/16/20.
 //
-
-public protocol Scene: Sendable {
+@MainActor
+public protocol Scene {
   associatedtype Body: Scene
 
   // FIXME: If I put `@SceneBuilder` in front of this

@@ -15,12 +15,12 @@
 //  Created by Carson Katri on 7/5/20.
 //
 
-public protocol ListStyle {
+public protocol ListStyle: Sendable {
   var hasDividers: Bool { get }
 }
 
 /// A protocol implemented on the renderer to create platform-specific list styles.
-public protocol ListStyleDeferredToRenderer {
+@MainActor public protocol ListStyleDeferredToRenderer {
   func listBody<ListBody>(_ content: ListBody) -> AnyView where ListBody: View
   func listRow<Row>(_ row: Row) -> AnyView where Row: View
   func sectionHeader<Header>(_ header: Header) -> AnyView where Header: View
@@ -28,24 +28,24 @@ public protocol ListStyleDeferredToRenderer {
   func sectionFooter<Footer>(_ footer: Footer) -> AnyView where Footer: View
 }
 
-public extension ListStyleDeferredToRenderer {
-  func listBody<ListBody>(_ content: ListBody) -> AnyView where ListBody: View {
+extension ListStyleDeferredToRenderer {
+  public func listBody<ListBody>(_ content: ListBody) -> AnyView where ListBody: View {
     AnyView(content)
   }
 
-  func listRow<Row>(_ row: Row) -> AnyView where Row: View {
+  public func listRow<Row>(_ row: Row) -> AnyView where Row: View {
     AnyView(row.padding([.trailing, .top, .bottom]))
   }
 
-  func sectionHeader<Header>(_ header: Header) -> AnyView where Header: View {
+  public func sectionHeader<Header>(_ header: Header) -> AnyView where Header: View {
     AnyView(header)
   }
 
-  func sectionBody<SectionBody>(_ section: SectionBody) -> AnyView where SectionBody: View {
+  public func sectionBody<SectionBody>(_ section: SectionBody) -> AnyView where SectionBody: View {
     AnyView(section)
   }
 
-  func sectionFooter<Footer>(_ footer: Footer) -> AnyView where Footer: View {
+  public func sectionFooter<Footer>(_ footer: Footer) -> AnyView where Footer: View {
     AnyView(footer)
   }
 }
@@ -77,7 +77,7 @@ public struct SidebarListStyle: ListStyle {
   public init() {}
 }
 
-enum ListStyleKey: EnvironmentKey {
+enum ListStyleKey: EnvironmentKey, Sendable {
   static let defaultValue: ListStyle = DefaultListStyle()
 }
 
@@ -92,8 +92,8 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
-  func listStyle<S>(_ style: S) -> some View where S: ListStyle {
+extension View {
+  public func listStyle<S>(_ style: S) -> some View where S: ListStyle {
     environment(\.listStyle, style)
   }
 }

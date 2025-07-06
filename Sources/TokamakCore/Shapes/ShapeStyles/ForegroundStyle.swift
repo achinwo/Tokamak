@@ -15,7 +15,7 @@
 //  Created by Carson Katri on 7/6/21.
 //
 
-public struct ForegroundStyle: ShapeStyle {
+public struct ForegroundStyle: ShapeStyle, Sendable {
   public init() {}
 
   public func _apply(to shape: inout _ShapeStyle_Shape) {
@@ -44,29 +44,26 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func foregroundStyle<S>(_ style: S) -> some View
-    where S: ShapeStyle
-  {
+  public func foregroundStyle<S>(_ style: S) -> some View
+  where S: ShapeStyle {
     foregroundStyle(style, style, style)
   }
 
   @inlinable
-  func foregroundStyle<S1, S2>(_ primary: S1, _ secondary: S2) -> some View
-    where S1: ShapeStyle, S2: ShapeStyle
-  {
+  public func foregroundStyle<S1, S2>(_ primary: S1, _ secondary: S2) -> some View
+  where S1: ShapeStyle, S2: ShapeStyle {
     foregroundStyle(primary, secondary, secondary)
   }
 
   @inlinable
-  func foregroundStyle<S1, S2, S3>(
+  public func foregroundStyle<S1, S2, S3>(
     _ primary: S1,
     _ secondary: S2,
     _ tertiary: S3
   ) -> some View
-    where S1: ShapeStyle, S2: ShapeStyle, S3: ShapeStyle
-  {
+  where S1: ShapeStyle, S2: ShapeStyle, S3: ShapeStyle {
     modifier(_ForegroundStyleModifier(primary: primary, secondary: secondary, tertiary: tertiary))
   }
 }
@@ -74,9 +71,8 @@ public extension View {
 @frozen
 public struct _ForegroundStyleModifier<
   Primary, Secondary, Tertiary
->: ViewModifier, _EnvironmentModifier
-  where Primary: ShapeStyle, Secondary: ShapeStyle, Tertiary: ShapeStyle
-{
+>: ViewModifier, @MainActor _EnvironmentModifier
+where Primary: ShapeStyle, Secondary: ShapeStyle, Tertiary: ShapeStyle {
   public var primary: Primary
   public var secondary: Secondary
   public var tertiary: Tertiary
@@ -99,6 +95,6 @@ public struct _ForegroundStyleModifier<
   }
 }
 
-public extension ShapeStyle where Self == ForegroundStyle {
-  static var foreground: Self { .init() }
+extension ShapeStyle where Self == ForegroundStyle {
+  public static var foreground: Self { .init() }
 }

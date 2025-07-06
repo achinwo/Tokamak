@@ -17,6 +17,7 @@
 
 import Foundation
 
+@MainActor
 public protocol ControlGroupStyle {
   associatedtype Body: View
   @ViewBuilder
@@ -81,10 +82,12 @@ public struct _AnyControlGroupStyle: ControlGroupStyle {
 }
 
 extension EnvironmentValues {
-  private enum ControlGroupStyleKey: EnvironmentKey {
+  @MainActor
+  private enum ControlGroupStyleKey: @MainActor EnvironmentKey {
     static let defaultValue = _AnyControlGroupStyle(AutomaticControlGroupStyle())
   }
 
+  @MainActor
   var controlGroupStyle: _AnyControlGroupStyle {
     get {
       self[ControlGroupStyleKey.self]
@@ -95,8 +98,8 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
-  func controlGroupStyle<S>(
+extension View {
+  public func controlGroupStyle<S>(
     _ style: S
   ) -> some View where S: ControlGroupStyle {
     environment(\.controlGroupStyle, .init(style))

@@ -19,7 +19,7 @@ public enum _VariadicView {
   public typealias ViewRoot = _VariadicView_ViewRoot
   public typealias Children = _VariadicView_Children
 
-  public struct Tree<Root, Content>: View, _VariadicView_AnyTree
+  public struct Tree<Root, Content>: View, @MainActor _VariadicView_AnyTree
   where Root: _VariadicView_ViewRoot, Content: View {
     public var root: Root
     public var content: Content
@@ -62,7 +62,7 @@ public struct _VariadicView_Children {
 }
 
 extension _VariadicView_Children: @MainActor RandomAccessCollection {
-  public struct Element: View, Identifiable {
+  public struct Element: View, @MainActor Identifiable {
     let view: AnyView
     public var id: AnyHashable
     let viewTraits: _ViewTraitStore

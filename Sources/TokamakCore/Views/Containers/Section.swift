@@ -21,13 +21,14 @@ protocol SectionView {
   func listRow(_ style: ListStyle) -> AnyView
 }
 
+@MainActor
 public struct Section<Parent, Content, Footer> {
   let header: Parent
   let footer: Footer
   let content: Content
 }
 
-extension Section: View, SectionView where Parent: View, Content: View, Footer: View {
+extension Section: View, @MainActor SectionView where Parent: View, Content: View, Footer: View {
   public init(header: Parent, footer: Footer, @ViewBuilder content: () -> Content) {
     self.header = header
     self.footer = footer
@@ -91,20 +92,20 @@ extension Section: View, SectionView where Parent: View, Content: View, Footer: 
   }
 }
 
-public extension Section where Parent == EmptyView, Content: View, Footer: View {
-  init(footer: Footer, @ViewBuilder content: () -> Content) {
+extension Section where Parent == EmptyView, Content: View, Footer: View {
+  public init(footer: Footer, @ViewBuilder content: () -> Content) {
     self.init(header: EmptyView(), footer: footer, content: content)
   }
 }
 
-public extension Section where Parent: View, Content: View, Footer == EmptyView {
-  init(header: Parent, @ViewBuilder content: () -> Content) {
+extension Section where Parent: View, Content: View, Footer == EmptyView {
+  public init(header: Parent, @ViewBuilder content: () -> Content) {
     self.init(header: header, footer: EmptyView(), content: content)
   }
 }
 
-public extension Section where Parent == EmptyView, Content: View, Footer == EmptyView {
-  init(@ViewBuilder content: () -> Content) {
+extension Section where Parent == EmptyView, Content: View, Footer == EmptyView {
+  public init(@ViewBuilder content: () -> Content) {
     self.init(header: EmptyView(), footer: EmptyView(), content: content)
   }
 }

@@ -17,7 +17,7 @@
 
 import Foundation
 
-public struct FixedRoundedRect: Equatable {
+public struct FixedRoundedRect: Equatable, Sendable {
   public let rect: CGRect
   public let cornerSize: CGSize?
   public let style: RoundedCornerStyle

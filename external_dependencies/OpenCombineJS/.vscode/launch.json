@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:OpenCombineJS}",
+      "name": "Debug OpenCombineJSExample",
+      "program": "${workspaceFolder:OpenCombineJS}/.build/debug/OpenCombineJSExample",
+      "preLaunchTask": "swift: Build Debug OpenCombineJSExample"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:OpenCombineJS}",
+      "name": "Release OpenCombineJSExample",
+      "program": "${workspaceFolder:OpenCombineJS}/.build/release/OpenCombineJSExample",
+      "preLaunchTask": "swift: Build Release OpenCombineJSExample"
+    }
+  ]
+}

@@ -17,6 +17,7 @@
 
 import Foundation
 
+@MainActor
 @frozen
 public struct AnyTransition {
   fileprivate let box: _AnyTransitionBox
@@ -26,8 +27,10 @@ public struct AnyTransition {
   }
 }
 
+@MainActor
 @usableFromInline
-struct TransitionTraitKey: _ViewTraitKey {
+struct TransitionTraitKey: @MainActor _ViewTraitKey {
+
   @inlinable
   static var defaultValue: AnyTransition { .opacity }
 
@@ -42,33 +45,34 @@ struct CanTransitionTraitKey: _ViewTraitKey {
   @usableFromInline typealias Value = Bool
 }
 
-public extension _ViewTraitStore {
-  var transition: AnyTransition { value(forKey: TransitionTraitKey.self) }
-  var canTransition: Bool { value(forKey: CanTransitionTraitKey.self) }
+extension _ViewTraitStore {
+  public var transition: AnyTransition { value(forKey: TransitionTraitKey.self) }
+  public var canTransition: Bool { value(forKey: CanTransitionTraitKey.self) }
 }
 
-enum TransitionPhase: Hashable {
+enum TransitionPhase: Hashable, Sendable {
   case willMount
   case normal
   case willUnmount
 }
 
-public extension View {
+@MainActor
+extension View {
+
   @inlinable
-  func transition(_ t: AnyTransition) -> some View {
+  public func transition(_ t: AnyTransition) -> some View {
     _trait(TransitionTraitKey.self, t)
   }
 }
 
 /// A `ViewModifier` used to apply a primitive transition to a `View`.
 public protocol _AnyTransitionModifier: AnimatableModifier
-  where Body == Content
-{
+where Body == Content {
   var isActive: Bool { get }
 }
 
-public extension _AnyTransitionModifier {
-  func body(content: Content) -> Body {
+extension _AnyTransitionModifier {
+  public func body(content: Content) -> Body {
     content
   }
 }
@@ -79,75 +83,79 @@ public struct _MoveTransition: @MainActor _AnyTransitionModifier {
   public typealias Body = Self.Content
 }
 
-public extension AnyTransition {
-  static let identity: AnyTransition = .init(IdentityTransitionBox())
+@MainActor
+extension AnyTransition {
+  public static let identity: AnyTransition = .init(IdentityTransitionBox())
 
-  static func move(edge: Edge) -> AnyTransition {
+  public static func move(edge: Edge) -> AnyTransition {
     modifier(
       active: _MoveTransition(edge: edge, isActive: true),
       identity: _MoveTransition(edge: edge, isActive: false)
     )
   }
 
-  static func asymmetric(
+  public static func asymmetric(
     insertion: AnyTransition,
     removal: AnyTransition
   ) -> AnyTransition {
     .init(AsymmetricTransitionBox(insertion: insertion.box, removal: removal.box))
   }
 
-  static func offset(_ offset: CGSize) -> AnyTransition {
+  public static func offset(_ offset: CGSize) -> AnyTransition {
     modifier(
       active: _OffsetEffect(offset: offset),
       identity: _OffsetEffect(offset: .zero)
     )
   }
 
-  static func offset(
+  public static func offset(
     x: CGFloat = 0,
     y: CGFloat = 0
   ) -> AnyTransition {
     offset(.init(width: x, height: y))
   }
 
-  static var scale: AnyTransition { scale(scale: 0) }
-  static func scale(scale: CGFloat, anchor: UnitPoint = .center) -> AnyTransition {
+  public static var scale: AnyTransition { scale(scale: 0) }
+  public static func scale(scale: CGFloat, anchor: UnitPoint = .center) -> AnyTransition {
     modifier(
       active: _ScaleEffect(scale: .init(width: scale, height: scale), anchor: anchor),
       identity: _ScaleEffect(scale: .init(width: 1, height: 1), anchor: anchor)
     )
   }
 
-  static let opacity: AnyTransition = modifier(
+  public static let opacity: AnyTransition = modifier(
     active: _OpacityEffect(opacity: 0),
     identity: _OpacityEffect(opacity: 1)
   )
 
-  static let slide: AnyTransition = asymmetric(
+  public static let slide: AnyTransition = asymmetric(
     insertion: .move(edge: .leading),
     removal: .move(edge: .trailing)
   )
 
-  static func modifier<E>(
+  public static func modifier<E>(
     active: E,
     identity: E
   ) -> AnyTransition where E: ViewModifier {
     .init(
       ConcreteTransitionBox(
-        (active: {
-          AnyView($0.modifier(active))
-        }, identity: {
-          AnyView($0.modifier(identity))
-        })
+        (
+          active: {
+            AnyView($0.modifier(active))
+          },
+          identity: {
+            AnyView($0.modifier(identity))
+          }
+        )
       )
     )
   }
 
-  func combined(with other: AnyTransition) -> AnyTransition {
+  public func combined(with other: AnyTransition) -> AnyTransition {
     .init(CombinedTransitionBox(a: box, b: other.box))
   }
 
-  func animation(_ animation: Animation?) -> AnyTransition {
+  public func animation(_ animation: Animation?) -> AnyTransition {
     .init(AnimatedTransitionBox(animation: animation, parent: box))
   }
 }
@@ -157,6 +165,7 @@ public struct _AnyTransitionProxy {
 
   public init(_ subject: AnyTransition) { self.subject = subject }
 
+  @MainActor
   public func resolve(
     in environment: EnvironmentValues
   ) -> _AnyTransitionBox.ResolvedValue {

@@ -19,15 +19,17 @@ import OpenCombineShim
 
 /// The renderer must specify a default `_StorageProvider` before any `SceneStorage`
 /// values are accessed.
+@MainActor
 public enum _DefaultSceneStorageProvider {
   public static var `default`: _StorageProvider!
 }
 
+@MainActor
 @propertyWrapper
 public struct SceneStorage<Value>: DynamicProperty {
   let key: String
   let defaultValue: Value
-  let store: (_StorageProvider, String, Value) -> ()
+  let store: (_StorageProvider, String, Value) -> Void
   let read: (_StorageProvider, String) -> Value?
 
   var objectWillChange: AnyPublisher<(), Never> {
@@ -52,38 +54,40 @@ public struct SceneStorage<Value>: DynamicProperty {
   }
 }
 
-extension SceneStorage: ObservedProperty {}
+extension SceneStorage: @MainActor ObservedProperty {}
 
-public extension SceneStorage {
-  init(wrappedValue: Value, _ key: String) where Value == Bool {
+extension SceneStorage {
+  public init(wrappedValue: Value, _ key: String) where Value == Bool {
     defaultValue = wrappedValue
     self.key = key
     store = { $0.store(key: $1, value: $2) }
     read = { $0.read(key: $1) }
   }
 
-  init(wrappedValue: Value, _ key: String) where Value == Int {
+  public init(wrappedValue: Value, _ key: String) where Value == Int {
     defaultValue = wrappedValue
     self.key = key
     store = { $0.store(key: $1, value: $2) }
     read = { $0.read(key: $1) }
   }
 
-  init(wrappedValue: Value, _ key: String) where Value == Double {
+  public init(wrappedValue: Value, _ key: String) where Value == Double {
     defaultValue = wrappedValue
     self.key = key
     store = { $0.store(key: $1, value: $2) }
     read = { $0.read(key: $1) }
   }
 
-  init(wrappedValue: Value, _ key: String) where Value == String {
+  public init(wrappedValue: Value, _ key: String) where Value == String {
     defaultValue = wrappedValue
     self.key = key
     store = { $0.store(key: $1, value: $2) }
     read = { $0.read(key: $1) }
   }
 
-  init(wrappedValue: Value, _ key: String) where Value: RawRepresentable,
+  public init(wrappedValue: Value, _ key: String)
+  where
+    Value: RawRepresentable,
     Value.RawValue == Int
   {
     defaultValue = wrappedValue
@@ -97,9 +101,8 @@ public extension SceneStorage {
     }
   }
 
-  init(wrappedValue: Value, _ key: String)
-    where Value: RawRepresentable, Value.RawValue == String
-  {
+  public init(wrappedValue: Value, _ key: String)
+  where Value: RawRepresentable, Value.RawValue == String {
     defaultValue = wrappedValue
     self.key = key
     store = { $0.store(key: $1, value: $2.rawValue) }

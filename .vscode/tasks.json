@@ -16,7 +16,8 @@
     {
       "label": "carton dev",
       "type": "shell",
-      "command": "carton dev --product TokamakDemo"
+      "command": "~/.swiftly/bin/swift run carton dev --product TokamakDemo --port 8083",
+      "problemMatcher": []
     },
     {
       "label": "benchmark",

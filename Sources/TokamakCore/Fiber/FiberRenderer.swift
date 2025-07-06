@@ -99,6 +99,7 @@ extension FiberRenderer {
     nil
   }
 
+  @MainActor
   func viewVisitor<V: View, Visitor: ViewVisitor>(for view: V) -> ViewVisitorF<Visitor> {
     if Self.isPrimitive(view) {
       return { (visitor: Visitor) in
@@ -114,12 +115,14 @@ extension FiberRenderer {
     }
   }
 
+  @MainActor
   @discardableResult
   @_disfavoredOverload
   public func render<V: View>(_ view: V) -> FiberReconciler<Self> {
     .init(self, view)
   }
 
+  @MainActor
   @discardableResult
   @_disfavoredOverload
   public func render<A: App>(_ app: A) -> FiberReconciler<Self> {

@@ -184,7 +184,8 @@ extension RotatedShape: @MainActor InsettableShape where Content: InsettableShap
   }
 }
 
-public struct TransformedShape<Content>: Shape where Content: Shape {
+@MainActor
+public struct TransformedShape<Content>: @MainActor Shape where Content: Shape {
   public var shape: Content
   public var transform: CGAffineTransform
 

@@ -37,7 +37,8 @@ public protocol ToggleStyle {
   typealias Configuration = ToggleStyleConfiguration
 }
 
-public struct _AnyToggleStyle: ToggleStyle {
+@MainActor
+public struct _AnyToggleStyle: @MainActor ToggleStyle {
   public typealias Body = AnyView
 
   private let bodyClosure: (ToggleStyleConfiguration) -> AnyView
@@ -70,8 +71,8 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
-  func toggleStyle<S>(_ style: S) -> some View where S: ToggleStyle {
+extension View {
+  public func toggleStyle<S>(_ style: S) -> some View where S: ToggleStyle {
     environment(\.toggleStyle, _AnyToggleStyle(style))
   }
 }

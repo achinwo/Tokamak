@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-@_spi(TokamakCore)
-import TokamakCore
+@_spi(TokamakCore) import TokamakCore
 
 public protocol DOMViewModifier {
   var attributes: [HTMLAttribute: String] { get }
@@ -21,13 +20,12 @@ public protocol DOMViewModifier {
   var isOrderDependent: Bool { get }
 }
 
-public extension DOMViewModifier {
-  var isOrderDependent: Bool { false }
+extension DOMViewModifier {
+  public var isOrderDependent: Bool { false }
 }
 
-extension ModifiedContent: DOMViewModifier
-  where Content: DOMViewModifier, Modifier: DOMViewModifier
-{
+extension ModifiedContent: @MainActor DOMViewModifier
+where Content: DOMViewModifier, Modifier: DOMViewModifier {
   // Merge attributes
   public var attributes: [HTMLAttribute: String] {
     var attr = content.attributes
@@ -40,7 +38,7 @@ extension ModifiedContent: DOMViewModifier
   }
 }
 
-extension _ZIndexModifier: DOMViewModifier {
+extension _ZIndexModifier: @MainActor DOMViewModifier {
   public var attributes: [HTMLAttribute: String] {
     ["style": "z-index: \(index);"]
   }
@@ -51,11 +49,13 @@ public protocol HTMLModifierConvertible {
   func primitiveVisitor<V, Content: View>(
     content: Content,
     useDynamicLayout: Bool
-  ) -> ((V) -> ())? where V: ViewVisitor
+  ) -> ((V) -> Void)? where V: ViewVisitor
 }
 
 @_spi(TokamakStaticHTML)
-extension ModifiedContent: HTMLConvertible where Content: View,
+extension ModifiedContent: @MainActor HTMLConvertible
+where
+  Content: View,
   Modifier: HTMLConvertible
 {
   public var tag: String { modifier.tag }
@@ -65,7 +65,7 @@ extension ModifiedContent: HTMLConvertible where Content: View,
 
   public var innerHTML: String? { modifier.innerHTML }
 
-  public func primitiveVisitor<V>(useDynamicLayout: Bool) -> ((V) -> ())? where V: ViewVisitor {
+  public func primitiveVisitor<V>(useDynamicLayout: Bool) -> ((V) -> Void)? where V: ViewVisitor {
     (modifier as? HTMLModifierConvertible)?
       .primitiveVisitor(
         content: content,

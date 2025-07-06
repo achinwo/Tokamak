@@ -37,19 +37,19 @@
 public struct TextField<Label>: _PrimitiveView where Label: View {
   let label: Label
   let textBinding: Binding<String>
-  let onEditingChanged: (Bool) -> ()
-  let onCommit: () -> ()
+  let onEditingChanged: (Bool) -> Void
+  let onCommit: () -> Void
 
   @Environment(\.self)
   var environment
 }
 
-public extension TextField where Label == Text {
-  init<S>(
+extension TextField where Label == Text {
+  public init<S>(
     _ title: S,
     text: Binding<String>,
-    onEditingChanged: @escaping (Bool) -> () = { _ in },
-    onCommit: @escaping () -> () = {}
+    onEditingChanged: @escaping (Bool) -> Void = { _ in },
+    onCommit: @escaping () -> Void = {}
   ) where S: StringProtocol {
     label = Text(title)
     textBinding = text
@@ -65,7 +65,7 @@ public extension TextField where Label == Text {
   // ) where S : StringProtocol
 }
 
-extension TextField: ParentView {
+extension TextField: @MainActor ParentView {
   @_spi(TokamakCore)
   public var children: [AnyView] {
     (label as? GroupView)?.children ?? [AnyView(label)]
@@ -73,6 +73,8 @@ extension TextField: ParentView {
 }
 
 /// This is a helper type that works around absence of "package private" access control in Swift
+///
+@MainActor
 public struct _TextFieldProxy<Label: View> {
   public let subject: TextField<Label>
 
@@ -80,8 +82,8 @@ public struct _TextFieldProxy<Label: View> {
 
   public var label: Label { subject.label }
   public var textBinding: Binding<String> { subject.textBinding }
-  public var onCommit: () -> () { subject.onCommit }
-  public var onEditingChanged: (Bool) -> () { subject.onEditingChanged }
+  public var onCommit: () -> Void { subject.onCommit }
+  public var onEditingChanged: (Bool) -> Void { subject.onEditingChanged }
   public var textFieldStyle: _AnyTextFieldStyle { subject.environment.textFieldStyle }
   public var foregroundColor: AnyColorBox.ResolvedValue? {
     guard let foregroundColor = subject.environment.foregroundColor else {

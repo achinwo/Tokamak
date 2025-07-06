@@ -14,16 +14,16 @@
 //
 //  Created by Carson Katri on 7/16/20.
 //
-
+@MainActor
 struct _TupleScene<T>: Scene, GroupScene {
   let value: T
   let children: [_AnyScene]
-  let visit: (SceneVisitor) -> ()
+  let visit: (SceneVisitor) -> Void
 
   init(
     _ value: T,
     children: [_AnyScene],
-    visit: @escaping (SceneVisitor) -> ()
+    visit: @escaping (SceneVisitor) -> Void
   ) {
     self.value = value
     self.children = children

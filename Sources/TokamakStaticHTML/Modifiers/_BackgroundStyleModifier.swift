@@ -14,7 +14,7 @@
 
 @_spi(TokamakCore) import TokamakCore
 
-extension _BackgroundStyleModifier: DOMViewModifier {
+extension _BackgroundStyleModifier: @MainActor DOMViewModifier {
   public var isOrderDependent: Bool { true }
   private func attributes(
     for material: _MaterialStyle,
@@ -36,12 +36,12 @@ extension _BackgroundStyleModifier: DOMViewModifier {
     return [
       "style":
         """
-        background-color: rgba(\(color.red * 255), \(color.green * 255), \(color
+      background-color: rgba(\(color.red * 255), \(color.green * 255), \(color
           .blue * 255), \(blur
           .opacity));
-        -webkit-backdrop-filter: blur(\(blur.radius)px);
-        backdrop-filter: blur(\(blur.radius)px);
-        """,
+      -webkit-backdrop-filter: blur(\(blur.radius)px);
+      backdrop-filter: blur(\(blur.radius)px);
+      """
     ]
   }
 
@@ -51,11 +51,11 @@ extension _BackgroundStyleModifier: DOMViewModifier {
       in: environment,
       role: .fill
     ) {
-      if case let .foregroundMaterial(color, material) = resolved {
+      if case .foregroundMaterial(let color, let material) = resolved {
         return attributes(for: material, color: color)
       } else if let color = resolved.color(at: 0) {
         return [
-          "style": "background-color: \(color.cssValue(environment));",
+          "style": "background-color: \(color.cssValue(environment));"
         ]
       }
     }
@@ -64,7 +64,7 @@ extension _BackgroundStyleModifier: DOMViewModifier {
 }
 
 @_spi(TokamakStaticHTML)
-extension _BackgroundStyleModifier: HTMLConvertible,
+extension _BackgroundStyleModifier: @MainActor HTMLConvertible, @MainActor
   HTMLModifierConvertible
 {
   public var tag: String { "div" }
@@ -74,7 +74,7 @@ extension _BackgroundStyleModifier: HTMLConvertible,
       in: environment,
       role: .fill
     )
-    if case let .foregroundMaterial(color, material) = resolved {
+    if case .foregroundMaterial(let color, let material) = resolved {
       return attributes(for: material, color: color)
     } else {
       return [:]
@@ -84,7 +84,7 @@ extension _BackgroundStyleModifier: HTMLConvertible,
   public func primitiveVisitor<V, Content>(
     content: Content,
     useDynamicLayout: Bool
-  ) -> ((V) -> ())? where V: ViewVisitor, Content: View {
+  ) -> ((V) -> Void)? where V: ViewVisitor, Content: View {
     let resolved = style.resolve(
       for: .resolveStyle(levels: 0..<1),
       in: environment,
@@ -95,11 +95,12 @@ extension _BackgroundStyleModifier: HTMLConvertible,
     } else {
       return {
         $0
-          .visit(_BackgroundLayout(
-            content: content,
-            background: Rectangle().fill(style),
-            alignment: .center
-          ))
+          .visit(
+            _BackgroundLayout(
+              content: content,
+              background: Rectangle().fill(style),
+              alignment: .center
+            ))
       }
     }
   }

@@ -39,7 +39,7 @@ extension ShapeStyle {
   }
 }
 
-extension _StrokedShape: ShapeAttributes {
+extension _StrokedShape: @MainActor ShapeAttributes {
   func attributes(_ style: ShapeStyle) -> [HTMLAttribute: String] {
     if let color = style.resolve(
       for: .resolveStyle(levels: 0..<1),
@@ -71,7 +71,7 @@ private struct GradientID: Hashable {
   }
 }
 
-extension _ShapeView: _HTMLPrimitive {
+extension _ShapeView: @MainActor _HTMLPrimitive {
   private func gradientID(for gradient: Gradient, in style: _GradientStyle) -> String {
     "gradient\(GradientID(gradient).hashValue)___\(style.hashValue)"
   }
@@ -81,7 +81,7 @@ extension _ShapeView: _HTMLPrimitive {
       return shapeAttributes.attributes(style)
     } else {
       switch resolvedStyle {
-      case let .gradient(gradient, style):
+      case .gradient(let gradient, let style):
 
         if case .angular = style {
           return [:]
@@ -91,8 +91,7 @@ extension _ShapeView: _HTMLPrimitive {
       default:
         if let color = resolvedStyle?.color(at: 0) {
           return ["style": "fill: \(color.cssValue(environment));"]
-        } else if
-          let foregroundStyle = environment._foregroundStyle,
+        } else if let foregroundStyle = environment._foregroundStyle,
           let color = foregroundStyle.resolve(
             for: .resolveStyle(levels: 0..<1),
             in: environment,
@@ -110,15 +109,17 @@ extension _ShapeView: _HTMLPrimitive {
   func svgDefinitions(resolvedStyle: _ResolvedStyle?)
     -> HTML<ForEach<[EnumeratedSequence<[Gradient.Stop]>.Element], Int, HTML<EmptyView>>>?
   {
-    guard case let .gradient(gradient, style) = resolvedStyle else { return nil }
+    guard case .gradient(let gradient, let style) = resolvedStyle else { return nil }
     let stops = ForEach(Array(gradient.stops.enumerated()), id: \.offset) {
-      HTML("stop", namespace: namespace, [
-        "offset": "\($0.element.location * 100)%",
-        "stop-color": $0.element.color.cssValue(environment),
-      ])
+      HTML(
+        "stop", namespace: namespace,
+        [
+          "offset": "\($0.element.location * 100)%",
+          "stop-color": $0.element.color.cssValue(environment),
+        ])
     }
     switch style {
-    case let .linear(startPoint, endPoint):
+    case .linear(let startPoint, let endPoint):
       return HTML(
         "linearGradient",
         namespace: namespace,
@@ -133,7 +134,7 @@ extension _ShapeView: _HTMLPrimitive {
       ) {
         stops
       }
-    case let .radial(center, startRadius, endRadius):
+    case .radial(let center, let startRadius, let endRadius):
       return HTML(
         "radialGradient",
         namespace: namespace,
@@ -155,7 +156,9 @@ extension _ShapeView: _HTMLPrimitive {
   }
 
   func cssGradient(resolvedStyle: _ResolvedStyle?) -> String? {
-    guard case let .gradient(gradient, .angular(center, startAngle, endAngle)) = resolvedStyle
+    guard
+      case .gradient(let gradient, .angular(let center, let startAngle, let endAngle)) =
+        resolvedStyle
     else { return nil }
     let ratio = CGFloat((endAngle - startAngle).degrees / 360.0)
     var cssStops = gradient.stops.enumerated().map {
@@ -172,9 +175,8 @@ extension _ShapeView: _HTMLPrimitive {
     if cssStops.count == 1 {
       cssStops.append(cssStops[0])
     }
-    return "background:conic-gradient(from \(startAngle.degrees + 90)deg at " +
-      "\(center.x * 100)% \(center.y * 100)%, " +
-      "\(cssStops.joined(separator: ", ")));"
+    return "background:conic-gradient(from \(startAngle.degrees + 90)deg at "
+      + "\(center.x * 100)% \(center.y * 100)%, " + "\(cssStops.joined(separator: ", ")));"
   }
 
   @_spi(TokamakStaticHTML)
@@ -187,36 +189,43 @@ extension _ShapeView: _HTMLPrimitive {
       role: Content.role
     )
 
-    if let view = mapAnyView(path, transform: { (html: HTML<HTML<EmptyView>?>) -> AnyView in
-      let uniqueKeys = { (first: String, second: String) in "\(first) \(second)" }
-      let mergedAttributes = html.attributes.merging(
-        attributes(resolvedStyle: resolvedStyle),
-        uniquingKeysWith: uniqueKeys
-      )
-      return AnyView(HTML(html.tag, mergedAttributes) {
-        if let cssGradient = cssGradient(resolvedStyle: resolvedStyle) {
-          HTML(
-            "clipPath",
-            namespace: namespace,
-            ["id": "clip", "width": "100%", "height": "100%"]
-          ) {
-            html.content
-          }
-          HTML(
-            "foreignObject",
-            namespace: namespace,
-            ["clip-path": "url(#clip)", "width": "100%", "height": "100%", "style": cssGradient]
-          )
-        } else {
-          html.content
-          if let svgDefs = svgDefinitions(resolvedStyle: resolvedStyle) {
-            HTML("defs", namespace: namespace) {
-              svgDefs
+    if let view = mapAnyView(
+      path,
+      transform: { (html: HTML<HTML<EmptyView>?>) -> AnyView in
+        let uniqueKeys = { (first: String, second: String) in "\(first) \(second)" }
+        let mergedAttributes = html.attributes.merging(
+          attributes(resolvedStyle: resolvedStyle),
+          uniquingKeysWith: uniqueKeys
+        )
+        return AnyView(
+          HTML(html.tag, mergedAttributes) {
+            if let cssGradient = cssGradient(resolvedStyle: resolvedStyle) {
+              HTML(
+                "clipPath",
+                namespace: namespace,
+                ["id": "clip", "width": "100%", "height": "100%"]
+              ) {
+                html.content
+              }
+              HTML(
+                "foreignObject",
+                namespace: namespace,
+                [
+                  "clip-path": "url(#clip)", "width": "100%", "height": "100%",
+                  "style": cssGradient,
+                ]
+              )
+            } else {
+              html.content
+              if let svgDefs = svgDefinitions(resolvedStyle: resolvedStyle) {
+                HTML("defs", namespace: namespace) {
+                  svgDefs
+                }
+              }
             }
-          }
-        }
+          })
       })
-    }) {
+    {
       return view
     } else {
       return path
@@ -225,7 +234,7 @@ extension _ShapeView: _HTMLPrimitive {
 }
 
 @_spi(TokamakStaticHTML)
-extension _ShapeView: HTMLConvertible {
+extension _ShapeView: @MainActor HTMLConvertible {
   public var tag: String { "svg" }
   public var namespace: String? { "http://www.w3.org/2000/svg" }
   public func attributes(useDynamicLayout: Bool) -> [HTMLAttribute: String] {
@@ -237,7 +246,7 @@ extension _ShapeView: HTMLConvertible {
     return attributes(resolvedStyle: resolvedStyle)
   }
 
-  public func primitiveVisitor<V>(useDynamicLayout: Bool) -> ((V) -> ())? where V: ViewVisitor {
+  public func primitiveVisitor<V>(useDynamicLayout: Bool) -> ((V) -> Void)? where V: ViewVisitor {
     let resolvedStyle = style.resolve(
       for: .resolveStyle(levels: 0..<1),
       in: environment,
@@ -247,29 +256,32 @@ extension _ShapeView: HTMLConvertible {
     return {
       if let cssGradient = cssGradient(resolvedStyle: resolvedStyle) {
         $0
-          .visit(HTML(
-            "clipPath",
+          .visit(
+            HTML(
+              "clipPath",
+              namespace: namespace,
+              ["id": "clip", "width": "100%", "height": "100%"]
+            ) {
+              path
+            })
+        $0.visit(
+          HTML(
+            "foreignObject",
             namespace: namespace,
-            ["id": "clip", "width": "100%", "height": "100%"]
-          ) {
-            path
-          })
-        $0.visit(HTML(
-          "foreignObject",
-          namespace: namespace,
-          [
-            "clip-path": "url(#clip)",
-            "width": "100%",
-            "height": "100%",
-            "style": cssGradient,
-          ]
-        ))
+            [
+              "clip-path": "url(#clip)",
+              "width": "100%",
+              "height": "100%",
+              "style": cssGradient,
+            ]
+          ))
       } else {
         $0.visit(path)
         if let svgDefs = svgDefinitions(resolvedStyle: resolvedStyle) {
-          $0.visit(HTML("defs", namespace: namespace) {
-            svgDefs
-          })
+          $0.visit(
+            HTML("defs", namespace: namespace) {
+              svgDefs
+            })
         }
       }
     }

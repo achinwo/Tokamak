@@ -13,35 +13,34 @@
 // limitations under the License.
 
 // FIXME: these should have standalone implementations
-public extension View {
+extension View {
   @_spi(TokamakCore)
-  func _onMount(perform action: (() -> ())? = nil) -> some View {
+  public func _onMount(perform action: (() -> Void)? = nil) -> some View {
     modifier(_AppearanceActionModifier(appear: action))
   }
 
   @_spi(TokamakCore)
-  func _onUpdate(perform action: (() -> ())? = nil) -> some View {
+  public func _onUpdate(perform action: (() -> Void)? = nil) -> some View {
     modifier(_LifecycleActionModifier(update: action))
   }
 
   @_spi(TokamakCore)
-  func _onUnmount(perform action: (() -> ())? = nil) -> some View {
+  public func _onUnmount(perform action: (() -> Void)? = nil) -> some View {
     modifier(_AppearanceActionModifier(disappear: action))
   }
 }
 
 protocol LifecycleActionType {
-  var update: (() -> ())? { get }
+  var update: (() -> Void)? { get }
 }
 
 struct _LifecycleActionModifier: ViewModifier {
-  var update: (() -> ())?
+  var update: (() -> Void)?
 
   typealias Body = Never
 }
 
-extension ModifiedContent: LifecycleActionType
-  where Content: View, Modifier == _LifecycleActionModifier
-{
-  var update: (() -> ())? { modifier.update }
+extension ModifiedContent: @MainActor LifecycleActionType
+where Content: View, Modifier == _LifecycleActionModifier {
+  var update: (() -> Void)? { modifier.update }
 }

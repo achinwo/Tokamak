@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+@MainActor
 final class MountedScene<R: Renderer>: MountedCompositeElement<R> {
   let title: String?
 
@@ -37,7 +38,8 @@ final class MountedScene<R: Renderer>: MountedCompositeElement<R> {
     super.prepareForMount(with: transaction)
     let childBody = reconciler.render(mountedScene: self)
 
-    let child: MountedElement<R> = childBody
+    let child: MountedElement<R> =
+      childBody
       .makeMountedElement(reconciler.renderer, parentTarget, environmentValues, self)
     mountedChildren = [child]
     child.mount(before: sibling, on: self, in: reconciler, with: transaction)
@@ -55,9 +57,9 @@ final class MountedScene<R: Renderer>: MountedCompositeElement<R> {
       .forEach { $0.unmount(in: reconciler, with: transaction, parentTask: parentTask) }
   }
 
-  override func update(in reconciler: StackReconciler<R>, with transaction: Transaction) {
+  override func update(in reconciler: StackReconciler<R>, with transaction: Transaction) async {
     let element = reconciler.render(mountedScene: self)
-    reconciler.reconcile(
+    await reconciler.reconcile(
       self,
       with: element,
       transaction: transaction,
@@ -65,9 +67,9 @@ final class MountedScene<R: Renderer>: MountedCompositeElement<R> {
       updateChild: {
         $0.environmentValues = environmentValues
         switch element {
-        case let .scene(scene):
+        case .scene(let scene):
           $0.scene = _AnyScene(scene)
-        case let .view(view):
+        case .view(let view):
           $0.view = AnyView(view)
         }
         $0.transaction = transaction
@@ -82,9 +84,9 @@ final class MountedScene<R: Renderer>: MountedCompositeElement<R> {
 extension _AnyScene.BodyResult {
   var type: Any.Type {
     switch self {
-    case let .scene(scene):
+    case .scene(let scene):
       return scene.type
-    case let .view(view):
+    case .view(let view):
       return view.type
     }
   }
@@ -96,9 +98,9 @@ extension _AnyScene.BodyResult {
     _ parent: MountedElement<R>?
   ) -> MountedElement<R> {
     switch self {
-    case let .scene(scene):
+    case .scene(let scene):
       return scene.makeMountedScene(renderer, parentTarget, environmentValues, parent)
-    case let .view(view):
+    case .view(let view):
       return view.makeMountedView(renderer, parentTarget, environmentValues, .init(), parent)
     }
   }
@@ -113,7 +115,7 @@ extension _AnyScene {
   ) -> MountedScene<R> {
     var title: String?
     if let titledSelf = scene as? TitledScene,
-       let text = titledSelf.title
+      let text = titledSelf.title
     {
       title = _TextProxy(text).rawText
     }
@@ -126,7 +128,7 @@ extension _AnyScene {
           environmentValues,
           .init(),
           parent
-        ),
+        )
       ]
     } else if let groupScene = scene as? GroupScene {
       children = groupScene.children.map {

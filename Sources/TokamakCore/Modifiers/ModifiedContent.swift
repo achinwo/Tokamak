@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+@MainActor
 protocol ModifierContainer {
   var environmentModifier: _EnvironmentModifier? { get }
 }
@@ -19,6 +19,7 @@ protocol ModifierContainer {
 protocol ModifiedContentProtocol {}
 
 /// A value with a modifier applied to it.
+@MainActor
 public struct ModifiedContent<Content, Modifier>: ModifiedContentProtocol {
   @Environment(\.self)
   public var environment
@@ -59,8 +60,8 @@ extension ModifiedContent: ViewModifier where Content: ViewModifier, Modifier: V
   }
 }
 
-public extension ViewModifier {
-  func concat<T>(_ modifier: T) -> ModifiedContent<Self, T> where T: ViewModifier {
+extension ViewModifier {
+  public func concat<T>(_ modifier: T) -> ModifiedContent<Self, T> where T: ViewModifier {
     .init(content: self, modifier: modifier)
   }
 }

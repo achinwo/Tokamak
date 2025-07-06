@@ -15,7 +15,7 @@
 //  Created by Carson Katri on 7/12/21.
 //
 
-public enum ControlSize: CaseIterable, Hashable {
+public enum ControlSize: CaseIterable, Hashable, Sendable {
   case mini
   case small
   case regular
@@ -23,8 +23,8 @@ public enum ControlSize: CaseIterable, Hashable {
 }
 
 extension EnvironmentValues {
-  private enum ControlSizeKey: EnvironmentKey {
-    static var defaultValue: ControlSize = .regular
+  private enum ControlSizeKey: EnvironmentKey, Sendable {
+    static let defaultValue: ControlSize = .regular
   }
 
   public var controlSize: ControlSize {
@@ -37,9 +37,9 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func controlSize(
+  public func controlSize(
     _ controlSize: ControlSize
   ) -> some View {
     environment(\.controlSize, controlSize)

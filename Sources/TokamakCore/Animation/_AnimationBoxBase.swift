@@ -17,7 +17,7 @@
 
 import Foundation
 
-public class _AnimationBoxBase: Equatable, Sendable {
+public class _AnimationBoxBase: Equatable, @unchecked Sendable {
 
   init() {}
 
@@ -48,7 +48,7 @@ public class _AnimationBoxBase: Equatable, Sendable {
       self.style = style
     }
 
-    public enum _Style: Equatable {
+    public enum _Style: Equatable, Sendable {
       case timingCurve(Double, Double, Double, Double, duration: Double)
       case solver(_AnimationSolver)
 
@@ -98,10 +98,9 @@ public class _AnimationBoxBase: Equatable, Sendable {
   }
 }
 
-final class StyleAnimationBox: _AnimationBoxBase {
+final class StyleAnimationBox: _AnimationBoxBase, @unchecked Sendable {
   let style: _Resolved._Style
 
-  @MainActor
   init(style: _Resolved._Style) {
     self.style = style
   }
@@ -116,7 +115,7 @@ final class StyleAnimationBox: _AnimationBoxBase {
   }
 }
 
-final class DelayedAnimationBox: _AnimationBoxBase {
+final class DelayedAnimationBox: _AnimationBoxBase, @unchecked Sendable {
   let delay: Double
   let parent: _AnimationBoxBase
 
@@ -137,7 +136,7 @@ final class DelayedAnimationBox: _AnimationBoxBase {
   }
 }
 
-final class RetimedAnimationBox: _AnimationBoxBase {
+final class RetimedAnimationBox: _AnimationBoxBase, @unchecked Sendable {
   let speed: Double
   let parent: _AnimationBoxBase
 
@@ -158,7 +157,7 @@ final class RetimedAnimationBox: _AnimationBoxBase {
   }
 }
 
-final class RepeatedAnimationBox: _AnimationBoxBase {
+final class RepeatedAnimationBox: _AnimationBoxBase, @unchecked Sendable {
   let style: _AnimationBoxBase._Resolved._RepeatStyle
   let parent: _AnimationBoxBase
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-public protocol PickerStyle {}
+public protocol PickerStyle: Sendable {}
 
 public struct PopUpButtonPickerStyle: PickerStyle {}
 
@@ -24,8 +24,8 @@ public struct WheelPickerStyle: PickerStyle {}
 
 public struct DefaultPickerStyle: PickerStyle {}
 
-enum PickerStyleKey: EnvironmentKey {
-  static var defaultValue: PickerStyle = DefaultPickerStyle()
+enum PickerStyleKey: EnvironmentKey, Sendable {
+  static let defaultValue: PickerStyle = DefaultPickerStyle()
 }
 
 extension EnvironmentValues {
@@ -39,8 +39,8 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
-  func pickerStyle(_ style: PickerStyle) -> some View {
+extension View {
+  public func pickerStyle(_ style: PickerStyle) -> some View {
     environment(\.pickerStyle, style)
   }
 }

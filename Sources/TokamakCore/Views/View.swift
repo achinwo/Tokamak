@@ -53,12 +53,12 @@ extension _PrimitiveView {
 }
 
 /// A `View` type that renders with subviews, usually specified in the `Content` type argument
-public protocol ParentView {
+@MainActor public protocol ParentView {
   var children: [AnyView] { get }
 }
 
 /// A `View` type that is not rendered but "flattened", rendering all its children instead.
-protocol GroupView: ParentView {}
+@MainActor protocol GroupView: ParentView {}
 
 /// Calls `fatalError` with an explanation that a given `type` is a primitive `View`
 public func neverBody(_ type: String) -> Never {

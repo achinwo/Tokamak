@@ -20,6 +20,7 @@ import OpenCombineShim
 // This is very similar to `MountedCompositeView`. However, the `mountedBody`
 // is the computed content of the specified `Scene`, instead of having child
 // `View`s
+@MainActor
 final class MountedApp<R: Renderer>: MountedCompositeElement<R> {
   override func mount(
     before sibling: R.TargetType? = nil,
@@ -28,6 +29,8 @@ final class MountedApp<R: Renderer>: MountedCompositeElement<R> {
     with transaction: Transaction
   ) {
     super.prepareForMount(with: transaction)
+
+    debugPrint("Mounting app \(app) - \(R.self)")
 
     // `App` elements have no siblings, hence the `before` argument is discarded.
     // They also have no parents, so the `parent` argument is discarded as well.
@@ -58,7 +61,8 @@ final class MountedApp<R: Renderer>: MountedCompositeElement<R> {
   ///   - childBody: The body of the child scene to mount for this app.
   /// - Returns: Returns an instance of the `MountedScene` class that's already mounted in this app.
   private func mountChild(_ renderer: R, _ childBody: _AnyScene) -> MountedScene<R> {
-    let mountedScene: MountedScene<R> = childBody
+    let mountedScene: MountedScene<R> =
+      childBody
       .makeMountedScene(renderer, parentTarget, environmentValues, self)
     if let title = mountedScene.title {
       // swiftlint:disable force_cast
@@ -67,19 +71,21 @@ final class MountedApp<R: Renderer>: MountedCompositeElement<R> {
     return mountedScene
   }
 
-  override func update(in reconciler: StackReconciler<R>, with transaction: Transaction) {
+  override func update(in reconciler: StackReconciler<R>, with transaction: Transaction) async {
     let element = reconciler.render(mountedApp: self)
-    reconciler.reconcile(
+    await reconciler.reconcile(
       self,
       with: element,
       transaction: transaction,
       getElementType: { $0.type },
-      updateChild: {
-        $0.environmentValues = environmentValues
-        $0.scene = _AnyScene(element)
-        $0.transaction = transaction
+      updateChild: { elem in
+        Task { @MainActor in
+          elem.environmentValues = environmentValues
+          elem.scene = _AnyScene(element)
+          elem.transaction = transaction
+        }
       },
-      mountChild: { mountChild(reconciler.renderer, $0) }
+      mountChild: { @MainActor scene in mountChild(reconciler.renderer, scene) }
     )
   }
 }

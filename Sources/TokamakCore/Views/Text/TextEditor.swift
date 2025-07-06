@@ -20,6 +20,7 @@ public struct TextEditor: _PrimitiveView {
   }
 }
 
+@MainActor
 public struct _TextEditorProxy {
   public let subject: TextEditor
 

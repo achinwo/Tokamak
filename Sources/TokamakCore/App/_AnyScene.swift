@@ -14,11 +14,12 @@
 //
 //  Created by Carson Katri on 7/19/20.
 //
-
+@MainActor
 public struct _AnyScene: Scene {
   /** The result type of `bodyClosure` allowing to disambiguate between scenes that
    produce other scenes or scenes that only produce containing views.
    */
+  @MainActor
   enum BodyResult {
     case scene(_AnyScene)
     case view(AnyView)

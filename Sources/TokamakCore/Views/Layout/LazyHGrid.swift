@@ -39,6 +39,7 @@ public struct LazyHGrid<Content>: _PrimitiveView where Content: View {
   }
 }
 
+@MainActor
 public struct _LazyHGridProxy<Content> where Content: View {
   public let subject: LazyHGrid<Content>
 

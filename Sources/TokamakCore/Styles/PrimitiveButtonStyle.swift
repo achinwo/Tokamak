@@ -14,7 +14,7 @@
 //
 //  Created by Carson Katri on 7/12/21.
 //
-
+@MainActor
 public protocol PrimitiveButtonStyle {
   associatedtype Body: View
   @ViewBuilder
@@ -30,7 +30,7 @@ public struct PrimitiveButtonStyleConfiguration {
   public let role: ButtonRole?
   public let label: PrimitiveButtonStyleConfiguration.Label
 
-  let action: () -> ()
+  let action: () -> Void
   public func trigger() { action() }
 }
 
@@ -92,7 +92,8 @@ public struct LinkButtonStyle: ButtonStyle {
   }
 }
 
-struct AnyPrimitiveButtonStyle: PrimitiveButtonStyle {
+@MainActor
+struct AnyPrimitiveButtonStyle: @MainActor PrimitiveButtonStyle {
   let bodyClosure: (PrimitiveButtonStyleConfiguration) -> AnyView
   let type: Any.Type
 
@@ -109,17 +110,18 @@ struct AnyPrimitiveButtonStyle: PrimitiveButtonStyle {
 }
 
 extension EnvironmentValues {
-  enum ButtonStyleKey: EnvironmentKey {
+  enum ButtonStyleKey: @MainActor EnvironmentKey {
     enum ButtonStyleKeyValue {
       case primitiveButtonStyle(AnyPrimitiveButtonStyle)
       case buttonStyle(AnyButtonStyle)
     }
 
-    public static let defaultValue: ButtonStyleKeyValue = .primitiveButtonStyle(
+    @MainActor public static let defaultValue: ButtonStyleKeyValue = .primitiveButtonStyle(
       .init(DefaultButtonStyle())
     )
   }
 
+  @MainActor
   var buttonStyle: ButtonStyleKey.ButtonStyleKeyValue {
     get {
       self[ButtonStyleKey.self]
@@ -130,14 +132,14 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
-  func buttonStyle<S>(
+extension View {
+  public func buttonStyle<S>(
     _ style: S
   ) -> some View where S: PrimitiveButtonStyle {
     environment(\.buttonStyle, .primitiveButtonStyle(.init(style)))
   }
 
-  func buttonStyle<S>(_ style: S) -> some View where S: ButtonStyle {
+  public func buttonStyle<S>(_ style: S) -> some View where S: ButtonStyle {
     environment(\.buttonStyle, .buttonStyle(.init(style)))
   }
 }

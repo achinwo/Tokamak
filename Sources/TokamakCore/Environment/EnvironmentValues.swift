@@ -14,7 +14,7 @@
 
 import OpenCombineShim
 
-public struct EnvironmentValues: CustomStringConvertible {
+public struct EnvironmentValues: CustomStringConvertible, @unchecked Sendable {
   public var description: String {
     "EnvironmentValues: \(values.count)"
   }
@@ -65,8 +65,8 @@ struct IsEnabledKey: EnvironmentKey {
   static let defaultValue = true
 }
 
-public extension EnvironmentValues {
-  var isEnabled: Bool {
+extension EnvironmentValues {
+  public var isEnabled: Bool {
     get {
       self[IsEnabledKey.self]
     }
@@ -76,7 +76,7 @@ public extension EnvironmentValues {
   }
 }
 
-struct _EnvironmentValuesWritingModifier: ViewModifier, _EnvironmentModifier {
+struct _EnvironmentValuesWritingModifier: @MainActor ViewModifier, @MainActor _EnvironmentModifier {
   let environmentValues: EnvironmentValues
 
   func body(content: Content) -> some View {
@@ -88,8 +88,8 @@ struct _EnvironmentValuesWritingModifier: ViewModifier, _EnvironmentModifier {
   }
 }
 
-public extension View {
-  func environmentValues(_ values: EnvironmentValues) -> some View {
+extension View {
+  public func environmentValues(_ values: EnvironmentValues) -> some View {
     modifier(_EnvironmentValuesWritingModifier(environmentValues: values))
   }
 }

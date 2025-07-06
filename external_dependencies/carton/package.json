@@ -1,0 +1,34 @@
+{
+  "name": "carton",
+  "version": "0.0.0",
+  "private": true,
+  "description": "📦 Watcher, bundler, and test runner for your SwiftWasm apps ",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swiftwasm/carton.git"
+  },
+  "keywords": [
+    "swift",
+    "webassembly",
+    "swiftwasm",
+    "bundler"
+  ],
+  "author": "Carton contributors",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/swiftwasm/carton/issues"
+  },
+  "homepage": "https://github.com/swiftwasm/carton#readme",
+  "devDependencies": {
+    "@bjorn3/browser_wasi_shim": "^0.3.0",
+    "@types/node": "^20.12.7",
+    "@types/reconnectingwebsocket": "^1.0.10",
+    "esbuild": "^0.14.38",
+    "npm-run-all": "^4.1.5",
+    "reconnecting-websocket": "^4.4.0",
+    "typescript": "^5.4.5",
+    "playwright": "^1.48.2",
+    "wasm-imports-parser": "1.0.4"
+  }
+}

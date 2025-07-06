@@ -17,7 +17,10 @@
 
 import OpenCombineShim
 
+@MainActor
 final class MountedCompositeView<R: Renderer>: MountedCompositeElement<R> {
+
+  @MainActor
   override func mount(
     before sibling: R.TargetType? = nil,
     on parent: MountedElement<R>? = nil,
@@ -109,13 +112,13 @@ final class MountedCompositeView<R: Renderer>: MountedCompositeElement<R> {
     }
   }
 
-  override func update(in reconciler: StackReconciler<R>, with transaction: Transaction) {
+  override func update(in reconciler: StackReconciler<R>, with transaction: Transaction) async {
     var transaction = transaction
     transaction.disablesAnimations = false
     (view.view as? _TransactionModifierProtocol)?.modifyTransaction(&transaction)
     updateVariadicView()
     let element = reconciler.render(compositeView: self)
-    reconciler.reconcile(
+    await reconciler.reconcile(
       self,
       with: element,
       transaction: transaction,
@@ -164,12 +167,12 @@ final class MountedCompositeView<R: Renderer>: MountedCompositeElement<R> {
   }
 }
 
-private extension GroupView {
-  var recursiveChildren: [AnyView] {
+extension GroupView {
+  fileprivate var recursiveChildren: [AnyView] {
     var allChildren = [AnyView]()
     for child in children {
       if !(child.view is ModifiedContentProtocol),
-         let group = child.view as? GroupView
+        let group = child.view as? GroupView
       {
         allChildren.append(contentsOf: group.recursiveChildren)
       } else {

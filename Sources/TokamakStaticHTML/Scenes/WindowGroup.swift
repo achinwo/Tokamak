@@ -17,7 +17,7 @@
 
 import TokamakCore
 
-extension WindowGroup: SceneDeferredToRenderer {
+extension WindowGroup: @MainActor SceneDeferredToRenderer {
   public var deferredBody: AnyView {
     AnyView(content)
   }

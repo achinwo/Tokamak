@@ -15,7 +15,7 @@
 //  Created by Carson Katri on 7/22/20.
 //
 
-public struct StrokedPath: Equatable {
+public struct StrokedPath: Equatable, Sendable {
   public let path: Path
   public let style: StrokeStyle
 

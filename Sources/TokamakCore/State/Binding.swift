@@ -15,10 +15,9 @@
 //  Created by Max Desiatov on 09/02/2019.
 //
 
-/** Note that `set` functions are not `mutating`, they never update the
- view's state in-place synchronously, but only schedule an update with
- the renderer at a later time.
- */
+/// Note that `set` functions are not `mutating`, they never update the
+/// view's state in-place synchronously, but only schedule an update with
+/// the renderer at a later time.
 @propertyWrapper
 @dynamicMemberLookup
 public struct Binding<Value>: DynamicProperty {
@@ -30,17 +29,17 @@ public struct Binding<Value>: DynamicProperty {
   public var transaction: Transaction
 
   private let get: () -> Value
-  private let set: (Value, Transaction) -> ()
+  private let set: (Value, Transaction) -> Void
 
   public var projectedValue: Binding<Value> { self }
 
-  public init(get: @escaping () -> Value, set: @escaping (Value) -> ()) {
+  public init(get: @escaping () -> Value, set: @escaping (Value) -> Void) {
     self.get = get
     self.set = { v, _ in set(v) }
     transaction = .init(animation: nil)
   }
 
-  public init(get: @escaping () -> Value, set: @escaping (Value, Transaction) -> ()) {
+  public init(get: @escaping () -> Value, set: @escaping (Value, Transaction) -> Void) {
     self.transaction = .init(animation: nil)
     self.get = get
     self.set = {
@@ -54,7 +53,8 @@ public struct Binding<Value>: DynamicProperty {
     .init(
       get: {
         self.wrappedValue[keyPath: keyPath]
-      }, set: {
+      },
+      set: {
         self.wrappedValue[keyPath: keyPath] = $0
       }
     )
@@ -65,14 +65,14 @@ public struct Binding<Value>: DynamicProperty {
   }
 }
 
-public extension Binding {
-  func transaction(_ transaction: Transaction) -> Binding<Value> {
+extension Binding {
+  public func transaction(_ transaction: Transaction) -> Binding<Value> {
     var binding = self
     binding.transaction = transaction
     return binding
   }
 
-  func animation(_ animation: Animation? = .default) -> Binding<Value> {
+  public func animation(_ animation: Animation? = .default) -> Binding<Value> {
     transaction(.init(animation: animation))
   }
 }
@@ -87,7 +87,7 @@ extension Binding: @MainActor Sequence where Value: MutableCollection {
   public typealias SubSequence = Slice<Binding<Value>>
 }
 
-extension Binding: Collection where Value: MutableCollection {
+extension Binding: @MainActor Collection where Value: MutableCollection {
   public typealias Index = Value.Index
   public typealias Indices = Value.Indices
   public var startIndex: Binding<Value>.Index { wrappedValue.startIndex }
@@ -111,7 +111,9 @@ extension Binding: Collection where Value: MutableCollection {
   }
 }
 
-extension Binding: BidirectionalCollection where Value: BidirectionalCollection,
+extension Binding: @MainActor BidirectionalCollection
+where
+  Value: BidirectionalCollection,
   Value: MutableCollection
 {
   public func index(before i: Binding<Value>.Index) -> Binding<Value>.Index {
@@ -123,5 +125,8 @@ extension Binding: BidirectionalCollection where Value: BidirectionalCollection,
   }
 }
 
-extension Binding: RandomAccessCollection where Value: MutableCollection,
-  Value: RandomAccessCollection {}
+extension Binding: @MainActor RandomAccessCollection
+where
+  Value: MutableCollection,
+  Value: RandomAccessCollection
+{}

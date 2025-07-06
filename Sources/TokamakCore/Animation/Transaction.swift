@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-public struct Transaction {
+public struct Transaction: Sendable {
   /// The overridden transaction for a state change in a `withTransaction` block.
   /// Is always set back to `nil` when the block exits.
-  static var _active: Self?
+  @MainActor static var _active: Self?
 
   public var animation: Animation?
 
@@ -30,6 +30,7 @@ public struct Transaction {
   }
 }
 
+@MainActor
 public func withTransaction<Result>(
   _ transaction: Transaction,
   _ body: () throws -> Result
@@ -39,6 +40,7 @@ public func withTransaction<Result>(
   return try body()
 }
 
+@MainActor
 public func withAnimation<Result>(
   _ animation: Animation? = .default,
   _ body: () throws -> Result
@@ -52,10 +54,10 @@ protocol _TransactionModifierProtocol {
 
 @frozen
 public struct _TransactionModifier: ViewModifier {
-  public var transform: (inout Transaction) -> ()
+  public var transform: (inout Transaction) -> Void
 
   @inlinable
-  public init(transform: @escaping (inout Transaction) -> ()) {
+  public init(transform: @escaping (inout Transaction) -> Void) {
     self.transform = transform
   }
 
@@ -64,15 +66,14 @@ public struct _TransactionModifier: ViewModifier {
   }
 }
 
-extension _TransactionModifier: _TransactionModifierProtocol {
+extension _TransactionModifier: @MainActor _TransactionModifierProtocol {
   func modifyTransaction(_ transaction: inout Transaction) {
     transform(&transaction)
   }
 }
 
-extension ModifiedContent: _TransactionModifierProtocol
-  where Modifier: _TransactionModifierProtocol
-{
+extension ModifiedContent: @MainActor _TransactionModifierProtocol
+where Modifier: _TransactionModifierProtocol {
   func modifyTransaction(_ transaction: inout Transaction) {
     modifier.modifyTransaction(&transaction)
   }
@@ -86,7 +87,7 @@ public struct _PushPopTransactionModifier<V>: ViewModifier where V: ViewModifier
   @inlinable
   public init(
     content: V,
-    transform: @escaping (inout Transaction) -> ()
+    transform: @escaping (inout Transaction) -> Void
   ) {
     self.content = content
     base = .init(transform: transform)
@@ -99,23 +100,23 @@ public struct _PushPopTransactionModifier<V>: ViewModifier where V: ViewModifier
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func transaction(_ transform: @escaping (inout Transaction) -> ()) -> some View {
+  public func transaction(_ transform: @escaping (inout Transaction) -> Void) -> some View {
     modifier(_TransactionModifier(transform: transform))
   }
 }
 
-public extension ViewModifier {
+extension ViewModifier {
   @inlinable
-  func transaction(
-    _ transform: @escaping (inout Transaction) -> ()
+  public func transaction(
+    _ transform: @escaping (inout Transaction) -> Void
   ) -> some ViewModifier {
     _PushPopTransactionModifier(content: self, transform: transform)
   }
 
   @inlinable
-  func animation(
+  public func animation(
     _ animation: Animation?
   ) -> some ViewModifier {
     transaction { t in

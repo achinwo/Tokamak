@@ -17,6 +17,7 @@
 
 import OpenCombineShim
 
+@MainActor
 class MountedCompositeElement<R: Renderer>: MountedElement<R> {
   let parentTarget: R.TargetType
 
@@ -69,7 +70,7 @@ class MountedCompositeElement<R: Renderer>: MountedElement<R> {
   }
 }
 
-extension MountedCompositeElement: Hashable {
+extension MountedCompositeElement: @MainActor Hashable {
   static func == (lhs: MountedCompositeElement<R>, rhs: MountedCompositeElement<R>) -> Bool {
     lhs === rhs
   }

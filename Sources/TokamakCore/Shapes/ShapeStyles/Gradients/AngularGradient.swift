@@ -18,7 +18,7 @@
 import Foundation
 
 @frozen
-public struct AngularGradient: ShapeStyle, @MainActor View {
+public struct AngularGradient: @MainActor ShapeStyle, @MainActor View {
   internal var gradient: Gradient
   internal var center: UnitPoint
   internal var startAngle: Angle
@@ -93,6 +93,7 @@ public struct AngularGradient: ShapeStyle, @MainActor View {
   public static func _apply(to type: inout _ShapeStyle_ShapeType) {}
 }
 
+@MainActor
 extension ShapeStyle where Self == AngularGradient {
   public static func angularGradient(
     _ gradient: Gradient,
@@ -131,6 +132,7 @@ extension ShapeStyle where Self == AngularGradient {
   }
 }
 
+@MainActor
 extension ShapeStyle where Self == AngularGradient {
   public static func conicGradient(
     _ gradient: Gradient,

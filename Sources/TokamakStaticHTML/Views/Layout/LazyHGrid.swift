@@ -31,7 +31,7 @@ extension LazyHGrid: SpacerContainer {
   }
 }
 
-extension LazyHGrid: _HTMLPrimitive {
+extension LazyHGrid: @MainActor _HTMLPrimitive {
   public var lastRow: GridItem? {
     _LazyHGridProxy(self).rows.last
   }
@@ -39,13 +39,13 @@ extension LazyHGrid: _HTMLPrimitive {
   @_spi(TokamakStaticHTML)
   public var renderedBody: AnyView {
     var styles = """
-    display: grid;
-    grid-template-rows: \(_LazyHGridProxy(self)
+      display: grid;
+      grid-template-rows: \(_LazyHGridProxy(self)
       .rows
       .map(\.description)
       .joined(separator: " "));
-    grid-auto-flow: column;
-    """
+      grid-auto-flow: column;
+      """
     if fillCrossAxis {
       styles += "height: 100%;"
     }
@@ -55,8 +55,9 @@ extension LazyHGrid: _HTMLPrimitive {
       styles += "align-items: \(lastRow.alignment.vertical.cssValue);"
     }
     styles += "grid-gap: \(_LazyHGridProxy(self).spacing)px;"
-    return AnyView(HTML("div", ["style": styles]) {
-      _LazyHGridProxy(self).content
-    })
+    return AnyView(
+      HTML("div", ["style": styles]) {
+        _LazyHGridProxy(self).content
+      })
   }
 }

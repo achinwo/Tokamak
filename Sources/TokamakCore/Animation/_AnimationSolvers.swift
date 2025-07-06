@@ -18,7 +18,7 @@
 import Foundation
 
 /// A solver for an animation with a duration that depends on its properties.
-public protocol _AnimationSolver {
+public protocol _AnimationSolver: Sendable {
   /// Solve value at a specific point in time.
   func solve(at t: Double) -> Double
   /// Calculates the duration of the animation to a specific precision.

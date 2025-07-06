@@ -21,7 +21,7 @@ import Foundation
   import CoreGraphics
 #endif
 
-public struct StrokeStyle: Equatable {
+public struct StrokeStyle: Equatable, Sendable {
   public var lineWidth: CGFloat
   public var lineCap: CGLineCap
   public var lineJoin: CGLineJoin

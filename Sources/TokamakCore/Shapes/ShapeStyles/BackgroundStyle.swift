@@ -44,23 +44,22 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func background() -> some View {
+  public func background() -> some View {
     modifier(_BackgroundStyleModifier(style: BackgroundStyle()))
   }
 
   @inlinable
-  func background<S>(_ style: S) -> some View where S: ShapeStyle {
+  public func background<S>(_ style: S) -> some View where S: ShapeStyle {
     modifier(_BackgroundStyleModifier(style: style))
   }
 }
 
 @frozen
-public struct _BackgroundStyleModifier<Style>: ViewModifier, _EnvironmentModifier,
+public struct _BackgroundStyleModifier<Style>: ViewModifier, @MainActor _EnvironmentModifier,
   EnvironmentReader
-  where Style: ShapeStyle
-{
+where Style: ShapeStyle {
   public var environment: EnvironmentValues!
   public var style: Style
 
@@ -82,6 +81,6 @@ public struct _BackgroundStyleModifier<Style>: ViewModifier, _EnvironmentModifie
   }
 }
 
-public extension ShapeStyle where Self == BackgroundStyle {
-  static var background: Self { .init() }
+extension ShapeStyle where Self == BackgroundStyle {
+  public static var background: Self { .init() }
 }

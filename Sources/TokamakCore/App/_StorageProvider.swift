@@ -17,7 +17,7 @@
 
 import OpenCombineShim
 
-public protocol _StorageProvider {
+public protocol _StorageProvider: Sendable {
   func store(key: String, value: Bool?)
   func store(key: String, value: Int?)
   func store(key: String, value: Double?)

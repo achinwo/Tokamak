@@ -17,9 +17,10 @@
 
 import Foundation
 
+@MainActor
 public struct Canvas<Symbols> where Symbols: View {
   public var symbols: Symbols
-  public var renderer: (inout GraphicsContext, CGSize) -> ()
+  public var renderer: (inout GraphicsContext, CGSize) -> Void
   public var isOpaque: Bool
   public var colorMode: ColorRenderingMode
   public var rendersAsynchronously: Bool
@@ -28,27 +29,29 @@ public struct Canvas<Symbols> where Symbols: View {
   public var _environment: EnvironmentValues
 
   public func _makeContext(
-    onOperation: @escaping (GraphicsContext._Storage, GraphicsContext._Storage._Operation) -> (),
+    onOperation: @escaping (GraphicsContext._Storage, GraphicsContext._Storage._Operation) -> Void,
     imageResolver: @escaping (Image, EnvironmentValues) -> GraphicsContext.ResolvedImage,
     textResolver: @escaping (Text, EnvironmentValues) -> GraphicsContext.ResolvedText,
-    symbolResolver: @escaping (AnyHashable, AnyView, EnvironmentValues) -> GraphicsContext
+    symbolResolver: @escaping (AnyHashable, AnyView, EnvironmentValues) ->
+      GraphicsContext
       .ResolvedSymbol
   ) -> GraphicsContext {
-    .init(_storage: .init(
-      in: _environment,
-      with: onOperation,
-      imageResolver: imageResolver,
-      textResolver: textResolver,
-      symbols: AnyView(symbols),
-      symbolResolver: symbolResolver
-    ))
+    .init(
+      _storage: .init(
+        in: _environment,
+        with: onOperation,
+        imageResolver: imageResolver,
+        textResolver: textResolver,
+        symbols: AnyView(symbols),
+        symbolResolver: symbolResolver
+      ))
   }
 
   public init(
     opaque: Bool = false,
     colorMode: ColorRenderingMode = .nonLinear,
     rendersAsynchronously: Bool = false,
-    renderer: @escaping (inout GraphicsContext, CGSize) -> (),
+    renderer: @escaping (inout GraphicsContext, CGSize) -> Void,
     @ViewBuilder symbols: () -> Symbols
   ) {
     isOpaque = opaque
@@ -61,12 +64,12 @@ public struct Canvas<Symbols> where Symbols: View {
 
 extension Canvas: _PrimitiveView {}
 
-public extension Canvas where Symbols == EmptyView {
-  init(
+extension Canvas where Symbols == EmptyView {
+  public init(
     opaque: Bool = false,
     colorMode: ColorRenderingMode = .nonLinear,
     rendersAsynchronously: Bool = false,
-    renderer: @escaping (inout GraphicsContext, CGSize) -> ()
+    renderer: @escaping (inout GraphicsContext, CGSize) -> Void
   ) {
     isOpaque = opaque
     self.colorMode = colorMode
@@ -92,6 +95,7 @@ public struct ColorMatrix: Equatable {
   public init() {}
 }
 
+@MainActor
 public struct _ColorMatrix: Equatable, Codable {
   public var m11: Float = 1, m12: Float = 0, m13: Float = 0, m14: Float = 0, m15: Float = 0
   public var m21: Float = 0, m22: Float = 1, m23: Float = 0, m24: Float = 0, m25: Float = 0

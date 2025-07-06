@@ -17,9 +17,11 @@
 
 import Foundation
 
-public class _AnyTransitionBox: AnyTokenBox {
+@MainActor
+public class _AnyTransitionBox: @MainActor AnyTokenBox {
   public typealias ResolvedValue = ResolvedTransition
 
+  @MainActor
   public struct ResolvedTransition {
     public var insertion: [Transition]
     public var removal: [Transition]
@@ -99,7 +101,6 @@ final class AsymmetricTransitionBox: _AnyTransitionBox {
   }
 }
 
-@MainActor
 final class CombinedTransitionBox: _AnyTransitionBox {
   let a: _AnyTransitionBox
   let b: _AnyTransitionBox

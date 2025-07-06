@@ -17,7 +17,7 @@
 
 import TokamakCore
 
-extension _OffsetEffect: DOMViewModifier {
+extension _OffsetEffect: @MainActor DOMViewModifier {
   public var attributes: [HTMLAttribute: String] {
     ["style": "transform: translate(\(offset.width)px, \(offset.height)px);"]
   }

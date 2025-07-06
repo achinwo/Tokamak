@@ -18,22 +18,23 @@
 import TokamakCore
 
 // Border modifier
-extension _OverlayModifier: DOMViewModifier
-  where Overlay == _ShapeView<_StrokedShape<TokamakCore.Rectangle._Inset>, Color>
-{
+extension _OverlayModifier: @MainActor DOMViewModifier
+where Overlay == _ShapeView<_StrokedShape<TokamakCore.Rectangle._Inset>, Color> {
   public var attributes: [HTMLAttribute: String] {
     let style = overlay.shape.style.dashPhase == 0 ? "solid" : "dashed"
-    return ["style": """
-    border-style: \(style);
-    border-width: \(overlay.shape.style.lineWidth);
-    border-color: \(overlay.style.cssValue(environment));
-    border-radius: inherit;
-    """]
+    return [
+      "style": """
+      border-style: \(style);
+      border-width: \(overlay.shape.style.lineWidth);
+      border-color: \(overlay.style.cssValue(environment));
+      border-radius: inherit;
+      """
+    ]
   }
 }
 
 // TODO: Implement arbitrary clip paths with CSS `clip-path`
-extension _ClipEffect: DOMViewModifier {
+extension _ClipEffect: @MainActor DOMViewModifier {
   public var isOrderDependent: Bool { true }
   public var attributes: [HTMLAttribute: String] {
     if let roundedRect = shape as? RoundedRectangle {

@@ -18,8 +18,8 @@
 import Foundation
 
 /// The outline of a 2D shape.
-public struct Path: Equatable, LosslessStringConvertible {
-  public class _PathBox: Equatable {
+public struct Path: Equatable, LosslessStringConvertible, Sendable {
+  public class _PathBox: Equatable, @unchecked Sendable {
     public var elements: [Element] = []
     public static func == (lhs: Path._PathBox, rhs: Path._PathBox) -> Bool {
       lhs.elements == rhs.elements
@@ -36,13 +36,13 @@ public struct Path: Equatable, LosslessStringConvertible {
     var pathString = [String]()
     for element in elements {
       switch element {
-      case let .move(to: pos):
+      case .move(to: let pos):
         pathString.append("\(pos.x) \(pos.y) m")
-      case let .line(to: pos):
+      case .line(to: let pos):
         pathString.append("\(pos.x) \(pos.y) l")
-      case let .curve(to: pos, control1: c1, control2: c2):
+      case .curve(to: let pos, control1: let c1, control2: let c2):
         pathString.append("\(c1.x) \(c1.y) \(c2.x) \(c2.y) \(pos.x) \(pos.y) c")
-      case let .quadCurve(to: pos, control: c):
+      case .quadCurve(to: let pos, control: let c):
         pathString.append("\(c.x) \(c.y) \(pos.x) \(pos.y) q")
       case .closeSubpath:
         pathString.append("h")
@@ -51,7 +51,7 @@ public struct Path: Equatable, LosslessStringConvertible {
     return pathString.joined(separator: " ")
   }
 
-  public enum Storage: Equatable {
+  public enum Storage: Equatable, Sendable {
     case empty
     case rect(CGRect)
     case ellipse(CGRect)
@@ -61,7 +61,7 @@ public struct Path: Equatable, LosslessStringConvertible {
     case path(_PathBox)
   }
 
-  public enum Element: Equatable {
+  public enum Element: Equatable, Sendable {
     case move(to: CGPoint)
     case line(to: CGPoint)
     case quadCurve(to: CGPoint, control: CGPoint)
@@ -100,11 +100,12 @@ public struct Path: Equatable, LosslessStringConvertible {
     style: RoundedCornerStyle = .circular
   ) {
     self.init(
-      storage: .roundedRect(FixedRoundedRect(
-        rect: rect,
-        cornerSize: CGSize(width: cornerRadius, height: cornerRadius),
-        style: style
-      ))
+      storage: .roundedRect(
+        FixedRoundedRect(
+          rect: rect,
+          cornerSize: CGSize(width: cornerRadius, height: cornerRadius),
+          style: style
+        ))
     )
   }
 
@@ -112,7 +113,7 @@ public struct Path: Equatable, LosslessStringConvertible {
     self.init(storage: .ellipse(rect))
   }
 
-  public init(_ callback: (inout Self) -> ()) {
+  public init(_ callback: (inout Self) -> Void) {
     var base = Self()
     callback(&base)
     self = base
@@ -134,20 +135,20 @@ public struct Path: Equatable, LosslessStringConvertible {
   public var boundingRect: CGRect {
     switch storage {
     case .empty: return .zero
-    case let .rect(rect): return rect
-    case let .ellipse(rect): return rect
-    case let .roundedRect(fixedRoundedRect): return fixedRoundedRect.rect
-    case let .stroked(strokedPath): return strokedPath.path.boundingRect
-    case let .trimmed(trimmedPath): return trimmedPath.path.boundingRect
-    case let .path(pathBox):
+    case .rect(let rect): return rect
+    case .ellipse(let rect): return rect
+    case .roundedRect(let fixedRoundedRect): return fixedRoundedRect.rect
+    case .stroked(let strokedPath): return strokedPath.path.boundingRect
+    case .trimmed(let trimmedPath): return trimmedPath.path.boundingRect
+    case .path(let pathBox):
       // Note: Copied from TokamakStaticHTML/Shapes/Path.swift
       // Should the control points be included in the positions array?
       let positions = pathBox.elements.compactMap { elem -> CGPoint? in
         switch elem {
-        case let .move(to: pos): return pos
-        case let .line(to: pos): return pos
-        case let .curve(to: pos, control1: _, control2: _): return pos
-        case let .quadCurve(to: pos, control: _): return pos
+        case .move(to: let pos): return pos
+        case .line(to: let pos): return pos
+        case .curve(to: let pos, control1: _, control2: _): return pos
+        case .quadCurve(to: let pos, control: _): return pos
         case .closeSubpath: return nil
         }
       }
@@ -169,7 +170,7 @@ public struct Path: Equatable, LosslessStringConvertible {
     false
   }
 
-  public func forEach(_ body: (Element) -> ()) {
+  public func forEach(_ body: (Element) -> Void) {
     elements.forEach { body($0) }
   }
 
@@ -186,7 +187,7 @@ public struct Path: Equatable, LosslessStringConvertible {
   //  public init(_ path: CGMutablePath)
 }
 
-public enum RoundedCornerStyle: Hashable, Equatable {
+public enum RoundedCornerStyle: Hashable, Equatable, Sendable {
   case circular
   case continuous
 }

@@ -27,7 +27,8 @@ extension EnvironmentValues {
   }
 }
 
-public final class HTMLTarget: Target {
+@MainActor
+public final class HTMLTarget: @MainActor Target {
   var html: AnyHTML
   var children: [HTMLTarget] = []
 
@@ -73,6 +74,7 @@ extension HTMLMeta.MetaTag {
   }
 }
 
+@MainActor
 public final class StaticHTMLRenderer: @MainActor Renderer {
   private var reconciler: StackReconciler<StaticHTMLRenderer>?
 

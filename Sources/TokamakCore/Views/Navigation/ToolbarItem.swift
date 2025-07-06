@@ -14,12 +14,13 @@
 //
 //  Created by Carson Katri on 7/7/20.
 //
-
+@MainActor
 public struct ToolbarItemGroup<ID, Items> {
   let items: Items
   let _items: [AnyView]
 }
 
+@MainActor
 public struct _ToolbarItemGroupProxy<ID, Items> {
   public let subject: ToolbarItemGroup<ID, Items>
 
@@ -29,7 +30,7 @@ public struct _ToolbarItemGroupProxy<ID, Items> {
   public var _items: [AnyView] { subject._items }
 }
 
-public struct ToolbarItemPlacement: Hashable {
+public struct ToolbarItemPlacement: Hashable, Sendable {
   let rawValue: Int8
   public static let automatic: ToolbarItemPlacement = .init(rawValue: 1 << 0)
   public static let principal: ToolbarItemPlacement = .init(rawValue: 1 << 1)
@@ -44,13 +45,15 @@ public struct ToolbarItemPlacement: Hashable {
   public static let bottomBar: ToolbarItemPlacement = .init(rawValue: 1 << 10)
 }
 
+@MainActor
 public protocol AnyToolbarItem {
   var placement: ToolbarItemPlacement { get }
   var anyContent: AnyView { get }
   var showsByDefault: Bool { get }
 }
 
-public struct ToolbarItem<ID, Content>: View, AnyToolbarItem where Content: View {
+@MainActor
+public struct ToolbarItem<ID, Content>: View, @MainActor AnyToolbarItem where Content: View {
   public let id: ID
   public let placement: ToolbarItemPlacement
   public let showsByDefault: Bool
@@ -73,8 +76,8 @@ public struct ToolbarItem<ID, Content>: View, AnyToolbarItem where Content: View
   }
 }
 
-public extension ToolbarItem where ID == () {
-  init(
+extension ToolbarItem where ID == () {
+  public init(
     placement: ToolbarItemPlacement = .automatic,
     @ViewBuilder content: () -> Content
   ) {
@@ -82,8 +85,9 @@ public extension ToolbarItem where ID == () {
   }
 }
 
-extension ToolbarItem: Identifiable where ID: Hashable {}
+extension ToolbarItem: @MainActor Identifiable where ID: Hashable {}
 
+@MainActor
 /// This is a helper class that works around absence of "package private" access control in Swift
 public struct _ToolbarItemProxy<ID, Content> where Content: View {
   public let subject: ToolbarItem<ID, Content>

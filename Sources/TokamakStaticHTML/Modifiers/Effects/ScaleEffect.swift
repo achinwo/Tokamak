@@ -17,13 +17,13 @@
 
 import TokamakCore
 
-extension _ScaleEffect: DOMViewModifier {
+extension _ScaleEffect: @MainActor DOMViewModifier {
   public var attributes: [HTMLAttribute: String] {
     [
       "style": """
       transform: scale(\(scale.width), \(scale.height));
       transform-origin: \(anchor.cssValue);
-      """,
+      """
     ]
   }
 }

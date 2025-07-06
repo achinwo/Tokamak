@@ -15,7 +15,9 @@
 //  Created by Carson Katri on 5/30/22.
 //
 
-extension FiberReconciler.Fiber: CustomDebugStringConvertible {
+extension FiberReconciler.Fiber: @MainActor CustomDebugStringConvertible {
+
+  @MainActor
   public var debugDescription: String {
     //String(format: "%010p", unsafeBitCast(self, to: Int.self))
 

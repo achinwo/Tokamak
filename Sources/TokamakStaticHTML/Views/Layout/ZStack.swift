@@ -22,22 +22,26 @@ struct _ZStack_ContentGridItem: ViewModifier, DOMViewModifier {
   }
 }
 
-extension ZStack: _HTMLPrimitive {
+extension ZStack: @MainActor _HTMLPrimitive {
   @_spi(TokamakStaticHTML)
   public var renderedBody: AnyView {
-    AnyView(HTML("div", [
-      "style": """
-      display: grid;
-      grid-template-columns: 1fr;
-      width: fit-content;
-      justify-items: \(alignment.horizontal.cssValue);
-      align-items: \(alignment.vertical.cssValue);
-      """,
-    ]) {
-      TupleView(
-        children,
-        children: children.map { AnyView($0.modifier(_ZStack_ContentGridItem())) }
-      )
-    })
+    AnyView(
+      HTML(
+        "div",
+        [
+          "style": """
+          display: grid;
+          grid-template-columns: 1fr;
+          width: fit-content;
+          justify-items: \(alignment.horizontal.cssValue);
+          align-items: \(alignment.vertical.cssValue);
+          """
+        ]
+      ) {
+        TupleView(
+          children,
+          children: children.map { AnyView($0.modifier(_ZStack_ContentGridItem())) }
+        )
+      })
   }
 }

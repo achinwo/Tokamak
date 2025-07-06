@@ -14,7 +14,7 @@
 //
 //  Created by Jed Fox on 06/30/2020.
 //
-
+@MainActor
 public final class NavigationContext: ObservableObject {
   @Published
   var destination = NavigationLinkDestination(EmptyView())
@@ -49,6 +49,7 @@ private struct ToolbarReader<Content>: View where Content: View {
 }
 
 /// This is a helper type that works around absence of "package private" access control in Swift
+@MainActor
 public struct _NavigationViewProxy<Content: View> {
   public let subject: NavigationView<Content>
 
@@ -76,11 +77,14 @@ public struct _NavigationViewProxy<Content: View> {
   }
 }
 
-struct NavigationDestinationKey: EnvironmentKey {
+@MainActor
+struct NavigationDestinationKey: @MainActor EnvironmentKey {
   public static let defaultValue: Binding<AnyView>? = nil
 }
 
 extension EnvironmentValues {
+
+  @MainActor
   var navigationDestination: Binding<AnyView>? {
     get {
       self[NavigationDestinationKey.self]

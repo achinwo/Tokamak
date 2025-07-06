@@ -31,7 +31,9 @@ protocol ForEachProtocol: GroupView {
 ///         Text("\($0)")
 ///       }
 ///     }
-public struct ForEach<Data, ID, Content>: _PrimitiveView where Data: RandomAccessCollection,
+public struct ForEach<Data, ID, Content>: _PrimitiveView
+where
+  Data: RandomAccessCollection,
   ID: Hashable,
   Content: View
 {
@@ -61,8 +63,8 @@ extension ForEach: ForEachProtocol where Data.Index == Int {
   func element(at index: Int) -> Any { data[index] }
 }
 
-public extension ForEach where Data.Element: Identifiable, ID == Data.Element.ID {
-  init(
+extension ForEach where Data.Element: Identifiable, ID == Data.Element.ID {
+  public init(
     _ data: Data,
     @ViewBuilder content: @escaping (Data.Element) -> Content
   ) {
@@ -70,8 +72,8 @@ public extension ForEach where Data.Element: Identifiable, ID == Data.Element.ID
   }
 }
 
-public extension ForEach where Data == Range<Int>, ID == Int {
-  init(
+extension ForEach where Data == Range<Int>, ID == Int {
+  public init(
     _ data: Range<Int>,
     @ViewBuilder content: @escaping (Data.Element) -> Content
   ) {
@@ -90,12 +92,13 @@ extension ForEach: ParentView {
 
 extension ForEach: GroupView {}
 
-struct _IDKey: EnvironmentKey {
+@MainActor
+struct _IDKey: @MainActor EnvironmentKey {
   static let defaultValue: AnyHashable? = nil
 }
 
-public extension EnvironmentValues {
-  var _id: AnyHashable? {
+@MainActor extension EnvironmentValues {
+  public var _id: AnyHashable? {
     get {
       self[_IDKey.self]
     }
@@ -110,7 +113,7 @@ public protocol _AnyIDView {
   var anyContent: AnyView { get }
 }
 
-struct IDView<Content, ID>: View, _AnyIDView where Content: View, ID: Hashable {
+struct IDView<Content, ID>: View, @MainActor _AnyIDView where Content: View, ID: Hashable {
   let content: Content
   let id: ID
   var anyId: AnyHashable { AnyHashable(id) }
@@ -127,8 +130,8 @@ struct IDView<Content, ID>: View, _AnyIDView where Content: View, ID: Hashable {
   }
 }
 
-public extension View {
-  func id<ID>(_ id: ID) -> some View where ID: Hashable {
+extension View {
+  public func id<ID>(_ id: ID) -> some View where ID: Hashable {
     IDView(self, id: id)
   }
 }

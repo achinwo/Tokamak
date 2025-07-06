@@ -17,9 +17,9 @@
 
 /// Delays the retrieval of a `PreferenceKey.Value` by passing the `_PreferenceValue` to a build
 /// function.
-public struct _DelayedPreferenceView<Key, Content>: View, _PreferenceReadingViewProtocol
-  where Key: PreferenceKey, Content: View
-{
+@MainActor
+public struct _DelayedPreferenceView<Key, Content>: View, @MainActor _PreferenceReadingViewProtocol
+where Key: PreferenceKey, Content: View {
   @State
   private var resolvedValue: _PreferenceValue<Key> = _PreferenceValue(storage: .init(Key.self))
   public let transform: (_PreferenceValue<Key>) -> Content
@@ -64,32 +64,30 @@ public struct _PreferenceReadingView<Key, Content>: View where Key: PreferenceKe
   }
 }
 
-public extension PreferenceKey {
-  static func _delay<T>(
+@MainActor
+extension PreferenceKey {
+  public static func _delay<T>(
     _ transform: @escaping (_PreferenceValue<Self>) -> T
   ) -> some View
-    where T: View
-  {
+  where T: View {
     _DelayedPreferenceView(transform: transform)
   }
 }
 
-public extension View {
-  func overlayPreferenceValue<Key, T>(
+extension View {
+  public func overlayPreferenceValue<Key, T>(
     _ key: Key.Type = Key.self,
     @ViewBuilder _ transform: @escaping (Key.Value) -> T
   ) -> some View
-    where Key: PreferenceKey, T: View
-  {
+  where Key: PreferenceKey, T: View {
     Key._delay { self.overlay($0._force(transform)) }
   }
 
-  func backgroundPreferenceValue<Key, T>(
+  public func backgroundPreferenceValue<Key, T>(
     _ key: Key.Type = Key.self,
     @ViewBuilder _ transform: @escaping (Key.Value) -> T
   ) -> some View
-    where Key: PreferenceKey, T: View
-  {
+  where Key: PreferenceKey, T: View {
     Key._delay { self.background($0._force(transform)) }
   }
 }

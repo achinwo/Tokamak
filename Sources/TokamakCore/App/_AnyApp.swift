@@ -17,6 +17,7 @@
 
 import OpenCombineShim
 
+@MainActor
 public struct _AnyApp: App {
   var app: Any
   let type: Any.Type

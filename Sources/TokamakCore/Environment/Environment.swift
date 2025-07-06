@@ -19,7 +19,7 @@
 /// 1. `View.makeMountedView`
 /// 2. `MountedHostView.update` when reconciling
 ///
-protocol EnvironmentReader {
+@MainActor protocol EnvironmentReader {
   mutating func setContent(from values: EnvironmentValues)
 }
 
@@ -43,9 +43,9 @@ public struct Environment<Value>: DynamicProperty {
 
   public var wrappedValue: Value {
     switch content {
-    case let .value(value):
+    case .value(let value):
       return value
-    case let .keyPath(keyPath):
+    case .keyPath(let keyPath):
       // not bound to a view, return the default value.
       return EnvironmentValues()[keyPath: keyPath]
     }

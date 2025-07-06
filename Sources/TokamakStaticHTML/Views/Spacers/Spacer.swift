@@ -15,26 +15,27 @@
 import Foundation
 import TokamakCore
 
-public enum SpacerContainerAxis {
+public enum SpacerContainerAxis: Sendable {
   case horizontal, vertical
 }
 
+@MainActor
 public protocol SpacerContainer {
   var hasSpacer: Bool { get }
   var axis: SpacerContainerAxis { get }
   var fillCrossAxis: Bool { get }
 }
 
-public extension SpacerContainer where Self: ParentView {
-  var hasSpacer: Bool {
+extension SpacerContainer where Self: ParentView {
+  public var hasSpacer: Bool {
     children
       .compactMap {
         mapAnyView($0) { (v: Spacer) in
           v
         }
       }
-      .count > 0 ||
-      children.compactMap {
+      .count > 0
+      || children.compactMap {
         mapAnyView($0) { (v: SpacerContainer) in
           v
         }
@@ -46,7 +47,7 @@ public extension SpacerContainer where Self: ParentView {
   // Does a child SpacerContainer along the opposite axis have a spacer?
   // (e.g., an HStack with a child VStack which contains a spacer)
   // If so, we need to fill the cross-axis so the child can show the correct layout.
-  var fillCrossAxis: Bool {
+  public var fillCrossAxis: Bool {
     children
       .compactMap {
         mapAnyView($0) { (v: SpacerContainer) in v }
@@ -56,11 +57,14 @@ public extension SpacerContainer where Self: ParentView {
   }
 }
 
-extension Spacer: _HTMLPrimitive {
+extension Spacer: @MainActor _HTMLPrimitive {
   @_spi(TokamakStaticHTML)
   public var renderedBody: AnyView {
-    AnyView(HTML("div", [
-      "style": "flex-grow: 1; \(minLength != nil ? "min-width: \(minLength!);" : "")",
-    ]))
+    AnyView(
+      HTML(
+        "div",
+        [
+          "style": "flex-grow: 1; \(minLength != nil ? "min-width: \(minLength!);" : "")"
+        ]))
   }
 }

@@ -16,12 +16,12 @@
 //
 
 /// A tree of cancellable in-progress unmounts.
-public class UnmountTask<R> where R: Renderer {
+@MainActor public class UnmountTask<R> where R: Renderer {
   public internal(set) var isCancelled = false
   var childTasks = [UnmountTask<R>]()
-  private let callback: () -> ()
+  private let callback: () -> Void
 
-  init(_ callback: @escaping () -> () = {}) {
+  init(_ callback: @escaping () -> Void = {}) {
     self.callback = callback
   }
 
@@ -50,7 +50,7 @@ public class UnmountTask<R> where R: Renderer {
     }
   }
 
-  func forEach(_ f: (UnmountTask<R>) -> ()) {
+  func forEach(_ f: (UnmountTask<R>) -> Void) {
     var stack = [self]
     while let last = stack.popLast() {
       f(last)
@@ -60,6 +60,7 @@ public class UnmountTask<R> where R: Renderer {
 }
 
 /// The state for the unmounting of a `MountedHostView` by a `Renderer`.
+@MainActor
 public final class UnmountHostTask<R>: UnmountTask<R> where R: Renderer {
   public private(set) weak var host: MountedHostView<R>!
   private unowned var reconciler: StackReconciler<R>
@@ -67,7 +68,7 @@ public final class UnmountHostTask<R>: UnmountTask<R> where R: Renderer {
   init(
     _ host: MountedHostView<R>,
     in reconciler: StackReconciler<R>,
-    callback: @escaping () -> ()
+    callback: @escaping () -> Void
   ) {
     self.host = host
     self.reconciler = reconciler

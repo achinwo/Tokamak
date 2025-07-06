@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 //  Created by Gene Z. Ragan on 07/22/2020.
-
+@MainActor
 public protocol ButtonStyle {
   associatedtype Body: View
   @ViewBuilder

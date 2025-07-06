@@ -152,13 +152,13 @@ public enum Sanitizers {
   }
 }
 
-struct RegularExpression: ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
+struct RegularExpression: ExpressibleByStringLiteral, ExpressibleByStringInterpolation, Sendable {
   let pattern: String
-  private let nsRegularExpression: Regex<String>?
+  //private let nsRegularExpression: Regex<String>?
 
   init(_ pattern: String) {
     self.pattern = pattern
-    nsRegularExpression = nil  // try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
+    //nsRegularExpression = nil  // try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
   }
 
   init(stringLiteral value: String) {

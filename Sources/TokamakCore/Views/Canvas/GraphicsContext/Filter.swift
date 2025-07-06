@@ -17,8 +17,9 @@
 
 import Foundation
 
+@MainActor
 extension GraphicsContext {
-  public struct Filter {
+  @MainActor public struct Filter {
     public let _storage: _Storage
 
     private init(_ storage: _Storage) {
@@ -60,6 +61,7 @@ extension GraphicsContext {
       .init(.projectionTransform(matrix))
     }
 
+    @MainActor
     public static func shadow(
       color: Color = Color(.sRGBLinear, white: 0, opacity: 0.33),
       radius: CGFloat,
@@ -122,6 +124,7 @@ extension GraphicsContext {
       .init(.blur(radius: radius, options: options))
     }
 
+    @MainActor
     public static func alphaThreshold(
       min: Double,
       max: Double = 1,

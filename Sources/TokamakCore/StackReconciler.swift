@@ -17,18 +17,19 @@
 
 import OpenCombineShim
 
-/** A class that reconciles a "raw" tree of element values (such as `App`, `Scene` and `View`,
- all coming from `body` or `renderedBody` properties) with a tree of mounted element instances
- ('MountedApp', `MountedScene`, `MountedCompositeView` and `MountedHostView` respectively). Any
- updates to the former tree are reflected in the latter tree, and then resulting changes are
- delegated to the renderer for it to reflect those in its viewport.
-
- Scheduled updates are stored in a simple stack-like structure and are processed sequentially as
- opposed to potentially more sophisticated implementations. [React's fiber
- reconciler](https://github.com/acdlite/react-fiber-architecture) is one of those and could be
- implemented in the future to improve UI responsiveness under heavy load and potentially even
- support multi-threading when it's supported in WebAssembly.
- */
+/// A class that reconciles a "raw" tree of element values (such as `App`, `Scene` and `View`,
+/// all coming from `body` or `renderedBody` properties) with a tree of mounted element instances
+/// ('MountedApp', `MountedScene`, `MountedCompositeView` and `MountedHostView` respectively). Any
+/// updates to the former tree are reflected in the latter tree, and then resulting changes are
+/// delegated to the renderer for it to reflect those in its viewport.
+///
+/// Scheduled updates are stored in a simple stack-like structure and are processed sequentially as
+/// opposed to potentially more sophisticated implementations. [React's fiber
+/// reconciler](https://github.com/acdlite/react-fiber-architecture) is one of those and could be
+/// implemented in the future to improve UI responsiveness under heavy load and potentially even
+/// support multi-threading when it's supported in WebAssembly.
+///
+@MainActor
 public final class StackReconciler<R: Renderer> {
   /** A set of mounted elements that triggered a re-render. These are stored in a `Set` instead of
    an array to avoid duplicate re-renders. The actual performance benefits of such de-duplication
@@ -37,7 +38,8 @@ public final class StackReconciler<R: Renderer> {
    */
   private var queuedRerenders = Set<Rerender>()
 
-  struct Rerender: Hashable {
+  @MainActor
+  struct Rerender: @MainActor Hashable {
     let element: MountedCompositeElement<R>
     let transaction: Transaction
 
@@ -79,14 +81,14 @@ public final class StackReconciler<R: Renderer> {
    Usually it's `DispatchQueue.main.async` on platforms where `Dispatch` is supported, or
    `setTimeout` in the DOM environment.
    */
-  private let scheduler: (@escaping () -> ()) -> ()
+  private let scheduler: (@escaping () -> Void) -> Void
 
   public init<V: View>(
     view: V,
     target: R.TargetType,
     environment: EnvironmentValues,
     renderer: R,
-    scheduler: @escaping (@escaping () -> ()) -> ()
+    scheduler: @escaping (@escaping () -> Void) -> Void
   ) {
     self.renderer = renderer
     self.scheduler = scheduler
@@ -102,7 +104,7 @@ public final class StackReconciler<R: Renderer> {
     target: R.TargetType,
     environment: EnvironmentValues,
     renderer: R,
-    scheduler: @escaping (@escaping () -> ()) -> ()
+    scheduler: @escaping (@escaping () -> Void) -> Void
   ) {
     self.renderer = renderer
     self.scheduler = scheduler
@@ -119,14 +121,17 @@ public final class StackReconciler<R: Renderer> {
 
   private func performInitialMount() {
     rootElement.mount(in: self, with: .init(animation: nil))
-    performPostrenderCallbacks()
+
+    Task {
+      await performPostrenderCallbacks()
+    }
   }
 
   private func queueStorageUpdate(
     for mountedElement: MountedCompositeElement<R>,
     id: Int,
     transaction: Transaction,
-    updater: (inout Any) -> ()
+    updater: (inout Any) -> Void
   ) {
     updater(&mountedElement.storage[id])
     queueUpdate(for: mountedElement, transaction: transaction)
@@ -146,18 +151,22 @@ public final class StackReconciler<R: Renderer> {
 
     guard shouldSchedule else { return }
 
-    scheduler { [weak self] in self?.updateStateAndReconcile() }
+    scheduler { [weak self] in
+      Task { @MainActor in
+        await self?.updateStateAndReconcile()
+      }
+    }
   }
 
-  private func updateStateAndReconcile() {
+  private func updateStateAndReconcile() async {
     let queued = queuedRerenders
     queuedRerenders.removeAll()
 
     for mountedView in queued {
-      mountedView.element.update(in: self, with: mountedView.transaction)
+      await mountedView.element.update(in: self, with: mountedView.transaction)
     }
 
-    performPostrenderCallbacks()
+    await performPostrenderCallbacks()
   }
 
   private func setupStorage(
@@ -199,9 +208,10 @@ public final class StackReconciler<R: Renderer> {
   ) {
     // `ObservedProperty` property already filtered out, so safe to assume the value's type
     // swiftlint:disable force_cast
-    let observed = property.get(
-      from: compositeElement[keyPath: bodyKeypath]
-    ) as! ObservedProperty
+    let observed =
+      property.get(
+        from: compositeElement[keyPath: bodyKeypath]
+      ) as! ObservedProperty
     // swiftlint:enable force_cast
 
     // break the reference cycle here as subscriptions are stored in the `compositeElement`
@@ -281,34 +291,35 @@ public final class StackReconciler<R: Renderer> {
     with element: Element,
     transaction: Transaction,
     getElementType: (Element) -> Any.Type,
-    updateChild: (MountedElement<R>) -> (),
-    mountChild: (Element) -> MountedElement<R>
-  ) {
+    updateChild: (MountedElement<R>) -> Void,
+    mountChild: (Element) async -> MountedElement<R>
+  ) async where Element: Sendable {
     // FIXME: for now without properly handling `Group` and `TupleView` mounted composite views
     // have only a single element in `mountedChildren`, but this will change when
     // fragments are implemented and this switch should be rewritten to compare
     // all elements in `mountedChildren`
     switch (mountedElement.mountedChildren.last, element) {
     // no mounted children previously, but children available now
-    case let (nil, childBody):
-      let child: MountedElement<R> = mountChild(childBody)
+    case (nil, let childBody):
+
+      let child: MountedElement<R> = await mountChild(childBody)
       mountedElement.mountedChildren = [child]
       child.mount(in: self, with: transaction)
 
     // some mounted children before and now
-    case let (mountedChild?, childBody):
+    case (let mountedChild?, let childBody):
       let childBodyType = getElementType(childBody)
 
       // new child has the same type as existing child
       if mountedChild.typeConstructorName == typeConstructorName(childBodyType) {
         updateChild(mountedChild)
-        mountedChild.update(in: self, with: transaction)
+        await mountedChild.update(in: self, with: transaction)
       } else {
         // new child is of a different type, complete rerender, i.e. unmount the old
         // wrapper, then mount a new one with the new `childBody`
         mountedChild.unmount(in: self, with: transaction, parentTask: nil)
 
-        let newMountedChild: MountedElement<R> = mountChild(childBody)
+        let newMountedChild: MountedElement<R> = await mountChild(childBody)
         mountedElement.mountedChildren = [newMountedChild]
         newMountedChild.mount(in: self, with: transaction)
       }
@@ -318,11 +329,11 @@ public final class StackReconciler<R: Renderer> {
   // swiftlint:enable function_parameter_count
 
   private var queuedPostrenderCallbacks = [() -> ()]()
-  func afterCurrentRender(perform callback: @escaping () -> ()) {
+  func afterCurrentRender(perform callback: @escaping () -> Void) {
     queuedPostrenderCallbacks.append(callback)
   }
 
-  private func performPostrenderCallbacks() {
+  private func performPostrenderCallbacks() async {
     queuedPostrenderCallbacks.forEach { $0() }
     queuedPostrenderCallbacks.removeAll()
   }

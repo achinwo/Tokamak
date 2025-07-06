@@ -19,8 +19,7 @@ import OpenCombineShim
 
 @propertyWrapper
 public struct EnvironmentObject<ObjectType>: DynamicProperty
-  where ObjectType: ObservableObject
-{
+where ObjectType: ObservableObject {
   @dynamicMemberLookup
   public struct Wrapper {
     internal let root: ObjectType
@@ -30,7 +29,8 @@ public struct EnvironmentObject<ObjectType>: DynamicProperty
       .init(
         get: {
           self.root[keyPath: keyPath]
-        }, set: {
+        },
+        set: {
           self.root[keyPath: keyPath] = $0
         }
       )
@@ -67,14 +67,15 @@ public struct EnvironmentObject<ObjectType>: DynamicProperty
 
 extension EnvironmentObject: ObservedProperty, EnvironmentReader {}
 
+@MainActor
 extension ObservableObject {
   static var environmentStore: WritableKeyPath<EnvironmentValues, Self?> {
     \.[ObjectIdentifier(self)]
   }
 }
 
-public extension View {
-  func environmentObject<B>(_ bindable: B) -> some View where B: ObservableObject {
+extension View {
+  public func environmentObject<B>(_ bindable: B) -> some View where B: ObservableObject {
     environment(B.environmentStore, bindable)
   }
 }

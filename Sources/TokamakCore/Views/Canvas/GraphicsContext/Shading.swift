@@ -21,7 +21,7 @@ import Foundation
 #endif
 
 extension GraphicsContext {
-  public enum _GradientGeometry {
+  public enum _GradientGeometry: Sendable {
     case axial(CGPoint, CGPoint)
     case conic(CGPoint, Angle)
     case radial(CGPoint, CGFloat, CGFloat)
@@ -39,7 +39,10 @@ extension GraphicsContext {
     )
   }
 
+  @MainActor
   public struct Shading {
+
+    @MainActor
     public enum _Storage {
       case backdrop
       case foreground
@@ -62,6 +65,7 @@ extension GraphicsContext {
       _storage = storage
     }
 
+    @MainActor
     public func _resolve(in environment: EnvironmentValues) -> Self {
       switch _storage {
       case .backdrop:
@@ -205,6 +209,7 @@ extension GraphicsContext {
     public static var linearColor: Self { Self(rawValue: 1 << 2) }
   }
 
+  @MainActor
   public func resolve(_ shading: Shading) -> Shading {
     shading._resolve(in: _storage.environment)
   }

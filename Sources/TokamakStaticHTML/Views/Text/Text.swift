@@ -64,7 +64,7 @@ extension Font.Design {
   }
 }
 
-extension Font.Leading: @preconcurrency CustomStringConvertible {
+extension Font.Leading: CustomStringConvertible {
   public var description: String {
     switch self {
     case .standard:
@@ -78,6 +78,8 @@ extension Font.Leading: @preconcurrency CustomStringConvertible {
 }
 
 extension Font {
+
+  @MainActor
   public func styles(in environment: EnvironmentValues) -> [String: String] {
     let proxy = _FontProxy(self).resolve(in: environment)
     return [
@@ -90,6 +92,7 @@ extension Font {
     ]
   }
 
+  @MainActor
   public func families(in environment: EnvironmentValues) -> [String] {
     let proxy = _FontProxy(self).resolve(in: environment)
     switch proxy._name {
@@ -106,7 +109,7 @@ extension Font {
   }
 }
 
-extension TextAlignment: @preconcurrency CustomStringConvertible {
+extension TextAlignment: CustomStringConvertible {
   public var description: String {
     switch self {
     case .leading: return "left"
@@ -124,7 +127,7 @@ private struct TextSpan: AnyHTML {
   var tag: String { "span" }
 }
 
-extension Text: AnyHTML {
+extension Text: @MainActor AnyHTML {
   public func innerHTML(shouldSortAttributes: Bool) -> String? {
     let proxy = _TextProxy(self)
     let innerHTML: String
@@ -161,7 +164,7 @@ extension Text: AnyHTML {
 }
 
 @_spi(TokamakStaticHTML)
-extension Text: HTMLConvertible {
+extension Text: @MainActor HTMLConvertible {
   @_spi(TokamakStaticHTML)
   public var innerHTML: String? {
     innerHTML(shouldSortAttributes: false)

@@ -15,7 +15,7 @@
 //  Created by Carson Katri on 7/31/20.
 //
 
-public struct RedactionReasons: OptionSet {
+public struct RedactionReasons: OptionSet, Sendable {
   public let rawValue: Int
   public init(rawValue: Int) {
     self.rawValue = rawValue
@@ -24,12 +24,12 @@ public struct RedactionReasons: OptionSet {
   public static let placeholder: Self = .init(rawValue: 1 << 0)
 }
 
-public extension View {
-  func redacted(reason: RedactionReasons) -> some View {
+extension View {
+  public func redacted(reason: RedactionReasons) -> some View {
     environment(\.redactionReasons, reason)
   }
 
-  func unredacted() -> some View {
+  public func unredacted() -> some View {
     environment(\.redactionReasons, [])
   }
 }
@@ -38,8 +38,8 @@ private struct RedactionReasonsKey: EnvironmentKey {
   static let defaultValue: RedactionReasons = []
 }
 
-public extension EnvironmentValues {
-  var redactionReasons: RedactionReasons {
+extension EnvironmentValues {
+  public var redactionReasons: RedactionReasons {
     get {
       self[RedactionReasonsKey.self]
     }

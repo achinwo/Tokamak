@@ -20,6 +20,7 @@ import OpenCombineShim
 
 /// A reconciler modeled after React's
 /// [Fiber reconciler](https://reactjs.org/docs/faq-internals.html#what-is-react-fiber)
+@MainActor
 public final class FiberReconciler<Renderer: FiberRenderer> {
   /// The root node in the `Fiber` tree that represents the `View`s currently rendered on screen.
   @_spi(TokamakCore)
@@ -51,6 +52,7 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
   private var changedFibers = Set<ObjectIdentifier>()
   public var afterReconcileActions = [() -> ()]()
 
+  @MainActor
   struct RootView<Content: View>: View {
     let content: Content
     let reconciler: FiberReconciler<Renderer>
@@ -140,7 +142,11 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
     var environment = renderer.defaultEnvironment
     // environment.measureText = renderer.measureText
     // environment.measureImage = renderer.measureImage
-    environment.afterReconcile = afterReconcile
+
+    Task { @MainActor in
+      environment.afterReconcile = afterReconcile
+    }
+
     var app = app
     current = .init(
       &app,
@@ -158,7 +164,7 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
   }
 
   /// A visitor that performs each pass used by the `FiberReconciler`.
-  final class ReconcilerVisitor: AppVisitor, SceneVisitor, ViewVisitor {
+  @MainActor final class ReconcilerVisitor: @MainActor AppVisitor, SceneVisitor, ViewVisitor {
     let root: Fiber
     /// Any `Fiber`s that changed state during the last run loop.
     let changedFibers: Set<ObjectIdentifier>
@@ -176,7 +182,9 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
     }
 
     func visit<S>(_ scene: S) where S: Scene {
-      visitAny(scene, scene._visitChildren)
+      visitAny(scene) { vis in
+        scene._visitChildren(vis)
+      }
     }
 
     func visit<V>(_ view: V) where V: View {
@@ -279,11 +287,14 @@ public final class FiberReconciler<Renderer: FiberRenderer> {
 }
 
 extension EnvironmentValues {
-  private enum AfterReconcileKey: EnvironmentKey {
-    static let defaultValue: (@escaping () -> Void) -> Void = { _ in }
+
+  @MainActor
+  private enum AfterReconcileKey: @MainActor EnvironmentKey {
+    static let defaultValue: (@MainActor @Sendable @escaping () -> Void) -> Void = { _ in }
   }
 
-  public var afterReconcile: (@escaping () -> Void) -> Void {
+  @MainActor
+  public var afterReconcile: (@MainActor @Sendable @escaping () -> Void) -> Void {
     get { self[AfterReconcileKey.self] }
     set { self[AfterReconcileKey.self] = newValue }
   }

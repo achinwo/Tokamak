@@ -17,7 +17,7 @@
 
 import Foundation
 
-public struct TrimmedPath: Equatable {
+public struct TrimmedPath: Equatable, Sendable {
   public let path: Path
   public let from: CGFloat
   public let to: CGFloat

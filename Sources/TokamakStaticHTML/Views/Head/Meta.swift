@@ -18,7 +18,7 @@
 import TokamakCore
 
 public struct HTMLMeta: View {
-  public enum MetaTag: Equatable, Hashable {
+  public enum MetaTag: Equatable, Hashable, Sendable {
     case charset(_ charset: String)
     case name(_ name: String, content: String)
     case property(_ property: String, content: String)
@@ -53,28 +53,28 @@ public struct HTMLMeta: View {
   }
 }
 
-public extension View {
-  func htmlMeta(_ value: HTMLMeta.MetaTag) -> some View {
+extension View {
+  public func htmlMeta(_ value: HTMLMeta.MetaTag) -> some View {
     htmlMeta(.init(value))
   }
 
-  func htmlMeta(charset: String) -> some View {
+  public func htmlMeta(charset: String) -> some View {
     htmlMeta(.init(charset: charset))
   }
 
-  func htmlMeta(name: String, content: String) -> some View {
+  public func htmlMeta(name: String, content: String) -> some View {
     htmlMeta(.init(name: name, content: content))
   }
 
-  func htmlMeta(property: String, content: String) -> some View {
+  public func htmlMeta(property: String, content: String) -> some View {
     htmlMeta(.init(property: property, content: content))
   }
 
-  func htmlMeta(httpEquiv: String, content: String) -> some View {
+  public func htmlMeta(httpEquiv: String, content: String) -> some View {
     htmlMeta(.init(httpEquiv: httpEquiv, content: content))
   }
 
-  func htmlMeta(_ meta: HTMLMeta) -> some View {
+  public func htmlMeta(_ meta: HTMLMeta) -> some View {
     Group {
       self
       meta

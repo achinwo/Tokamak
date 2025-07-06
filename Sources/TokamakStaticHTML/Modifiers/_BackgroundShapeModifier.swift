@@ -14,7 +14,7 @@
 
 import TokamakCore
 
-extension _BackgroundShapeModifier: DOMViewModifier where Bounds == Rectangle {
+extension _BackgroundShapeModifier: @MainActor DOMViewModifier where Bounds == Rectangle {
   public var isOrderDependent: Bool { true }
   public var attributes: [HTMLAttribute: String] {
     var backgroundStyleModifier = _BackgroundStyleModifier(style: style)

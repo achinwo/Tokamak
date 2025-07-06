@@ -16,7 +16,7 @@
 //
 
 /// A type that can visit a `View`.
-public protocol ViewVisitor {
+@MainActor public protocol ViewVisitor {
   func visit<V: View>(_ view: V)
 }
 
@@ -26,7 +26,7 @@ extension View {
   }
 }
 
-public typealias ViewVisitorF<V: ViewVisitor> = @Sendable @MainActor (V) -> Void
+public typealias ViewVisitorF<V: ViewVisitor> = @MainActor (V) -> Void
 
 /// A type that creates a `Result` by visiting multiple `View`s.
 protocol ViewReducer {

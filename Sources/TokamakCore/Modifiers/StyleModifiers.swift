@@ -19,8 +19,7 @@ import Foundation
 
 /// Override this View's body to provide a layout that fits the background to the content.
 public struct _BackgroundLayout<Content, Background>: _PrimitiveView
-  where Content: View, Background: View
-{
+where Content: View, Background: View {
   public let content: Content
   public let background: Background
   public let alignment: Alignment
@@ -39,8 +38,7 @@ public struct _BackgroundLayout<Content, Background>: _PrimitiveView
 }
 
 public struct _BackgroundModifier<Background>: ViewModifier, EnvironmentReader
-  where Background: View
-{
+where Background: View {
   public var environment: EnvironmentValues!
   public var background: Background
   public var alignment: Alignment
@@ -63,7 +61,7 @@ public struct _BackgroundModifier<Background>: ViewModifier, EnvironmentReader
   }
 }
 
-extension _BackgroundModifier: Equatable where Background: Equatable {
+extension _BackgroundModifier: @MainActor Equatable where Background: Equatable {
   public static func == (
     lhs: _BackgroundModifier<Background>,
     rhs: _BackgroundModifier<Background>
@@ -72,8 +70,8 @@ extension _BackgroundModifier: Equatable where Background: Equatable {
   }
 }
 
-public extension View {
-  func background<Background>(
+extension View {
+  public func background<Background>(
     _ background: Background,
     alignment: Alignment = .center
   ) -> some View where Background: View {
@@ -81,7 +79,7 @@ public extension View {
   }
 
   @inlinable
-  func background<V>(
+  public func background<V>(
     alignment: Alignment = .center,
     @ViewBuilder content: () -> V
   ) -> some View where V: View {
@@ -91,8 +89,7 @@ public extension View {
 
 @frozen
 public struct _BackgroundShapeModifier<Style, Bounds>: ViewModifier, EnvironmentReader
-  where Style: ShapeStyle, Bounds: Shape
-{
+where Style: ShapeStyle, Bounds: Shape {
   public var environment: EnvironmentValues!
 
   public var style: Style
@@ -116,9 +113,9 @@ public struct _BackgroundShapeModifier<Style, Bounds>: ViewModifier, Environment
   }
 }
 
-public extension View {
+extension View {
   @inlinable
-  func background<S, T>(
+  public func background<S, T>(
     _ style: S,
     in shape: T,
     fillStyle: FillStyle = FillStyle()
@@ -127,7 +124,7 @@ public extension View {
   }
 
   @inlinable
-  func background<S>(
+  public func background<S>(
     in shape: S,
     fillStyle: FillStyle = FillStyle()
   ) -> some View where S: Shape {
@@ -137,8 +134,7 @@ public extension View {
 
 /// Override this View's body to provide a layout that fits the background to the content.
 public struct _OverlayLayout<Content, Overlay>: _PrimitiveView
-  where Content: View, Overlay: View
-{
+where Content: View, Overlay: View {
   public let content: Content
   public let overlay: Overlay
   public let alignment: Alignment
@@ -150,8 +146,7 @@ public struct _OverlayLayout<Content, Overlay>: _PrimitiveView
 }
 
 public struct _OverlayModifier<Overlay>: ViewModifier, EnvironmentReader
-  where Overlay: View
-{
+where Overlay: View {
   public var environment: EnvironmentValues!
   public var overlay: Overlay
   public var alignment: Alignment
@@ -174,21 +169,20 @@ public struct _OverlayModifier<Overlay>: ViewModifier, EnvironmentReader
   }
 }
 
-extension _OverlayModifier: Equatable where Overlay: Equatable {
+extension _OverlayModifier: @MainActor Equatable where Overlay: Equatable {
   public static func == (lhs: _OverlayModifier<Overlay>, rhs: _OverlayModifier<Overlay>) -> Bool {
     lhs.overlay == rhs.overlay
   }
 }
 
-public extension View {
-  func overlay<Overlay>(_ overlay: Overlay, alignment: Alignment = .center) -> some View
-    where Overlay: View
-  {
+extension View {
+  public func overlay<Overlay>(_ overlay: Overlay, alignment: Alignment = .center) -> some View
+  where Overlay: View {
     modifier(_OverlayModifier(overlay: overlay, alignment: alignment))
   }
 
   @inlinable
-  func overlay<V>(
+  public func overlay<V>(
     alignment: Alignment = .center,
     @ViewBuilder content: () -> V
   ) -> some View where V: View {
@@ -196,13 +190,13 @@ public extension View {
   }
 
   @inlinable
-  func overlay<S>(
+  public func overlay<S>(
     _ style: S
   ) -> some View where S: ShapeStyle {
     overlay(Rectangle().fill(style))
   }
 
-  func border<S>(_ content: S, width: CGFloat = 1) -> some View where S: ShapeStyle {
+  public func border<S>(_ content: S, width: CGFloat = 1) -> some View where S: ShapeStyle {
     overlay(Rectangle().strokeBorder(content, lineWidth: width))
   }
 }

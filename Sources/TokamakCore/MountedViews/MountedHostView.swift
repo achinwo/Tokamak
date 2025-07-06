@@ -51,11 +51,12 @@ public final class MountedHostView<R: Renderer>: MountedElement<R> {
 
     self.transaction = transaction
 
-    guard let target = reconciler.renderer.mountTarget(
-      before: sibling,
-      to: parentTarget,
-      with: self
-    )
+    guard
+      let target = reconciler.renderer.mountTarget(
+        before: sibling,
+        to: parentTarget,
+        with: self
+      )
     else { return }
 
     self.target = target
@@ -119,7 +120,7 @@ public final class MountedHostView<R: Renderer>: MountedElement<R> {
     parentUnmountTask = .init()
   }
 
-  override func update(in reconciler: StackReconciler<R>, with transaction: Transaction) {
+  override func update(in reconciler: StackReconciler<R>, with transaction: Transaction) async {
     guard let target = target else { return }
 
     invalidateUnmount()
@@ -161,7 +162,7 @@ public final class MountedHostView<R: Renderer>: MountedElement<R> {
           mountedChild.environmentValues = environmentValues
           mountedChild.view = childView
           mountedChild.updateEnvironment()
-          mountedChild.update(in: reconciler, with: transaction)
+          await mountedChild.update(in: reconciler, with: transaction)
           newChild = mountedChild
         } else {
           /* note the order of operations here: we mount the new child first, use the mounted child

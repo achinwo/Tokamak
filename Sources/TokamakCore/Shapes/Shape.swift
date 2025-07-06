@@ -36,7 +36,7 @@ extension Shape {
   }
 }
 
-public enum ShapeRole: Hashable {
+public enum ShapeRole: Hashable, Sendable {
   case fill
   case stroke
   case separator

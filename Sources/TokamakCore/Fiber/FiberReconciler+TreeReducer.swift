@@ -19,7 +19,10 @@ import Foundation
 
 extension FiberReconciler {
   /// Convert the first level of children of a `View` into a linked list of `Fiber`s.
-  struct TreeReducer: SceneReducer {
+  @MainActor
+  struct TreeReducer: @MainActor SceneReducer {
+
+    @MainActor
     final class Result {
       // For references
       let fiber: Fiber?

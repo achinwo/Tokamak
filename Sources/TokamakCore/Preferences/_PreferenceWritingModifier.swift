@@ -16,8 +16,7 @@
 //
 
 public struct _PreferenceWritingModifier<Key>: _PreferenceWritingModifierProtocol
-  where Key: PreferenceKey
-{
+where Key: PreferenceKey {
   public let value: Key.Value
   public init(key: Key.Type = Key.self, value: Key.Value) {
     self.value = value
@@ -37,16 +36,15 @@ public struct _PreferenceWritingModifier<Key>: _PreferenceWritingModifierProtoco
   }
 }
 
-extension _PreferenceWritingModifier: Equatable where Key.Value: Equatable {
+extension _PreferenceWritingModifier: @MainActor Equatable where Key.Value: Equatable {
   public static func == (a: Self, b: Self) -> Bool {
     a.value == b.value
   }
 }
 
-public extension View {
-  func preference<K>(key: K.Type = K.self, value: K.Value) -> some View
-    where K: PreferenceKey
-  {
+extension View {
+  public func preference<K>(key: K.Type = K.self, value: K.Value) -> some View
+  where K: PreferenceKey {
     modifier(_PreferenceWritingModifier<K>(value: value))
   }
 }

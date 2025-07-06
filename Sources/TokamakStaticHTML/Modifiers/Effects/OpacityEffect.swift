@@ -17,7 +17,7 @@
 
 import TokamakCore
 
-extension _OpacityEffect: DOMViewModifier {
+extension _OpacityEffect: @MainActor DOMViewModifier {
   public var attributes: [HTMLAttribute: String] {
     ["style": "opacity: \(opacity); "]
   }

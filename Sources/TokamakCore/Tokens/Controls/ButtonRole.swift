@@ -15,7 +15,7 @@
 //  Created by Carson Katri on 7/12/21.
 //
 
-public struct ButtonRole: Equatable {
+public struct ButtonRole: Equatable, Sendable {
   public static let destructive = ButtonRole(rawValue: 0)
   public static let cancel = ButtonRole(rawValue: 1)
 

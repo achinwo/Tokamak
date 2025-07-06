@@ -14,7 +14,7 @@
 //
 //  Created by Carson Katri on 7/16/20.
 //
-
+@MainActor
 @resultBuilder
 public enum SceneBuilder {
   public static func buildBlock<Content: Scene>(_ content: Content) -> some Scene {
@@ -25,8 +25,10 @@ public enum SceneBuilder {
 // swiftlint:disable large_tuple
 // swiftlint:disable function_parameter_count
 
-public extension SceneBuilder {
-  static func buildBlock<C0, C1>(_ c0: C0, _ c1: C1) -> some Scene where C0: Scene,
+extension SceneBuilder {
+  public static func buildBlock<C0, C1>(_ c0: C0, _ c1: C1) -> some Scene
+  where
+    C0: Scene,
     C1: Scene
   {
     _TupleScene(
@@ -40,10 +42,9 @@ public extension SceneBuilder {
   }
 }
 
-public extension SceneBuilder {
-  static func buildBlock<C0, C1, C2>(_ c0: C0, _ c1: C1, _ c2: C2) -> some Scene
-    where C0: Scene, C1: Scene, C2: Scene
-  {
+extension SceneBuilder {
+  public static func buildBlock<C0, C1, C2>(_ c0: C0, _ c1: C1, _ c2: C2) -> some Scene
+  where C0: Scene, C1: Scene, C2: Scene {
     _TupleScene(
       (c0, c1, c2),
       children: [_AnyScene(c0), _AnyScene(c1), _AnyScene(c2)],
@@ -56,8 +57,8 @@ public extension SceneBuilder {
   }
 }
 
-public extension SceneBuilder {
-  static func buildBlock<C0, C1, C2, C3>(
+extension SceneBuilder {
+  public static func buildBlock<C0, C1, C2, C3>(
     _ c0: C0,
     _ c1: C1,
     _ c2: C2,
@@ -76,8 +77,8 @@ public extension SceneBuilder {
   }
 }
 
-public extension SceneBuilder {
-  static func buildBlock<C0, C1, C2, C3, C4>(
+extension SceneBuilder {
+  public static func buildBlock<C0, C1, C2, C3, C4>(
     _ c0: C0,
     _ c1: C1,
     _ c2: C2,
@@ -98,15 +99,17 @@ public extension SceneBuilder {
   }
 }
 
-public extension SceneBuilder {
-  static func buildBlock<C0, C1, C2, C3, C4, C5>(
+extension SceneBuilder {
+  public static func buildBlock<C0, C1, C2, C3, C4, C5>(
     _ c0: C0,
     _ c1: C1,
     _ c2: C2,
     _ c3: C3,
     _ c4: C4,
     _ c5: C5
-  ) -> some Scene where C0: Scene, C1: Scene, C2: Scene, C3: Scene, C4: Scene,
+  ) -> some Scene
+  where
+    C0: Scene, C1: Scene, C2: Scene, C3: Scene, C4: Scene,
     C5: Scene
   {
     _TupleScene(
@@ -131,8 +134,8 @@ public extension SceneBuilder {
   }
 }
 
-public extension SceneBuilder {
-  static func buildBlock<C0, C1, C2, C3, C4, C5, C6>(
+extension SceneBuilder {
+  public static func buildBlock<C0, C1, C2, C3, C4, C5, C6>(
     _ c0: C0,
     _ c1: C1,
     _ c2: C2,
@@ -140,7 +143,9 @@ public extension SceneBuilder {
     _ c4: C4,
     _ c5: C5,
     _ c6: C6
-  ) -> some Scene where C0: Scene, C1: Scene, C2: Scene, C3: Scene,
+  ) -> some Scene
+  where
+    C0: Scene, C1: Scene, C2: Scene, C3: Scene,
     C4: Scene, C5: Scene, C6: Scene
   {
     _TupleScene(
@@ -167,8 +172,8 @@ public extension SceneBuilder {
   }
 }
 
-public extension SceneBuilder {
-  static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7>(
+extension SceneBuilder {
+  public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7>(
     _ c0: C0,
     _ c1: C1,
     _ c2: C2,
@@ -177,7 +182,9 @@ public extension SceneBuilder {
     _ c5: C5,
     _ c6: C6,
     _ c7: C7
-  ) -> some Scene where C0: Scene, C1: Scene, C2: Scene, C3: Scene, C4: Scene, C5: Scene, C6: Scene,
+  ) -> some Scene
+  where
+    C0: Scene, C1: Scene, C2: Scene, C3: Scene, C4: Scene, C5: Scene, C6: Scene,
     C7: Scene
   {
     _TupleScene(
@@ -206,8 +213,8 @@ public extension SceneBuilder {
   }
 }
 
-public extension SceneBuilder {
-  static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8>(
+extension SceneBuilder {
+  public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8>(
     _ c0: C0,
     _ c1: C1,
     _ c2: C2,
@@ -217,7 +224,9 @@ public extension SceneBuilder {
     _ c6: C6,
     _ c7: C7,
     _ c8: C8
-  ) -> some Scene where C0: Scene, C1: Scene, C2: Scene, C3: Scene, C4: Scene, C5: Scene, C6: Scene,
+  ) -> some Scene
+  where
+    C0: Scene, C1: Scene, C2: Scene, C3: Scene, C4: Scene, C5: Scene, C6: Scene,
     C7: Scene, C8: Scene
   {
     _TupleScene(
@@ -248,8 +257,8 @@ public extension SceneBuilder {
   }
 }
 
-public extension SceneBuilder {
-  static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(
+extension SceneBuilder {
+  public static func buildBlock<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(
     _ c0: C0,
     _ c1: C1,
     _ c2: C2,
@@ -260,7 +269,9 @@ public extension SceneBuilder {
     _ c7: C7,
     _ c8: C8,
     _ c9: C9
-  ) -> some Scene where C0: Scene, C1: Scene, C2: Scene, C3: Scene, C4: Scene, C5: Scene, C6: Scene,
+  ) -> some Scene
+  where
+    C0: Scene, C1: Scene, C2: Scene, C3: Scene, C4: Scene, C5: Scene, C6: Scene,
     C7: Scene, C8: Scene, C9: Scene
   {
     _TupleScene(

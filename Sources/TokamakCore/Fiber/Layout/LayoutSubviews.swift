@@ -18,7 +18,7 @@
 import Foundation
 
 /// A collection of `LayoutSubview` proxies.
-public struct LayoutSubviews: @MainActor Equatable, @MainActor RandomAccessCollection {
+@MainActor public struct LayoutSubviews: @MainActor Equatable, @MainActor RandomAccessCollection {
   public var layoutDirection: LayoutDirection
   var storage: [LayoutSubview]
 
@@ -73,12 +73,12 @@ public struct LayoutSubviews: @MainActor Equatable, @MainActor RandomAccessColle
 ///
 /// `Layout` types are expected to call `place(at:anchor:proposal:)` on all subviews.
 /// If `place(at:anchor:proposal:)` is not called, the center will be used as its position.
-public struct LayoutSubview: Equatable {
+@MainActor public struct LayoutSubview: @MainActor Equatable {
   private let id: ObjectIdentifier
   private let storage: AnyStorage
 
   /// A protocol used to erase `Storage<R>`.
-  private class AnyStorage {
+  @MainActor private class AnyStorage {
     let traits: _ViewTraitStore?
 
     init(traits: _ViewTraitStore?) {
@@ -109,7 +109,8 @@ public struct LayoutSubview: Equatable {
 
   /// The backing storage for a `LayoutSubview`. This contains the underlying implementations for
   /// methods accessing the `fiber`, `element`, and `cache` this subview represents.
-  private final class Storage<R: FiberRenderer>: AnyStorage {
+
+  @MainActor private final class Storage<R: FiberRenderer>: AnyStorage {
     weak var fiber: FiberReconciler<R>.Fiber?
     weak var element: R.ElementType?
     unowned var caches: FiberReconciler<R>.Caches

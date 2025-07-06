@@ -21,8 +21,8 @@ public protocol PreferenceKey {
   static func reduce(value: inout Value, nextValue: () -> Value)
 }
 
-public extension PreferenceKey where Self.Value: ExpressibleByNilLiteral {
-  static var defaultValue: Value { nil }
+extension PreferenceKey where Self.Value: ExpressibleByNilLiteral {
+  public static var defaultValue: Value { nil }
 }
 
 final class _PreferenceValueStorage: CustomDebugStringConvertible {
@@ -50,6 +50,7 @@ final class _PreferenceValueStorage: CustomDebugStringConvertible {
   }
 }
 
+@MainActor
 public struct _PreferenceValue<Key> where Key: PreferenceKey {
   var storage: _PreferenceValueStorage
 
@@ -69,15 +70,16 @@ public struct _PreferenceValue<Key> where Key: PreferenceKey {
   }
 }
 
-public extension _PreferenceValue {
-  func _force<V>(
+extension _PreferenceValue {
+  public func _force<V>(
     _ transform: @escaping (Key.Value) -> V
   ) -> _PreferenceReadingView<Key, V> where V: View {
     _PreferenceReadingView(value: self, transform: transform)
   }
 }
 
-public final class _PreferenceStore: CustomDebugStringConvertible {
+@MainActor
+public final class _PreferenceStore: @MainActor CustomDebugStringConvertible {
   /// The values of the `_PreferenceStore` on the last update.
   private var previousValues: [ObjectIdentifier: _PreferenceValueStorage]
   /// The backing values of the `_PreferenceStore`.
@@ -96,8 +98,7 @@ public final class _PreferenceStore: CustomDebugStringConvertible {
 
   /// Retrieve a late-binding token for `key`, or save the default value if it does not yet exist.
   public func value<Key>(forKey key: Key.Type = Key.self) -> _PreferenceValue<Key>
-    where Key: PreferenceKey
-  {
+  where Key: PreferenceKey {
     let keyID = ObjectIdentifier(key)
     let storage: _PreferenceValueStorage
     if let existing = values[keyID] {
@@ -113,14 +114,12 @@ public final class _PreferenceStore: CustomDebugStringConvertible {
   ///
   /// Used to check if the value changed during the last update.
   func previousValue<Key>(forKey key: Key.Type = Key.self) -> _PreferenceValue<Key>
-    where Key: PreferenceKey
-  {
+  where Key: PreferenceKey {
     _PreferenceValue(storage: previousValues[ObjectIdentifier(key)] ?? .init(key))
   }
 
   public func insert<Key>(_ value: Key.Value, forKey key: Key.Type = Key.self)
-    where Key: PreferenceKey
-  {
+  where Key: PreferenceKey {
     let keyID = ObjectIdentifier(key)
     if !values.keys.contains(keyID) {
       values[keyID] = .init(key)
@@ -169,20 +168,18 @@ public protocol _PreferenceWritingViewProtocol {
 
 /// A protocol that allows a `ViewModifier` to modify values from the current `_PreferenceStore`.
 public protocol _PreferenceWritingModifierProtocol: ViewModifier
-  where Body == AnyView
-{
+where Body == AnyView {
   func body(_ content: Self.Content, with preferenceStore: inout _PreferenceStore) -> AnyView
 }
 
-public extension _PreferenceWritingModifierProtocol {
-  func body(content: Content) -> AnyView {
+extension _PreferenceWritingModifierProtocol {
+  public func body(content: Content) -> AnyView {
     content.view
   }
 }
 
-extension ModifiedContent: _PreferenceWritingViewProtocol
-  where Content: View, Modifier: _PreferenceWritingModifierProtocol
-{
+extension ModifiedContent: @MainActor _PreferenceWritingViewProtocol
+where Content: View, Modifier: _PreferenceWritingModifierProtocol {
   public func modifyPreferenceStore(_ preferenceStore: inout _PreferenceStore) -> AnyView {
     AnyView(
       modifier

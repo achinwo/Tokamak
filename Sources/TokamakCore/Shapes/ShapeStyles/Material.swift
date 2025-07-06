@@ -15,7 +15,7 @@
 //  Created by Carson Katri on 7/6/21.
 //
 
-public struct Material {
+public struct Material: Sendable {
   private let style: _MaterialStyle
 
   private init(_ style: _MaterialStyle) {
@@ -29,7 +29,7 @@ public struct Material {
   public static let ultraThick = Self(.ultraThick)
 }
 
-public enum _MaterialStyle {
+public enum _MaterialStyle: Sendable {
   case regular
   case thick
   case thin
@@ -41,9 +41,11 @@ extension Material: ShapeStyle {
   public func _apply(to shape: inout _ShapeStyle_Shape) {
     shape.result = .resolved(
       .foregroundMaterial(
-        _ColorProxy(Color._withScheme {
-          $0 == .light ? Color.white : Color.black
-        }).resolve(in: shape.environment),
+        _ColorProxy(
+          Color._withScheme {
+            $0 == .light ? Color.white : Color.black
+          }
+        ).resolve(in: shape.environment),
         style
       )
     )
@@ -52,15 +54,15 @@ extension Material: ShapeStyle {
   public static func _apply(to shape: inout _ShapeStyle_ShapeType) {}
 }
 
-public extension Material {
-  static let bar = Self.regular
+extension Material {
+  public static let bar = Self.regular
 }
 
-public extension ShapeStyle where Self == Material {
-  static var regularMaterial: Self { .regular }
-  static var thickMaterial: Self { .thick }
-  static var thinMaterial: Self { .thin }
-  static var ultraThinMaterial: Self { .ultraThin }
-  static var ultraThickMaterial: Self { .ultraThick }
-  static var bar: Self { .bar }
+extension ShapeStyle where Self == Material {
+  public static var regularMaterial: Self { .regular }
+  public static var thickMaterial: Self { .thick }
+  public static var thinMaterial: Self { .thin }
+  public static var ultraThinMaterial: Self { .ultraThin }
+  public static var ultraThickMaterial: Self { .ultraThick }
+  public static var bar: Self { .bar }
 }

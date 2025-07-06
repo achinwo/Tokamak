@@ -22,7 +22,7 @@ import Foundation
 /// renderer needs to know whether the attribute should be assigned via a DOM element property or the
 /// [`setAttribute`](https://developer.mozilla.org/en-US/docs/Web/API/Element/setAttribute) function.
 /// The `isUpdatedAsProperty` flag is used to disambiguate between these two cases.
-public struct HTMLAttribute: Hashable {
+public struct HTMLAttribute: Hashable, Sendable {
   public let value: String
   public let isUpdatedAsProperty: Bool
 
@@ -53,6 +53,8 @@ public protocol AnyHTML {
 }
 
 extension AnyHTML {
+
+  @MainActor
   public func outerHTML(
     shouldSortAttributes: Bool,
     additonalAttributes: [HTMLAttribute: String] = [:],
@@ -86,7 +88,7 @@ extension AnyHTML {
   }
 }
 
-public struct HTML<Content>: View, AnyHTML, @MainActor Layout {
+public struct HTML<Content>: View, @MainActor AnyHTML, @MainActor Layout {
   public let tag: String
   public let namespace: String?
   public let attributes: [HTMLAttribute: String]
@@ -186,7 +188,7 @@ extension HTML where Content == EmptyView {
 }
 
 @_spi(TokamakStaticHTML)
-extension HTML: HTMLConvertible {
+extension HTML: @MainActor HTMLConvertible {
   public func attributes(useDynamicLayout: Bool) -> [HTMLAttribute: String] {
     attributes
   }

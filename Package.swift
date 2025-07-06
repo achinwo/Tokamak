@@ -47,14 +47,14 @@ let package = Package(
   dependencies: [
     .package(
       url: "https://github.com/swiftwasm/JavaScriptKit.git",
-      from: "0.15.0"
+      from: "0.31.1"
     ),
     .package(
       url: "https://github.com/OpenCombine/OpenCombine.git",
       from: "0.14.0"
     ),
     .package(
-      path: "../OpenCombineJS"
+      path: "./external_dependencies/OpenCombineJS"
     ),
     .package(
       url: "https://github.com/google/swift-benchmark",
@@ -65,7 +65,7 @@ let package = Package(
       from: "1.9.0"
     ),
     .package(url: "https://github.com/swiftlang/swift-foundation.git", branch: "main"),
-    .package(path: "../carton"),
+    .package(path: "./external_dependencies/carton"),
   ],
   targets: [
     // Targets are the basic building blocks of a package. A target can define
@@ -79,11 +79,7 @@ let package = Package(
           name: "FoundationEssentials",
           package: "swift-foundation"
         )
-      ],
-      swiftSettings: [
-        .defaultIsolation(MainActor.self),
-        .unsafeFlags(["-strict-concurrency=minimal"]),
-      ],
+      ]
     ),
     .target(
       name: "TokamakCore",
@@ -100,11 +96,7 @@ let package = Package(
         //       name: "FoundationEssentials",
         //       package: "swift-foundation"
         //     )
-      ],
-      swiftSettings: [
-        .defaultIsolation(MainActor.self)
-        //.unsafeFlags(["-strict-concurrency=minimal"]),
-      ],
+      ]
     ),
     .target(
       name: "TokamakShim",
@@ -115,10 +107,6 @@ let package = Package(
           name: "Foundation",
           condition: .when(platforms: [.wasi])
         ),
-      ],
-      swiftSettings: [
-        .defaultIsolation(MainActor.self)
-        //.unsafeFlags(["-strict-concurrency=minimal"]),
       ]
     ),
     .systemLibrary(
@@ -162,10 +150,6 @@ let package = Package(
       name: "TokamakStaticHTML",
       dependencies: [
         "TokamakCore"
-      ],
-      swiftSettings: [
-        .defaultIsolation(MainActor.self)
-        //.unsafeFlags(["-strict-concurrency=minimal"]),
       ]
     ),
     .executableTarget(
@@ -203,9 +187,6 @@ let package = Package(
           condition: .when(platforms: [.wasi])
         ),
         "OpenCombineJS",
-      ],
-      swiftSettings: [
-        .defaultIsolation(MainActor.self)
       ]
     ),
     .executableTarget(
@@ -218,29 +199,20 @@ let package = Package(
           condition: .when(platforms: [.wasi])
         ),
       ],
-      resources: [.copy("logo-header.png")],
-      swiftSettings: [
-        .defaultIsolation(MainActor.self),
-        .unsafeFlags(["-strict-concurrency=minimal"]),
+      resources: [
+        .copy("logo-header.png"),
+        .copy("../../JavaScriptKit_JavaScriptKit.resources"),
       ]
     ),
     .executableTarget(
       name: "TokamakStaticHTMLDemo",
       dependencies: [
         "TokamakStaticHTML"
-      ],
-      swiftSettings: [
-        .defaultIsolation(MainActor.self),
-        .unsafeFlags(["-strict-concurrency=minimal"]),
       ]
     ),
     .target(
       name: "TokamakTestRenderer",
-      dependencies: ["TokamakCore"],
-      swiftSettings: [
-        .defaultIsolation(MainActor.self),
-        .unsafeFlags(["-strict-concurrency=minimal"]),
-      ]
+      dependencies: ["TokamakCore"]
     ),
     .testTarget(
       name: "TokamakLayoutTests",

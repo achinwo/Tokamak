@@ -15,14 +15,14 @@
 //  Created by Carson Katri on 6/20/22.
 //
 
-public enum LayoutDirection: Hashable, CaseIterable {
+public enum LayoutDirection: Hashable, CaseIterable, Sendable {
   case leftToRight
   case rightToLeft
 }
 
 extension EnvironmentValues {
   private enum LayoutDirectionKey: EnvironmentKey {
-    static var defaultValue: LayoutDirection = .leftToRight
+    static let defaultValue: LayoutDirection = .leftToRight
   }
 
   public var layoutDirection: LayoutDirection {

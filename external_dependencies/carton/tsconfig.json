@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "ES2020",
+    "strict": true,
+    "target": "ESNext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "lib": [
+      "DOM",
+      "ES2020",
+      "ES2021.WeakRef"
+    ],
+    "noEmit": true,
+    "isolatedModules": true,
+    "sourceMap": true
+  },
+  "include": [
+    "entrypoint/**/*.ts"
+  ]
+}

@@ -1,0 +1,20 @@
+disabled_rules:
+  - trailing_comma
+  - identifier_name
+  - void_return
+  - operator_whitespace
+  - nesting
+  - cyclomatic_complexity
+  - opening_brace
+  - todo
+
+line_length: 120
+
+function_body_length: 50
+
+included:
+  - Sources
+  - Tests
+
+excluded:
+  - Tests/Fixtures

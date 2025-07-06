@@ -18,11 +18,13 @@
 import OpenCombineShim
 
 /// Provides the ability to set the title of the Scene.
+@MainActor
 public protocol _TitledApp {
   static func _setTitle(_ title: String)
 }
 
 /// The renderer is responsible for implementing certain functionality.
+@MainActor
 public protocol App: _TitledApp {
   associatedtype Body: Scene
   var body: Body { get }
@@ -46,10 +48,11 @@ public protocol App: _TitledApp {
   init()
 }
 
-public struct _AppConfiguration {
+public struct _AppConfiguration: Sendable {
   public let reconciler: Reconciler
   public let rootEnvironment: EnvironmentValues
 
+  @MainActor
   public init(
     reconciler: Reconciler = .stack,
     rootEnvironment: EnvironmentValues = .init()
@@ -58,7 +61,7 @@ public struct _AppConfiguration {
     self.rootEnvironment = rootEnvironment
   }
 
-  public enum Reconciler {
+  public enum Reconciler: Sendable {
     /// Use the `StackReconciler`.
     case stack
     /// Use the `FiberReconciler` with layout steps optionally enabled.
@@ -66,10 +69,10 @@ public struct _AppConfiguration {
   }
 }
 
-public extension App {
-  static var _configuration: _AppConfiguration { .init() }
+extension App {
+  public static var _configuration: _AppConfiguration { .init() }
 
-  static func main() {
+  public static func main() {
     let app = Self()
     _launch(app, with: Self._configuration)
   }

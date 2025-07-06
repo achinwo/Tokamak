@@ -15,14 +15,14 @@
 //  Created by Carson Katri on 7/12/21.
 //
 
-public enum Prominence: Hashable {
+public enum Prominence: Hashable, Sendable {
   case standard
   case increased
 }
 
 extension EnvironmentValues {
   private enum HeaderProminenceKey: EnvironmentKey {
-    static var defaultValue: Prominence = .standard
+    static let defaultValue: Prominence = .standard
   }
 
   public var headerProminence: Prominence {
@@ -35,8 +35,8 @@ extension EnvironmentValues {
   }
 }
 
-public extension View {
-  func headerProminence(_ prominence: Prominence) -> some View {
+extension View {
+  public func headerProminence(_ prominence: Prominence) -> some View {
     environment(\.headerProminence, prominence)
   }
 }

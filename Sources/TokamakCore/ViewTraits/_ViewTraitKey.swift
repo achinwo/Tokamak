@@ -14,8 +14,7 @@
 //
 //  Created by Carson Katri on 7/10/21.
 //
-
-public protocol _ViewTraitKey {
+@MainActor public protocol _ViewTraitKey {
   associatedtype Value
   static var defaultValue: Value { get }
 }
@@ -25,9 +24,8 @@ public protocol _TraitWritingModifierProtocol {
 }
 
 @frozen
-public struct _TraitWritingModifier<Trait>: ViewModifier, _TraitWritingModifierProtocol
-  where Trait: _ViewTraitKey
-{
+public struct _TraitWritingModifier<Trait>: ViewModifier, @MainActor _TraitWritingModifierProtocol
+where Trait: _ViewTraitKey {
   public let value: Trait.Value
   @inlinable
   public init(value: Trait.Value) {
@@ -51,17 +49,18 @@ public struct _TraitWritingModifier<Trait>: ViewModifier, _TraitWritingModifierP
   }
 }
 
-extension ModifiedContent: _TraitWritingModifierProtocol
-  where Modifier: _TraitWritingModifierProtocol
-{
+extension ModifiedContent: @MainActor _TraitWritingModifierProtocol
+where Modifier: _TraitWritingModifierProtocol {
   public func modifyViewTraitStore(_ viewTraitStore: inout _ViewTraitStore) {
     modifier.modifyViewTraitStore(&viewTraitStore)
   }
 }
 
-public extension View {
+@MainActor
+extension View {
+
   @inlinable
-  func _trait<K>(
+  public func _trait<K>(
     _ key: K.Type,
     _ value: K.Value
   ) -> some View where K: _ViewTraitKey {

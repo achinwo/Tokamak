@@ -17,7 +17,7 @@
 
 import Foundation
 
-public struct ViewGeometry: Equatable {
+public struct ViewGeometry: Equatable, Sendable {
   @_spi(TokamakCore)
   public let origin: ViewOrigin
 
@@ -28,7 +28,7 @@ public struct ViewGeometry: Equatable {
 }
 
 /// The position of the `View` relative to its parent.
-public struct ViewOrigin: Equatable {
+public struct ViewOrigin: Equatable, Sendable {
   @_spi(TokamakCore)
   public let origin: CGPoint
 
@@ -38,7 +38,7 @@ public struct ViewOrigin: Equatable {
   public var y: CGFloat { origin.y }
 }
 
-public struct ViewDimensions: Equatable {
+public struct ViewDimensions: Equatable, Sendable {
   @_spi(TokamakCore)
   public let size: CGSize
 

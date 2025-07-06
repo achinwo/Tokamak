@@ -15,7 +15,7 @@
 //  Created by Carson Katri on 1/20/21.
 //
 
-public struct _OpacityEffect: Animatable, ViewModifier, Equatable {
+public struct _OpacityEffect: @MainActor Animatable, ViewModifier, Equatable {
   public var opacity: Double
 
   public init(opacity: Double) {
@@ -32,8 +32,8 @@ public struct _OpacityEffect: Animatable, ViewModifier, Equatable {
   }
 }
 
-public extension View {
-  func opacity(_ opacity: Double) -> some View {
+extension View {
+  public func opacity(_ opacity: Double) -> some View {
     modifier(_OpacityEffect(opacity: opacity))
   }
 }

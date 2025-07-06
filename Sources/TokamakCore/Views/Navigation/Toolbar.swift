@@ -14,8 +14,8 @@
 //
 //  Created by Carson Katri on 7/7/20.
 //
-
-struct ToolbarKey: PreferenceKey {
+@MainActor
+struct ToolbarKey: @MainActor PreferenceKey {
   static let defaultValue = ToolbarValue([])
   static func reduce(value: inout ToolbarValue, nextValue: () -> ToolbarValue) {
     value = nextValue()
@@ -33,9 +33,9 @@ struct ToolbarKey: PreferenceKey {
   }
 }
 
-public extension View {
+extension View {
   @_disfavoredOverload
-  func toolbar<Content>(
+  public func toolbar<Content>(
     @ViewBuilder content: @escaping () -> Content
   ) -> some View where Content: View {
     toolbar {
@@ -43,20 +43,26 @@ public extension View {
     }
   }
 
-  func toolbar<Items>(@ToolbarContentBuilder<()> items: () -> ToolbarItemGroup<(), Items>)
+  public func toolbar<Items>(@ToolbarContentBuilder<()> items: () -> ToolbarItemGroup<(), Items>)
     -> some View
   {
-    preference(key: ToolbarKey.self, value: ToolbarKey.ToolbarValue(items()._items.compactMap {
-      $0.view as? AnyToolbarItem
-    }))
+    preference(
+      key: ToolbarKey.self,
+      value: ToolbarKey.ToolbarValue(
+        items()._items.compactMap {
+          $0.view as? AnyToolbarItem
+        }))
   }
 
-  func toolbar<Items>(
+  public func toolbar<Items>(
     id: String,
     @ToolbarContentBuilder<String> items: () -> ToolbarItemGroup<String, Items>
   ) -> some View {
-    preference(key: ToolbarKey.self, value: ToolbarKey.ToolbarValue(items()._items.compactMap {
-      $0.view as? AnyToolbarItem
-    }))
+    preference(
+      key: ToolbarKey.self,
+      value: ToolbarKey.ToolbarValue(
+        items()._items.compactMap {
+          $0.view as? AnyToolbarItem
+        }))
   }
 }

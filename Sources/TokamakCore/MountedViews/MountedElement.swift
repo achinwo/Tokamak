@@ -23,32 +23,34 @@ private enum MountedElementKind {
 
   var type: Any.Type {
     switch self {
-    case let .app(app): return app.type
-    case let .scene(scene): return scene.type
-    case let .view(view): return view.type
+    case .app(let app): return app.type
+    case .scene(let scene): return scene.type
+    case .view(let view): return view.type
     }
   }
 }
 
+@MainActor
 public class MountedElement<R: Renderer> {
   private var element: MountedElementKind
   var type: Any.Type { element.type }
 
   public internal(set) var app: _AnyApp {
     get {
-      if case let .app(app) = element {
+      if case .app(let app) = element {
         return app
       } else {
         fatalError("The `MountedElement` is of type `\(element)`, not `App`.")
       }
-    } set {
+    }
+    set {
       element = .app(newValue)
     }
   }
 
   public internal(set) var scene: _AnyScene {
     get {
-      if case let .scene(scene) = element {
+      if case .scene(let scene) = element {
         return scene
       } else {
         fatalError("The `MountedElement` is of type `\(element)`, not `Scene`.")
@@ -61,7 +63,7 @@ public class MountedElement<R: Renderer> {
 
   public internal(set) var view: AnyView {
     get {
-      if case let .view(view) = element {
+      if case .view(let view) = element {
         return view
       } else {
         fatalError("The `MountedElement` is of type `\(element)`, not `View`.")
@@ -74,13 +76,15 @@ public class MountedElement<R: Renderer> {
 
   var typeConstructorName: String {
     switch element {
-    case .app: fatalError("""
-      `App` values aren't supposed to be reconciled, thus the type constructor name is not stored \
-      for `App` elements. Please report this crash as a bug at \
-      https://github.com/swiftwasm/Tokamak/issues/new
-      """)
-    case let .scene(scene): return scene.typeConstructorName
-    case let .view(view): return view.typeConstructorName
+    case .app:
+      fatalError(
+        """
+        `App` values aren't supposed to be reconciled, thus the type constructor name is not stored \
+        for `App` elements. Please report this crash as a bug at \
+        https://github.com/swiftwasm/Tokamak/issues/new
+        """)
+    case .scene(let scene): return scene.typeConstructorName
+    case .view(let view): return view.typeConstructorName
     }
   }
 
@@ -151,8 +155,8 @@ public class MountedElement<R: Renderer> {
   /// You must call `super.prepareForMount` before all other mounting work.
   func prepareForMount(with transaction: Transaction) {
     // `GroupView`'s don't really mount, so let their children transition if the group can.
-    if case let .view(view) = element,
-       view.type is GroupView.Type
+    if case .view(let view) = element,
+      view.type is GroupView.Type
     {
       transitionPhase = parent?.transitionPhase ?? .normal
     }
@@ -162,8 +166,8 @@ public class MountedElement<R: Renderer> {
       viewTraits.insert(
         transaction.animation != nil
           || _AnyTransitionProxy(viewTraits.transition)
-          .resolve(in: environmentValues)
-          .insertionAnimation != nil,
+            .resolve(in: environmentValues)
+            .insertionAnimation != nil,
         forKey: CanTransitionTraitKey.self
       )
     }
@@ -191,8 +195,8 @@ public class MountedElement<R: Renderer> {
     }
 
     // `GroupView`'s don't really unmount, so let their children transition if the group can.
-    if case let .view(view) = element,
-       view.type is GroupView.Type
+    if case .view(let view) = element,
+      view.type is GroupView.Type
     {
       transitionPhase = parent?.transitionPhase ?? .normal
     } else {
@@ -205,14 +209,14 @@ public class MountedElement<R: Renderer> {
       viewTraits.insert(
         transaction.animation != nil
           || _AnyTransitionProxy(viewTraits.transition)
-          .resolve(in: environmentValues)
-          .removalAnimation != nil,
+            .resolve(in: environmentValues)
+            .removalAnimation != nil,
         forKey: CanTransitionTraitKey.self
       )
     }
   }
 
-  func update(in reconciler: StackReconciler<R>, with transaction: Transaction) {
+  func update(in reconciler: StackReconciler<R>, with transaction: Transaction) async {
     fatalError("implement \(#function) in subclass")
   }
 
@@ -231,6 +235,8 @@ public class MountedElement<R: Renderer> {
 }
 
 extension EnvironmentValues {
+
+  @MainActor
   mutating func inject(into element: inout Any, _ type: Any.Type) {
     guard let info = typeInfo(of: type) else { return }
 
@@ -266,6 +272,7 @@ extension TypeInfo {
   /// Extract all `DynamicProperty` from a type, recursively.
   /// This is necessary as a `DynamicProperty` can be nested.
   /// `EnvironmentValues` can also be injected at this point.
+  @MainActor
   func dynamicProperties(
     _ environment: inout EnvironmentValues,
     source: inout Any

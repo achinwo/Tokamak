@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /// A type-eraser for `VectorArithmetic`.
-public struct _AnyAnimatableData: @MainActor VectorArithmetic {
+public struct _AnyAnimatableData: VectorArithmetic {
   private var box: _AnyAnimatableDataBox?
 
   private init(_ box: _AnyAnimatableDataBox?) {
@@ -31,7 +31,7 @@ public struct _AnyAnimatableData: @MainActor VectorArithmetic {
 /// `B : Super`; casting both `A.self as? B.Type` and `B.self as? A.Type` fail.
 /// This is important for static operators, since non-type-erased operators get this right.
 /// Thankfully, only no-inheritance types are supported.
-private protocol _AnyAnimatableDataBox {
+private protocol _AnyAnimatableDataBox: Sendable {
   var value: Any { get }
 
   func equals(_ other: Any) -> Bool

@@ -63,10 +63,12 @@ extension ContainerRelativeShape: @MainActor InsettableShape {
 }
 
 extension EnvironmentValues {
-  fileprivate enum ContainerShapeKey: EnvironmentKey {
+  @MainActor
+  fileprivate enum ContainerShapeKey: @MainActor EnvironmentKey {
     static let defaultValue: (CGRect, GeometryProxy) -> Path? = { _, _ in nil }
   }
 
+  @MainActor
   fileprivate var _containerShape: (CGRect, GeometryProxy) -> Path? {
     get {
       self[ContainerShapeKey.self]

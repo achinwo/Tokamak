@@ -12,30 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import JavaScriptKit
 import TokamakShim
 
-@available(OSX 10.16, iOS 14.0, *)
-struct CustomScene: @preconcurrency Scene {
+@main
+struct TokamakDemoApp: @MainActor App {
+
   @Environment(\.scenePhase)
   private var scenePhase
 
   var body: some Scene {
-    print("In CustomScene.body scenePhase is \(scenePhase)")
-    return WindowGroup("Tokamak Demo") {
+    WindowGroup("Tokamak Demo") {
       TokamakDemoView()
     }
   }
-}
 
-@available(OSX 10.16, iOS 14.0, *)
-struct TokamakDemoApp: @MainActor App {
-  var body: some Scene {
-    CustomScene()
-  }
-}
-
-// If @main was supported for executable Swift Packages,
-// this would match SwiftUI 100%
-if #available(OSX 10.16, iOS 14.0, *) {
-  TokamakDemoApp.main()
 }

@@ -31,7 +31,7 @@ import Foundation
 ///       .bold()
 ///       .italic()
 ///       .underline(true, color: .red)
-public struct Text: _PrimitiveView, Equatable {
+@MainActor public struct Text: _PrimitiveView, @MainActor Equatable {
   let storage: _Storage
   let modifiers: [_Modifier]
 
@@ -49,12 +49,13 @@ public struct Text: _PrimitiveView, Equatable {
 
     public static func == (lhs: Text._Storage, rhs: Text._Storage) -> Bool {
       switch lhs {
-      case let .verbatim(lhsVerbatim):
-        guard case let .verbatim(rhsVerbatim) = rhs else { return false }
+      case .verbatim(let lhsVerbatim):
+        guard case .verbatim(let rhsVerbatim) = rhs else { return false }
         return lhsVerbatim == rhsVerbatim
-      case let .segmentedText(lhsSegments):
-        guard case let .segmentedText(rhsSegments) = rhs,
-              lhsSegments.count == rhsSegments.count else { return false }
+      case .segmentedText(let lhsSegments):
+        guard case .segmentedText(let rhsSegments) = rhs,
+          lhsSegments.count == rhsSegments.count
+        else { return false }
         return lhsSegments.enumerated().allSatisfy {
           $0.element.0 == rhsSegments[$0.offset].0
             && $0.element.1 == rhsSegments[$0.offset].1
@@ -72,15 +73,16 @@ public struct Text: _PrimitiveView, Equatable {
     case tracking(CGFloat)
     case baseline(CGFloat)
     case rounded
-    case strikethrough(Bool, Color?) // Note: Not in SwiftUI
-    case underline(Bool, Color?) // Note: Not in SwiftUI
+    case strikethrough(Bool, Color?)  // Note: Not in SwiftUI
+    case underline(Bool, Color?)  // Note: Not in SwiftUI
   }
 
   init(storage: _Storage, modifiers: [_Modifier] = []) {
-    if case let .segmentedText(segments) = storage {
-      self.storage = .segmentedText(segments.map {
-        ($0.0, modifiers + $0.1)
-      })
+    if case .segmentedText(let segments) = storage {
+      self.storage = .segmentedText(
+        segments.map {
+          ($0.0, modifiers + $0.1)
+        })
     } else {
       self.storage = storage
     }
@@ -96,21 +98,22 @@ public struct Text: _PrimitiveView, Equatable {
   }
 }
 
-public extension Text._Storage {
-  var rawText: String {
+extension Text._Storage {
+  public var rawText: String {
     switch self {
-    case let .segmentedText(segments):
-      return segments
+    case .segmentedText(let segments):
+      return
+        segments
         .map(\.0.rawText)
         .reduce("", +)
-    case let .verbatim(text):
+    case .verbatim(let text):
       return text
     }
   }
 }
 
 /// This is a helper type that works around absence of "package private" access control in Swift
-public struct _TextProxy {
+@MainActor public struct _TextProxy {
   public let subject: Text
 
   public init(_ subject: Text) {
@@ -122,7 +125,7 @@ public struct _TextProxy {
         role: .fill
       )
       foregroundStyle._apply(to: &shape)
-      if case let .prepared(text) = shape.result {
+      if case .prepared(let text) = shape.result {
         self.subject = text
         return
       }
@@ -145,54 +148,55 @@ public struct _TextProxy {
   public var environment: EnvironmentValues { subject.environment }
 }
 
-public extension Text {
-  func font(_ font: Font?) -> Text {
+extension Text {
+  public func font(_ font: Font?) -> Text {
     .init(storage: storage, modifiers: modifiers + [.font(font)])
   }
 
-  func foregroundColor(_ color: Color?) -> Text {
+  public func foregroundColor(_ color: Color?) -> Text {
     .init(storage: storage, modifiers: modifiers + [.color(color)])
   }
 
-  func fontWeight(_ weight: Font.Weight?) -> Text {
+  public func fontWeight(_ weight: Font.Weight?) -> Text {
     .init(storage: storage, modifiers: modifiers + [.weight(weight)])
   }
 
-  func bold() -> Text {
+  public func bold() -> Text {
     .init(storage: storage, modifiers: modifiers + [.weight(.bold)])
   }
 
-  func italic() -> Text {
+  public func italic() -> Text {
     .init(storage: storage, modifiers: modifiers + [.italic])
   }
 
-  func strikethrough(_ active: Bool = true, color: Color? = nil) -> Text {
+  public func strikethrough(_ active: Bool = true, color: Color? = nil) -> Text {
     .init(storage: storage, modifiers: modifiers + [.strikethrough(active, color)])
   }
 
-  func underline(_ active: Bool = true, color: Color? = nil) -> Text {
+  public func underline(_ active: Bool = true, color: Color? = nil) -> Text {
     .init(storage: storage, modifiers: modifiers + [.underline(active, color)])
   }
 
-  func kerning(_ kerning: CGFloat) -> Text {
+  public func kerning(_ kerning: CGFloat) -> Text {
     .init(storage: storage, modifiers: modifiers + [.kerning(kerning)])
   }
 
-  func tracking(_ tracking: CGFloat) -> Text {
+  public func tracking(_ tracking: CGFloat) -> Text {
     .init(storage: storage, modifiers: modifiers + [.tracking(tracking)])
   }
 
-  func baselineOffset(_ baselineOffset: CGFloat) -> Text {
+  public func baselineOffset(_ baselineOffset: CGFloat) -> Text {
     .init(storage: storage, modifiers: modifiers + [.baseline(baselineOffset)])
   }
 }
 
-public extension Text {
-  static func _concatenating(lhs: Self, rhs: Self) -> Self {
-    .init(storage: .segmentedText([
-      (lhs.storage, lhs.modifiers),
-      (rhs.storage, rhs.modifiers),
-    ]))
+extension Text {
+  public static func _concatenating(lhs: Self, rhs: Self) -> Self {
+    .init(
+      storage: .segmentedText([
+        (lhs.storage, lhs.modifiers),
+        (rhs.storage, rhs.modifiers),
+      ]))
   }
 }
 
