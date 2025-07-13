@@ -19,6 +19,7 @@ import Foundation
 import JavaScriptKit
 import TokamakCore
 
+@MainActor
 private enum ImageCache {
   private static var values = [String: JSObject]()
 

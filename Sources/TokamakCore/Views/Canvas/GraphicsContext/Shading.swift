@@ -16,9 +16,6 @@ import Foundation
 //
 //  Created by Carson Katri on 9/18/21.
 //
-#if canImport(CoreGraphics)
-  import CoreGraphics
-#endif
 
 extension GraphicsContext {
   public enum _GradientGeometry: Sendable {

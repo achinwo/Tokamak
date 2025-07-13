@@ -15,7 +15,7 @@
 import TokamakCore
 
 // TOOD: Add _AnyModifiedActionContent similar to TokamakStaticHTML/ModifiedContent.swift?
-extension ModifiedContent: DOMPrimitive where Content: View, Modifier: DOMActionModifier {
+extension ModifiedContent: @MainActor DOMPrimitive where Content: View, Modifier: DOMActionModifier {
   public var renderedBody: AnyView {
     // TODO: Combine DOM nodes when possible, rather than generating arbitrary new ones
     AnyView(DynamicHTML("div", listeners: modifier.listeners) {

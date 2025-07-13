@@ -17,10 +17,6 @@
 
 import Foundation
 
-#if canImport(CoreGraphics)
-  import CoreGraphics
-#endif
-
 @frozen
 public struct ProposedViewSize: Equatable {
   public var width: CGFloat?

@@ -22,7 +22,7 @@ public func testScheduler(closure: @escaping () -> ()) {
   closure()
 }
 
-public final class TestRenderer: Renderer {
+public final class TestRenderer: @MainActor Renderer {
   public private(set) var reconciler: StackReconciler<TestRenderer>?
 
   public var rootTarget: TestView {

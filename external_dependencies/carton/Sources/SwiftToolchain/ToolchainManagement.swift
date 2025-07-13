@@ -340,6 +340,6 @@ public class ToolchainSystem {
   }
 }
 
-public let SWIFT_SDK_TAG = "6.2-DEVELOPMENT-SNAPSHOT-2025-06-27-a"
+public let SWIFT_SDK_TAG = "6.2-DEVELOPMENT-SNAPSHOT-2025-07-09-a"
 
 public let SWIFT_SDK = "swift-\(SWIFT_SDK_TAG)_wasm"

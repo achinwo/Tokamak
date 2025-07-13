@@ -17,7 +17,7 @@
 
 import Foundation
 
-public protocol VectorArithmetic: AdditiveArithmetic, Sendable {
+nonisolated public protocol VectorArithmetic: AdditiveArithmetic {
   mutating func scale(by rhs: Double)
   var magnitudeSquared: Double { get }
 }
@@ -31,19 +31,16 @@ extension CGFloat: VectorArithmetic {
     Double(self * self)
   }
 }
-
-#if !os(WASI)
-  extension Float: VectorArithmetic {
-    @_transparent
-    public mutating func scale(by rhs: Double) { self *= Float(rhs) }
-
-    @_transparent
-    public var magnitudeSquared: Double {
-      Double(self * self)
-    }
-  }
-
-#endif
+//
+//extension Float: VectorArithmetic {
+//  @_transparent
+//  public mutating func scale(by rhs: Double) { self *= Float(rhs) }
+//
+//  @_transparent
+//  public var magnitudeSquared: Double {
+//    Double(self * self)
+//  }
+//}
 
 extension Double: VectorArithmetic {
   @_transparent

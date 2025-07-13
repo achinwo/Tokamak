@@ -64,7 +64,7 @@ extension Font.Design {
   }
 }
 
-extension Font.Leading: CustomStringConvertible {
+extension Font.Leading: @MainActor CustomStringConvertible {
   public var description: String {
     switch self {
     case .standard:
@@ -109,7 +109,7 @@ extension Font {
   }
 }
 
-extension TextAlignment: CustomStringConvertible {
+extension TextAlignment: @MainActor CustomStringConvertible {
   public var description: String {
     switch self {
     case .leading: return "left"

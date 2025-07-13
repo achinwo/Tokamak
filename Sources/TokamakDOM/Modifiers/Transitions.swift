@@ -18,7 +18,7 @@
 import TokamakCore
 import TokamakStaticHTML
 
-extension _MoveTransition: DOMViewModifier {
+extension _MoveTransition: @MainActor DOMViewModifier {
   public var attributes: [HTMLAttribute: String] {
     let offset: (String, String)
     switch edge {

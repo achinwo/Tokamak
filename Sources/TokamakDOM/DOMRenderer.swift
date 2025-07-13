@@ -61,13 +61,13 @@ extension AnyView {
   }
 }
 
-let global = JSObject.global
-let window = global.window.object!
-let matchMediaDarkScheme = window.matchMedia!("(prefers-color-scheme: dark)").object!
-let log = global.console.object!.log.function!
-let document = global.document.object!
-let body = document.body.object!
-let head = document.head.object!
+@MainActor let global = JSObject.global
+@MainActor let window = global.window.object!
+@MainActor let matchMediaDarkScheme = window.matchMedia!("(prefers-color-scheme: dark)").object!
+@MainActor let log = global.console.object!.log.function!
+@MainActor let document = global.document.object!
+@MainActor let body = document.body.object!
+@MainActor let head = document.head.object!
 
 func appendRootStyle(_ rootNode: JSObject) {
   rootNode.style = .string(rootNodeStyles)

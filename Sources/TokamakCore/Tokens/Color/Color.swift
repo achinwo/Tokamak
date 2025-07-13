@@ -60,7 +60,7 @@ public struct Color: Hashable, Equatable, Sendable {
 
   /// Create a `Color` dependent on the current `ColorScheme`.
   @_spi(TokamakCore)
-  public static func _withScheme(_ resolver: @Sendable @escaping (ColorScheme) -> Self) -> Self {
+  public static func _withScheme(_ resolver: @MainActor @Sendable @escaping (ColorScheme) -> Self) -> Self {
     .init(
       _EnvironmentDependentColorBox {
         resolver($0.colorScheme)
@@ -110,18 +110,18 @@ extension Color {
     self.init(_SystemColorBox(systemColor))
   }
 
-  public static let clear: Self = .init(systemColor: .clear)
-  public static let black: Self = .init(systemColor: .black)
-  public static let white: Self = .init(systemColor: .white)
-  public static let gray: Self = .init(systemColor: .gray)
-  public static let red: Self = .init(systemColor: .red)
-  public static let green: Self = .init(systemColor: .green)
-  public static let blue: Self = .init(systemColor: .blue)
-  public static let orange: Self = .init(systemColor: .orange)
-  public static let yellow: Self = .init(systemColor: .yellow)
-  public static let pink: Self = .init(systemColor: .pink)
-  public static let purple: Self = .init(systemColor: .purple)
-  public static let primary: Self = .init(systemColor: .primary)
+  @MainActor public static let clear: Self = .init(systemColor: .clear)
+  @MainActor public static let black: Self = .init(systemColor: .black)
+  @MainActor public static let white: Self = .init(systemColor: .white)
+  @MainActor public static let gray: Self = .init(systemColor: .gray)
+  @MainActor public static let red: Self = .init(systemColor: .red)
+  @MainActor public static let green: Self = .init(systemColor: .green)
+  @MainActor public static let blue: Self = .init(systemColor: .blue)
+  @MainActor public static let orange: Self = .init(systemColor: .orange)
+  @MainActor public static let yellow: Self = .init(systemColor: .yellow)
+  @MainActor public static let pink: Self = .init(systemColor: .pink)
+  @MainActor public static let purple: Self = .init(systemColor: .purple)
+  @MainActor public static let primary: Self = .init(systemColor: .primary)
 
   public static let secondary: Self = .init(systemColor: .secondary)
   public static let accentColor: Self = .init(

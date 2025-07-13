@@ -14,10 +14,6 @@
 //
 //  Created by Max Desiatov on 20/06/2021.
 //
-#if canImport(CoreGraphics)
-import CoreGraphics
-#endif
-
 
 import Foundation
 

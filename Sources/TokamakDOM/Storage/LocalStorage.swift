@@ -19,11 +19,11 @@ import JavaScriptKit
 import OpenCombineShim
 import TokamakCore
 
-private let rootPublisher = ObservableObjectPublisher()
-private let localStorage = JSObject.global.localStorage.object!
+@MainActor private let rootPublisher = ObservableObjectPublisher()
+@MainActor private let localStorage = JSObject.global.localStorage.object!
 
 public class LocalStorage: WebStorage, _StorageProvider {
-  static let closure = JSClosure { _ in
+  @MainActor static let closure = JSClosure { _ in
     rootPublisher.send()
     return .undefined
   }

@@ -5,8 +5,8 @@ import PackageDescription
 let package = Package(
   name: "Tokamak",
   platforms: [
-    .macOS(.v15),
-    .iOS(.v13),
+    .macOS("15.4"),
+    .iOS(.v15),
   ],
   products: [
     // Products define the executables and libraries produced by a package,
@@ -64,8 +64,13 @@ let package = Package(
       url: "https://github.com/pointfreeco/swift-snapshot-testing.git",
       from: "1.9.0"
     ),
-    .package(url: "https://github.com/swiftlang/swift-foundation.git", branch: "main"),
-    .package(path: "./external_dependencies/carton"),
+    .package(
+      url: "https://github.com/swiftlang/swift-foundation.git",
+      branch: "main"
+    ),
+    .package(
+      path: "./external_dependencies/carton"
+    ),
   ],
   targets: [
     // Targets are the basic building blocks of a package. A target can define
@@ -79,6 +84,9 @@ let package = Package(
           name: "FoundationEssentials",
           package: "swift-foundation"
         )
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .target(
@@ -92,21 +100,24 @@ let package = Package(
           name: "Foundation",
           condition: .when(platforms: [.wasi])
         ),
-        //     .product(
-        //       name: "FoundationEssentials",
-        //       package: "swift-foundation"
-        //     )
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .target(
       name: "TokamakShim",
       dependencies: [
-        .target(name: "TokamakDOM", condition: .when(platforms: [.wasi])),
-        .target(name: "TokamakGTK", condition: .when(platforms: [.linux])),
+        .target(
+          name: "TokamakDOM"
+        ),
         .target(
           name: "Foundation",
           condition: .when(platforms: [.wasi])
         ),
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .systemLibrary(
@@ -150,21 +161,36 @@ let package = Package(
       name: "TokamakStaticHTML",
       dependencies: [
         "TokamakCore"
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .executableTarget(
       name: "TokamakCoreBenchmark",
       dependencies: [
-        .product(name: "Benchmark", package: "swift-benchmark"),
+        .product(
+          name: "Benchmark",
+          package: "swift-benchmark"
+        ),
         "TokamakCore",
         "TokamakTestRenderer",
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .executableTarget(
       name: "TokamakStaticHTMLBenchmark",
       dependencies: [
-        .product(name: "Benchmark", package: "swift-benchmark"),
+        .product(
+          name: "Benchmark",
+          package: "swift-benchmark"
+        ),
         "TokamakStaticHTML",
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .target(
@@ -179,14 +205,15 @@ let package = Package(
         .product(
           name: "JavaScriptKit",
           package: "JavaScriptKit",
-          condition: .when(platforms: [.wasi])
         ),
         .product(
           name: "JavaScriptEventLoop",
           package: "JavaScriptKit",
-          condition: .when(platforms: [.wasi])
         ),
         "OpenCombineJS",
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .executableTarget(
@@ -195,24 +222,32 @@ let package = Package(
         "TokamakShim",
         .product(
           name: "JavaScriptKit",
-          package: "JavaScriptKit",
-          condition: .when(platforms: [.wasi])
+          package: "JavaScriptKit"
         ),
       ],
       resources: [
         .copy("logo-header.png"),
         .copy("../../JavaScriptKit_JavaScriptKit.resources"),
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .executableTarget(
       name: "TokamakStaticHTMLDemo",
       dependencies: [
         "TokamakStaticHTML"
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .target(
       name: "TokamakTestRenderer",
-      dependencies: ["TokamakCore"]
+      dependencies: ["TokamakCore"],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
+      ]
     ),
     .testTarget(
       name: "TokamakLayoutTests",
@@ -222,8 +257,11 @@ let package = Package(
         .product(
           name: "SnapshotTesting",
           package: "swift-snapshot-testing",
-          condition: .when(platforms: [.macOS])
+          condition: .when(platforms: [.macOS]),
         ),
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .testTarget(
@@ -231,11 +269,17 @@ let package = Package(
       dependencies: [
         "TokamakCore",
         "TokamakTestRenderer",
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
       ]
     ),
     .testTarget(
       name: "TokamakTests",
-      dependencies: ["TokamakTestRenderer"]
+      dependencies: ["TokamakTestRenderer"],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
+      ]
     ),
     .testTarget(
       name: "TokamakStaticHTMLTests",
@@ -247,7 +291,13 @@ let package = Package(
           condition: .when(platforms: [.macOS])
         ),
       ],
-      exclude: ["__Snapshots__", "RenderingTests/__Snapshots__"]
+      exclude: [
+        "__Snapshots__",
+        "RenderingTests/__Snapshots__",
+      ],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
+      ]
     ),
   ]
 )

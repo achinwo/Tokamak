@@ -73,6 +73,8 @@ public struct _FoundationProgressView: View {
   }
 }
 #else
+import Foundation
+
 public struct _FoundationProgressView: View {
   let progress: Progress
 

@@ -14,7 +14,7 @@
 
 import TokamakCore
 
-extension _HoverActionModifier: DOMActionModifier {
+extension _HoverActionModifier: @MainActor DOMActionModifier {
   public var listeners: [String: Listener] {
     [
       "mouseover":

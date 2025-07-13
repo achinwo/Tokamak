@@ -77,16 +77,26 @@ public class AnyFontBox: AnyTokenBox, Hashable, Equatable, @unchecked Sendable {
   }
 
   public func equals(_ other: AnyFontBox) -> Bool {
-    fatalError("implement \(#function) in subclass")
-  }
+     type(of: self) == type(of: other)
+   }
 
-  public func hash(into hasher: inout Hasher) {
-    fatalError("implement \(#function) in subclass")
-  }
+   public func hash(into hasher: inout Hasher) {
+     hasher.combine(ObjectIdentifier(type(of: self)))
+   }
 
-  public func resolve(in environment: EnvironmentValues) -> _Font {
-    fatalError("implement \(#function) in subclass")
-  }
+   public func resolve(in environment: EnvironmentValues) -> _Font {
+     return _Font(
+       name: .system,
+       size: 12,
+       design: .default,
+       weight: .regular,
+       smallCaps: false,
+       italic: false,
+       bold: false,
+       monospaceDigit: false,
+       leading: .standard
+     )
+   }
 }
 
 public class _ConcreteFontBox: AnyFontBox, @unchecked Sendable {

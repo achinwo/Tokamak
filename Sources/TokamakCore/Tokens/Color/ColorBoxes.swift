@@ -104,7 +104,7 @@ public final class _ConcreteColorBox: AnyColorBox, @unchecked Sendable {
 }
 
 public final class _EnvironmentDependentColorBox: AnyColorBox, @unchecked Sendable {
-  public let resolver: @Sendable (EnvironmentValues) -> Color
+  public let resolver: @MainActor @Sendable (EnvironmentValues) -> Color
 
   override public func equals(_ other: AnyColorBox) -> Bool {
     guard let other = other as? _EnvironmentDependentColorBox
@@ -116,7 +116,7 @@ public final class _EnvironmentDependentColorBox: AnyColorBox, @unchecked Sendab
     hasher.combine(resolver(EnvironmentValues()))
   }
 
-  init(_ resolver: @escaping @Sendable (EnvironmentValues) -> Color) {
+  init(_ resolver: @MainActor @Sendable @escaping (EnvironmentValues) -> Color) {
     self.resolver = resolver
   }
 

@@ -16,6 +16,4 @@
 @_exported import SwiftUI
 #elseif os(WASI)
 @_exported import TokamakDOM
-#elseif os(Linux)
-@_exported import TokamakGTK
 #endif

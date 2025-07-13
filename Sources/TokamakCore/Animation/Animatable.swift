@@ -41,7 +41,7 @@ extension Animatable where Self.AnimatableData == EmptyAnimatableData {
 }
 
 @frozen
-public struct EmptyAnimatableData: VectorArithmetic {
+nonisolated public struct EmptyAnimatableData: VectorArithmetic {
   @inlinable
   public init() {}
 
@@ -129,8 +129,7 @@ where First: VectorArithmetic, Second: VectorArithmetic {
   }
 
   public static func == (a: Self, b: Self) -> Bool {
-    a.first == b.first
-      && a.second == b.second
+    a.first == b.first && a.second == b.second
   }
 }
 
@@ -141,14 +140,14 @@ extension CGPoint: Animatable {
   }
 }
 
-extension CGSize: @MainActor Animatable {
+extension CGSize: Animatable {
   public var animatableData: AnimatablePair<CGFloat, CGFloat> {
     @inlinable get { .init(width, height) }
     @inlinable set { (width, height) = newValue[] }
   }
 }
 
-extension CGRect: @MainActor Animatable {
+extension CGRect: Animatable {
   public var animatableData: AnimatablePair<CGPoint.AnimatableData, CGSize.AnimatableData> {
     @inlinable get {
       .init(origin.animatableData, size.animatableData)

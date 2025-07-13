@@ -42,7 +42,7 @@ public struct UnitPoint: Hashable, Sendable {
   public static let bottomTrailing: UnitPoint = .init(x: 1, y: 1)
 }
 
-extension UnitPoint: Animatable {
+extension UnitPoint: @MainActor Animatable {
   public var animatableData: AnimatablePair<CGFloat, CGFloat> {
     get {
       .init(x, y)
